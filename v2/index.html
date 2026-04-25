@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QDII 资产监控看板 v2.0</title>
+    <meta name="theme-color" content="#2b8fb8" />
+    <link rel="manifest" href="./manifest.webmanifest?v=20260402-hotfix8" />
+    <link rel="stylesheet" href="./styles.css?v=20260402-hotfix8" />
+  </head>
+  <body>
+    <div class="page-bg"></div>
+    <main class="container">
+      <section class="panel tabs-panel">
+        <div class="tabs-head">
+          <button id="tab-view-btn" class="tab-btn is-active" data-tab="view">资产概览</button>
+          <button id="tab-pie-btn" class="tab-btn" data-tab="pie">饼图</button>
+          <button id="tab-performance-btn" class="tab-btn" data-tab="performance">收益曲线</button>
+          <button id="tab-config-btn" class="tab-btn" data-tab="config">配置管理</button>
+        </div>
+
+        <div class="account-toolbar">
+          <div class="control-item compact account-select-wrap">
+            <label for="account-select">账户</label>
+            <select id="account-select"></select>
+          </div>
+          <div class="control-item compact display-currency-wrap">
+            <label>计价</label>
+            <div class="pie-display-switch display-currency-switch" role="group" aria-label="计价币种切换">
+              <button type="button" class="pie-display-btn display-currency-btn is-active" data-display-currency="cny">
+                人民币
+              </button>
+              <button type="button" class="pie-display-btn display-currency-btn" data-display-currency="usd">美元</button>
+            </div>
+          </div>
+          <div class="account-actions">
+            <button id="account-add-btn" class="btn btn-lite">新增</button>
+            <button id="account-rename-btn" class="btn btn-lite">改名</button>
+            <button id="archive-open-btn" class="btn btn-lite">归档</button>
+            <button id="account-delete-btn" class="btn btn-danger">删除</button>
+          </div>
+        </div>
+
+        <div id="tab-view" class="tab-content is-active">
+          <section class="overview-strip panel-lite">
+            <article class="overview-card overview-card-emphasis">
+              <p class="overview-label">当日盈亏</p>
+              <div class="overview-dayline">
+                <p class="overview-change" id="overview-day-change">--</p>
+                <p class="overview-change-pct" id="overview-day-change-pct">--</p>
+              </div>
+            </article>
+          </section>
+
+          <div class="view-toolbar">
+            <div class="toolbar-left">
+              <div class="control-item compact">
+                <label for="view-sort">排序</label>
+                <select id="view-sort">
+                  <option value="default" selected>按默认顺序</option>
+                  <option value="amount">按总金额（高到低）</option>
+                  <option value="change_pct">按涨跌幅（高到低）</option>
+                </select>
+              </div>
+            </div>
+            <div class="view-actions">
+              <button id="refresh-btn" class="btn btn-lite">刷新</button>
+              <button id="unlock-open-btn" class="btn btn-primary">解锁</button>
+              <button id="lock-btn" class="btn btn-ghost">锁定</button>
+            </div>
+          </div>
+
+          <div class="view-level-toolbar">
+            <span class="view-level-label">展开层级</span>
+            <div class="tree-mode-switch" role="group" aria-label="资产层级快捷切换">
+              <button type="button" class="tree-mode-btn" data-tree-depth="fund">基金</button>
+              <button type="button" class="tree-mode-btn is-active" data-tree-depth="group">分组</button>
+              <button type="button" class="tree-mode-btn" data-tree-depth="class">大类</button>
+            </div>
+          </div>
+
+          <div class="view-table-wrap">
+            <table class="view-table">
+              <thead>
+                <tr>
+                  <th>名称 / 金额 / 占比</th>
+                  <th>当日盈亏</th>
+                </tr>
+              </thead>
+              <tbody id="view-table-body"></tbody>
+            </table>
+          </div>
+
+          <section class="summary-grid summary-grid-bottom" id="summary-grid">
+            <article class="summary-card">
+              <p class="label">总资产</p>
+              <p class="value" id="total-asset">--</p>
+            </article>
+            <article class="summary-card">
+              <p class="label">总成本</p>
+              <p class="value" id="total-cost">--</p>
+            </article>
+            <article class="summary-card">
+              <p class="label">浮动盈亏</p>
+              <p class="value" id="total-pnl">--</p>
+            </article>
+            <article class="summary-card">
+              <p class="label">最近刷新</p>
+              <p class="value small" id="last-refresh">未刷新</p>
+            </article>
+          </section>
+        </div>
+
+        <div id="tab-pie" class="tab-content">
+          <section class="pie-panel">
+            <div class="pie-head">
+              <div class="pie-head-top">
+                <div>
+                  <p class="pie-title">资产占比饼图</p>
+                  <p class="pie-subtitle" id="pie-subtitle">按分组展示，轻触饼图或按钮切换</p>
+                </div>
+                <div class="pie-head-actions">
+                  <div class="pie-mode-switch" role="group" aria-label="饼图层级切换">
+                    <button type="button" class="pie-mode-btn" data-pie-level="class">大类</button>
+                    <button type="button" class="pie-mode-btn is-active" data-pie-level="group">分组</button>
+                    <button type="button" class="pie-mode-btn" data-pie-level="fund">基金</button>
+                  </div>
+                  <div class="pie-display-switch" role="group" aria-label="饼图数值显示切换">
+                    <button type="button" class="pie-display-btn is-active" data-pie-display="full">比例+金额</button>
+                    <button type="button" class="pie-display-btn" data-pie-display="percent">仅比例</button>
+                  </div>
+                </div>
+              </div>
+              <select id="pie-level" hidden>
+                <option value="class">资产大类</option>
+                <option value="group" selected>分组</option>
+                <option value="fund">基金</option>
+              </select>
+            </div>
+            <div class="pie-layout">
+              <canvas id="allocation-pie" width="640" height="320" aria-label="资产占比饼图"></canvas>
+              <div id="pie-legend" class="pie-legend"></div>
+            </div>
+            <div class="group-target-panel">
+              <div class="group-target-head">
+                <div>
+                  <p class="group-target-title">分组目标仓位</p>
+                  <p class="group-target-subtitle">点击分组即可设置目标仓位，偏离 = 当前 - 目标</p>
+                </div>
+                <p id="group-target-summary" class="group-target-summary">未设置目标</p>
+              </div>
+              <div id="group-target-list" class="group-target-list"></div>
+              <div class="target-pie-panel">
+                <div class="pie-head">
+                  <div class="pie-head-top">
+                    <div>
+                      <p class="pie-title">目标仓位占比图</p>
+                      <p class="pie-subtitle" id="target-pie-subtitle">按分组展示目标仓位，未设目标部分会单独显示</p>
+                    </div>
+                    <div class="pie-head-actions">
+                      <div class="pie-mode-switch" role="group" aria-label="目标仓位饼图层级切换">
+                        <button type="button" class="pie-mode-btn" data-target-pie-level="class">大类</button>
+                        <button type="button" class="pie-mode-btn is-active" data-target-pie-level="group">分组</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="pie-layout target-pie-layout">
+                  <canvas id="target-allocation-pie" width="640" height="280" aria-label="目标仓位占比饼图"></canvas>
+                  <div id="target-pie-legend" class="pie-legend"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div id="tab-performance" class="tab-content">
+          <section class="panel-lite performance-panel">
+            <div class="performance-toolbar">
+              <div class="control-item compact performance-range-block">
+                <label>时间区间</label>
+                <div class="performance-range-switch" role="group" aria-label="收益率时间区间">
+                  <button type="button" class="performance-range-btn is-active" data-performance-preset="3m">3M</button>
+                  <button type="button" class="performance-range-btn" data-performance-preset="6m">6M</button>
+                  <button type="button" class="performance-range-btn" data-performance-preset="ytd">YTD</button>
+                  <button type="button" class="performance-range-btn" data-performance-preset="1y">1Y</button>
+                  <button type="button" class="performance-range-btn" data-performance-preset="all">ALL</button>
+                  <button type="button" class="performance-range-btn" data-performance-preset="custom">自定义</button>
+                </div>
+              </div>
+              <div class="performance-date-row">
+                <input id="performance-start-date-input" type="date" />
+                <span class="performance-date-sep">至</span>
+                <input id="performance-end-date-input" type="date" />
+              </div>
+            </div>
+
+            <div class="performance-toolbar">
+              <div class="control-item compact">
+                <label for="performance-scope-type">统计范围</label>
+                <select id="performance-scope-type">
+                  <option value="portfolio" selected>整个组合</option>
+                  <option value="class">资产大类</option>
+                  <option value="group">分组</option>
+                  <option value="holding">单个资产</option>
+                </select>
+              </div>
+              <div class="control-item compact performance-scope-target-wrap">
+                <label for="performance-scope-target">具体对象</label>
+                <select id="performance-scope-target"></select>
+              </div>
+              <div class="control-item compact">
+                <label>曲线口径</label>
+                <div class="performance-metric-switch" role="group" aria-label="收益率曲线口径">
+                  <button type="button" class="performance-metric-btn is-active" data-performance-metric="nav">净值</button>
+                  <button type="button" class="performance-metric-btn" data-performance-metric="return">累计收益率</button>
+                </div>
+              </div>
+            </div>
+
+            <p id="performance-status" class="status-text">解锁后可查看收益率曲线。</p>
+
+            <section class="summary-grid performance-summary-grid">
+              <article class="summary-card">
+                <p class="label">累计收益率</p>
+                <p class="value" id="performance-total-return">--</p>
+              </article>
+              <article class="summary-card">
+                <p class="label">年化收益率</p>
+                <p class="value" id="performance-xirr">--</p>
+              </article>
+              <article class="summary-card">
+                <p class="label">期末市值</p>
+                <p class="value" id="performance-end-value">--</p>
+              </article>
+              <article class="summary-card">
+                <p class="label">净流入</p>
+                <p class="value" id="performance-net-flow">--</p>
+              </article>
+            </section>
+
+            <div class="performance-chart-wrap">
+              <canvas id="performance-chart" width="760" height="340" aria-label="收益率曲线"></canvas>
+            </div>
+
+            <div class="performance-meta-grid">
+              <article class="panel-lite performance-meta-card">
+                <p class="quote-debug-title">统计区间</p>
+                <p id="performance-range-meta" class="quote-debug-summary">--</p>
+              </article>
+              <article class="panel-lite performance-meta-card">
+                <p class="quote-debug-title">计算说明</p>
+                <p id="performance-formula-meta" class="quote-debug-summary">
+                  曲线按时间加权收益率计算，年化收益率按 XIRR 计算。
+                </p>
+              </article>
+            </div>
+
+            <section class="panel-lite performance-notes-panel">
+              <div class="quote-debug-head">
+                <div>
+                  <p class="quote-debug-title">计算备注</p>
+                  <p class="quote-debug-summary">有加减仓时，会先识别现金流，再剥离现金流影响后计算收益率曲线。</p>
+                </div>
+              </div>
+              <div id="performance-notes" class="performance-notes"></div>
+            </section>
+          </section>
+        </div>
+
+        <div id="tab-config" class="tab-content">
+          <section class="panel config-settings">
+            <div class="settings-grid">
+              <div class="control-item">
+                <label for="refresh-interval">自动刷新</label>
+                <select id="refresh-interval">
+                  <option value="0">关闭</option>
+                  <option value="30">每 30 秒</option>
+                  <option value="60" selected>每 60 秒</option>
+                  <option value="180">每 3 分钟</option>
+                  <option value="300">每 5 分钟</option>
+                </select>
+              </div>
+              <div class="control-item">
+                <label for="quote-preference">价格模式</label>
+                <select id="quote-preference">
+                  <option value="nav" selected>优先净值</option>
+                  <option value="estimate">最新价格</option>
+                </select>
+              </div>
+              <div class="control-item">
+                <label>云备份</label>
+                <div class="row-buttons">
+                  <button id="sync-btn" class="btn btn-lite">立即备份</button>
+                  <button id="sync-pull-btn" class="btn btn-lite">从 Gist 恢复</button>
+                </div>
+              </div>
+              <div class="control-item">
+                <label for="gist-token-input">GitHub Gist</label>
+                <div class="stack-fields">
+                  <div class="inline-input-row">
+                    <input id="gist-token-input" type="password" placeholder="输入仅含 gist 权限的 Token" autocomplete="off" />
+                    <button id="gist-verify-btn" class="btn btn-lite" type="button">验证</button>
+                  </div>
+                  <input id="gist-id-input" type="text" placeholder="首次备份后会自动生成 Gist ID" autocomplete="off" />
+                  <a id="gist-link" class="inline-link" href="#" target="_blank" rel="noreferrer" hidden>打开当前 Gist</a>
+                </div>
+              </div>
+              <div class="control-item">
+                <label>备份</label>
+                <div class="row-buttons">
+                  <button id="export-btn" class="btn btn-lite">导出密文备份</button>
+                  <button id="import-btn" class="btn btn-lite">导入密文备份</button>
+                  <button id="export-history-btn" class="btn btn-lite">导出事件 JSON</button>
+                  <button id="export-daily-nav-btn" class="btn btn-lite">导出净值 CSV</button>
+                  <button id="change-pass-btn" class="btn btn-lite">修改口令</button>
+                  <input type="file" id="import-file" accept="application/json" hidden />
+                </div>
+              </div>
+            </div>
+            <div class="meta-strip panel-lite">
+              <p id="vault-status" class="status-text">当前状态：未解锁</p>
+              <p id="sync-meta" class="status-text">Gist 备份：未完成</p>
+              <p id="status-text" class="status-text">等待刷新</p>
+            </div>
+            <section class="panel-lite history-tools">
+              <div class="history-tools-head">
+                <div>
+                  <p class="quote-debug-title">历史回放</p>
+                  <p class="quote-debug-summary">选择日期后，按事件日志回放当日仓位结构。</p>
+                </div>
+              </div>
+              <div class="history-tools-controls">
+                <input id="history-replay-date-input" type="date" />
+                <button id="history-replay-btn" class="btn btn-lite" type="button">回放仓位</button>
+              </div>
+              <pre id="history-replay-output" class="history-replay-output">解锁后可查看历史回放摘要。</pre>
+              <div class="history-preview-tools">
+                <div>
+                  <p class="quote-debug-title">收益曲线演示</p>
+                  <p class="quote-debug-summary">可基于当前持仓生成一段本地演示历史，方便预览收益率曲线，恢复时会自动还原原历史记录。</p>
+                </div>
+                <div class="row-buttons">
+                  <button id="seed-preview-history-btn" class="btn btn-lite" type="button">生成演示历史</button>
+                  <button id="restore-preview-history-btn" class="btn btn-lite" type="button">恢复原历史</button>
+                </div>
+              </div>
+            </section>
+            <section id="quote-debug-panel" class="quote-debug-panel panel-lite">
+              <div class="quote-debug-head">
+                <div>
+                  <p class="quote-debug-title">刷新诊断</p>
+                  <p id="quote-debug-summary" class="quote-debug-summary">刷新后会显示本次报价来源和与上次刷新的差异。</p>
+                </div>
+                <button id="quote-debug-clear-btn" class="btn btn-ghost btn-sm" type="button">清空</button>
+              </div>
+              <div id="quote-debug-changes" class="quote-debug-list"></div>
+              <details class="quote-debug-details">
+                <summary>查看本次所有持仓报价</summary>
+                <div id="quote-debug-current" class="quote-debug-list"></div>
+              </details>
+            </section>
+          </section>
+
+          <div class="config-toolbar">
+            <button id="add-row-btn" class="btn btn-ghost">新增持仓</button>
+          </div>
+          <div id="config-list" class="config-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <div id="unlock-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="unlock-modal-title">
+        <h2 id="unlock-modal-title">解锁持仓库</h2>
+        <p class="modal-desc">口令仅在本地解密与加密备份时使用，不会明文上传。</p>
+        <div class="field">
+          <label for="passphrase-input">解锁口令</label>
+          <input
+            id="passphrase-input"
+            type="password"
+            autocomplete="current-password"
+            placeholder="输入口令后解锁持仓"
+          />
+        </div>
+        <label class="checkbox-row">
+          <input id="remember-passphrase-input" type="checkbox" />
+          <span>在此设备记住口令（便利性更高，安全性降低）</span>
+        </label>
+        <div class="row-buttons modal-actions">
+          <button id="unlock-btn" class="btn btn-primary">解锁</button>
+          <button id="unlock-cancel-btn" class="btn btn-ghost">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="password-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
+        <h2 id="password-modal-title">修改解锁口令</h2>
+        <p class="modal-desc">新口令将用于本地与 Gist 备份密文重加密，长度至少 8 位。</p>
+        <div class="modal-grid">
+          <div class="field">
+            <label for="new-passphrase-input">新口令</label>
+            <input id="new-passphrase-input" type="password" autocomplete="new-password" placeholder="输入新口令" />
+          </div>
+          <div class="field">
+            <label for="confirm-passphrase-input">确认新口令</label>
+            <input
+              id="confirm-passphrase-input"
+              type="password"
+              autocomplete="new-password"
+              placeholder="再次输入新口令"
+            />
+          </div>
+        </div>
+        <div class="row-buttons modal-actions">
+          <button id="password-save-btn" class="btn btn-primary">保存口令</button>
+          <button id="password-cancel-btn" class="btn btn-ghost">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="account-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="account-modal-title">
+        <h2 id="account-modal-title">新增账户</h2>
+        <p class="modal-desc">账户之间资产概览与配置互相独立。</p>
+        <div class="field">
+          <label for="account-name-input">账户名称</label>
+          <input id="account-name-input" maxlength="24" placeholder="例如：长期投资账户" />
+        </div>
+        <div class="row-buttons modal-actions">
+          <button id="account-save-btn" class="btn btn-primary">保存</button>
+          <button id="account-cancel-btn" class="btn btn-ghost">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="holding-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="holding-modal-title">
+        <h2 id="holding-modal-title">新增持仓</h2>
+        <p class="modal-desc">通过弹窗维护持仓明细，避免配置页过长。</p>
+        <div class="modal-grid">
+          <div class="field">
+            <label for="holding-name-input">资产名称（可选）</label>
+            <input id="holding-name-input" maxlength="60" placeholder="如：货币基金/账户现金" />
+          </div>
+          <div class="field">
+            <label for="holding-code-input">基金代码</label>
+            <input id="holding-code-input" maxlength="6" placeholder="018738" />
+          </div>
+          <div class="field">
+            <label for="holding-manual-amount-input">手工金额（填写后不自动更新）</label>
+            <div class="inline-field-row">
+              <input id="holding-manual-amount-input" type="number" min="0" step="0.01" placeholder="如 10000" />
+              <select id="holding-manual-amount-currency-input" aria-label="手工金额币种">
+                <option value="CNY">人民币</option>
+                <option value="USD">美元</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="holding-units-input">持有份额</label>
+            <input id="holding-units-input" type="number" min="0" step="0.01" placeholder="1000" />
+          </div>
+          <div class="field">
+            <label for="holding-class-input">资产大类</label>
+            <select id="holding-class-input">
+              <option value="stock">股票</option>
+              <option value="bond">债券</option>
+              <option value="gold">黄金</option>
+              <option value="cash">现金</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="holding-group-input">分组</label>
+            <input id="holding-group-input" maxlength="40" placeholder="如：纳指100" />
+          </div>
+          <div class="field">
+            <label for="holding-cost-input">成本单价（可选）</label>
+            <input id="holding-cost-input" type="number" min="0" step="0.0001" placeholder="可选" />
+          </div>
+          <div class="field">
+            <label for="holding-manual-price-input">手动单价（接口失败时兜底）</label>
+            <input id="holding-manual-price-input" type="number" min="0" step="0.0001" placeholder="如 1.2345" />
+          </div>
+        </div>
+        <div class="row-buttons modal-actions">
+          <button id="holding-save-btn" class="btn btn-primary">保存</button>
+          <button id="holding-cancel-btn" class="btn btn-ghost">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="group-target-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="group-target-modal-title">
+        <h2 id="group-target-modal-title">设置分组目标仓位</h2>
+        <p id="group-target-modal-desc" class="modal-desc">--</p>
+        <div class="field">
+          <label for="group-target-input">目标仓位（%）</label>
+          <input id="group-target-input" type="number" min="0" max="100" step="0.1" placeholder="例如 12.5" />
+        </div>
+        <p id="group-target-modal-current" class="modal-note">--</p>
+        <p id="group-target-modal-summary" class="modal-note">--</p>
+        <div class="row-buttons modal-actions">
+          <button id="group-target-save-btn" class="btn btn-primary">保存目标</button>
+          <button id="group-target-clear-btn" class="btn btn-danger">清除目标</button>
+          <button id="group-target-cancel-btn" class="btn btn-ghost">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="archive-modal" class="modal-backdrop" hidden>
+      <div class="modal-card modal-card-wide" role="dialog" aria-modal="true" aria-labelledby="archive-modal-title">
+        <h2 id="archive-modal-title">归档内容</h2>
+        <p id="archive-modal-desc" class="modal-desc">删除的账户和持仓会先进入归档，可随时恢复。</p>
+        <div class="archive-section">
+          <div class="archive-section-head">
+            <p class="archive-section-title">已归档账户</p>
+            <p id="archive-account-count" class="archive-section-meta">0 个</p>
+          </div>
+          <div id="archive-account-list" class="archive-list"></div>
+        </div>
+        <div class="archive-section">
+          <div class="archive-section-head">
+            <p class="archive-section-title">已归档持仓</p>
+            <p id="archive-holding-count" class="archive-section-meta">0 个</p>
+          </div>
+          <div id="archive-holding-list" class="archive-list"></div>
+        </div>
+        <div class="row-buttons modal-actions">
+          <button id="archive-close-btn" class="btn btn-ghost">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="delete-confirm-modal" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title">
+        <h2 id="delete-confirm-title">确认删除</h2>
+        <p id="delete-confirm-desc" class="modal-desc">--</p>
+        <p id="delete-confirm-note" class="modal-note">--</p>
+        <div class="row-buttons modal-actions">
+          <button id="delete-confirm-submit-btn" class="btn btn-danger">移入归档</button>
+          <button id="delete-confirm-cancel-btn" class="btn btn-ghost">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <template id="holding-config-template">
+      <article class="config-item">
+        <div class="config-main">
+          <p class="config-title">--</p>
+          <p class="config-meta">
+            <span class="config-order">排序 #--</span>
+            <span class="config-asset">--</span>
+            <span class="config-change">--</span>
+          </p>
+        </div>
+        <div class="config-actions">
+          <button class="btn btn-lite btn-sm edit-btn">编辑</button>
+          <button class="btn btn-lite btn-sm move-up-btn">上移</button>
+          <button class="btn btn-lite btn-sm move-down-btn">下移</button>
+          <button class="btn btn-danger btn-sm remove-btn">删除</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js?v=20260402-hotfix8" type="module"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js?v=20260402-hotfix8").catch(() => {});
+      }
+    </script>
+  </body>
+</html>

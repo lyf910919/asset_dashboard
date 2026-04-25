@@ -1,0 +1,12 @@
+{
+  "name": "qdii-dashboard-v2-static",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "node dashboard-server.mjs",
+    "decrypt-backup": "node tools/decrypt-backup.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.0"
+  }
+}
