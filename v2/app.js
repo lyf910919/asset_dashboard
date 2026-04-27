@@ -14,10 +14,10 @@ import {
   setBundle,
   setConfigValue,
   upsertDailyNav,
-} from "./lib/storage.js?v=20260402-hotfix8";
-import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260402-hotfix8";
-import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260402-hotfix8";
-import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260402-hotfix8";
+} from "./lib/storage.js?v=20260428-performance-baseline";
+import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260428-performance-baseline";
+import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260428-performance-baseline";
+import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260428-performance-baseline";
 const STORAGE_KEY = "qdii-vault-encrypted-v1";
 const LEGACY_STORAGE_KEY = "qdii-dashboard-config-v1";
 const REMEMBER_PASS_KEY = "qdii-remember-passphrase-v1";

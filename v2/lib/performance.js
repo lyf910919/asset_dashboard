@@ -468,9 +468,11 @@ export function computePerformanceReport({
     .filter((item) => item?.accountId === accountId && item?.date && item.date <= endDate)
     .sort(compareByTimeline);
 
-  const baseline = [...relevantEvents]
-    .reverse()
-    .find((item) => item?.type === "FULL_SNAPSHOT" && item?.date && item.date <= endDate);
+  const fullSnapshots = relevantEvents.filter((item) => item?.type === "FULL_SNAPSHOT" && item?.date && item.date <= endDate);
+  const baseline =
+    [...fullSnapshots].reverse().find((item) => item.date <= startDate) ||
+    fullSnapshots.find((item) => item.date >= startDate) ||
+    null;
 
   if (!baseline) {
     return {

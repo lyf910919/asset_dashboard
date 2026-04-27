@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "serve": "node dashboard-server.mjs",
+    "test:performance": "node performance.test.mjs",
     "decrypt-backup": "node tools/decrypt-backup.mjs"
   },
   "devDependencies": {
