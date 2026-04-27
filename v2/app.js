@@ -14,10 +14,10 @@ import {
   setBundle,
   setConfigValue,
   upsertDailyNav,
-} from "./lib/storage.js?v=20260428-performance-point";
-import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260428-performance-point";
-import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260428-performance-point";
-import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260428-performance-point";
+} from "./lib/storage.js?v=20260428-history-restore";
+import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260428-history-restore";
+import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260428-history-restore";
+import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260428-history-restore";
 const STORAGE_KEY = "qdii-vault-encrypted-v1";
 const LEGACY_STORAGE_KEY = "qdii-dashboard-config-v1";
 const REMEMBER_PASS_KEY = "qdii-remember-passphrase-v1";
@@ -129,6 +129,8 @@ const el = {
   importBtn: document.querySelector("#import-btn"),
   importFile: document.querySelector("#import-file"),
   exportHistoryBtn: document.querySelector("#export-history-btn"),
+  importHistoryBtn: document.querySelector("#import-history-btn"),
+  importHistoryFile: document.querySelector("#import-history-file"),
   exportDailyNavBtn: document.querySelector("#export-daily-nav-btn"),
   seedPreviewHistoryBtn: document.querySelector("#seed-preview-history-btn"),
   restorePreviewHistoryBtn: document.querySelector("#restore-preview-history-btn"),
@@ -1462,6 +1464,45 @@ async function exportHistoryEventsJson() {
   setVaultStatus("历史事件已导出", "good");
 }
 
+function isHistoryPayload(value) {
+  return Boolean(value && typeof value === "object" && (Array.isArray(value.events) || Array.isArray(value.dailyNav)));
+}
+
+function countHistoryPayloadRecords(payload) {
+  return (Array.isArray(payload?.events) ? payload.events.length : 0) + (Array.isArray(payload?.dailyNav) ? payload.dailyNav.length : 0);
+}
+
+function countNonPreviewHistoryRecords(payload) {
+  const events = Array.isArray(payload?.events) ? payload.events : [];
+  const dailyNav = Array.isArray(payload?.dailyNav) ? payload.dailyNav : [];
+  return events.filter((item) => !item?.previewTag).length + dailyNav.filter((item) => !item?.previewTag).length;
+}
+
+async function importHistoryEventsJson(file) {
+  if (!state.unlocked) {
+    setVaultStatus("请先解锁后再导入历史记录", "bad");
+    return;
+  }
+
+  const text = await file.text();
+  const payload = JSON.parse(text);
+  if (!isHistoryPayload(payload)) {
+    throw new Error("文件不是有效的历史事件 JSON");
+  }
+
+  await importHistoryPayload(payload);
+  await deleteConfigValue(PERFORMANCE_PREVIEW_BACKUP_KEY);
+  await deleteConfigValue(PERFORMANCE_PREVIEW_META_KEY);
+  renderAllPanels();
+  if (state.activeTab === "performance") {
+    await renderPerformanceOnly();
+  }
+
+  const eventCount = Array.isArray(payload.events) ? payload.events.length : 0;
+  const dailyNavCount = Array.isArray(payload.dailyNav) ? payload.dailyNav.length : 0;
+  setVaultStatus(`历史事件已导入：${eventCount} 条事件，${dailyNavCount} 条每日净值`, "good");
+}
+
 async function exportDailyNavCsv() {
   if (!state.unlocked) {
     setVaultStatus("请先解锁后再导出每日净值", "bad");
@@ -1871,8 +1912,10 @@ async function seedPerformancePreviewHistory() {
 
   setVaultStatus("正在生成本地演示历史...");
 
+  const previewMeta = getConfigValue(PERFORMANCE_PREVIEW_META_KEY, null);
   const existingBackup = getConfigValue(PERFORMANCE_PREVIEW_BACKUP_KEY, null);
-  if (!existingBackup) {
+  const keepExistingBackup = Boolean(previewMeta?.active && isHistoryPayload(existingBackup));
+  if (!keepExistingBackup) {
     const backupPayload = await exportHistoryPayload();
     await setConfigValue(PERFORMANCE_PREVIEW_BACKUP_KEY, backupPayload);
   }
@@ -1903,13 +1946,34 @@ async function restorePerformancePreviewHistory() {
   }
 
   setVaultStatus("正在恢复生成演示历史前的原始记录...");
+  const previewMeta = getConfigValue(PERFORMANCE_PREVIEW_META_KEY, null);
   const backupPayload = getConfigValue(PERFORMANCE_PREVIEW_BACKUP_KEY, null);
-  if (backupPayload && typeof backupPayload === "object") {
-    await importHistoryPayload(backupPayload);
-  } else {
-    await importHistoryPayload({ version: 1, exportedAt: nowIso(), events: [], dailyNav: [] });
+
+  if (!previewMeta?.active) {
+    await deleteConfigValue(PERFORMANCE_PREVIEW_BACKUP_KEY);
+    await deleteConfigValue(PERFORMANCE_PREVIEW_META_KEY);
+    setVaultStatus("没有正在使用的演示历史，当前历史记录未改动。", "good");
+    return;
   }
 
+  if (!isHistoryPayload(backupPayload)) {
+    await deleteConfigValue(PERFORMANCE_PREVIEW_BACKUP_KEY);
+    await deleteConfigValue(PERFORMANCE_PREVIEW_META_KEY);
+    setVaultStatus("没有找到演示历史前的备份，已保留当前历史；如需恢复请导入事件 JSON 或从 Gist 恢复。", "bad");
+    return;
+  }
+
+  const currentPayload = await exportHistoryPayload();
+  const backupRecordCount = countHistoryPayloadRecords(backupPayload);
+  const currentNonPreviewCount = countNonPreviewHistoryRecords(currentPayload);
+  if (backupRecordCount === 0 && currentNonPreviewCount > 0) {
+    await deleteConfigValue(PERFORMANCE_PREVIEW_BACKUP_KEY);
+    await deleteConfigValue(PERFORMANCE_PREVIEW_META_KEY);
+    setVaultStatus("演示历史备份为空，但当前存在真实历史；为避免误删，已保留当前历史。", "bad");
+    return;
+  }
+
+  await importHistoryPayload(backupPayload);
   await deleteConfigValue(PERFORMANCE_PREVIEW_BACKUP_KEY);
   await deleteConfigValue(PERFORMANCE_PREVIEW_META_KEY);
   renderAllPanels();
@@ -3017,6 +3081,7 @@ function updateLockUI() {
   el.exportBtn.disabled = !state.unlocked;
   el.importBtn.disabled = false;
   if (el.exportHistoryBtn) el.exportHistoryBtn.disabled = !state.unlocked;
+  if (el.importHistoryBtn) el.importHistoryBtn.disabled = !state.unlocked;
   if (el.exportDailyNavBtn) el.exportDailyNavBtn.disabled = !state.unlocked;
   if (el.historyReplayDateInput) el.historyReplayDateInput.disabled = !state.unlocked;
   if (el.historyReplayBtn) el.historyReplayBtn.disabled = !state.unlocked;
@@ -6294,6 +6359,20 @@ function bindEvents() {
   el.exportBtn.addEventListener("click", () => exportEncryptedBackup());
   el.exportHistoryBtn?.addEventListener("click", () => {
     exportHistoryEventsJson().catch((error) => setVaultStatus(`历史导出失败：${formatError(error)}`, "bad"));
+  });
+  el.importHistoryBtn?.addEventListener("click", () => {
+    el.importHistoryFile?.click();
+  });
+  el.importHistoryFile?.addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      await importHistoryEventsJson(file);
+    } catch (error) {
+      setVaultStatus(`历史事件导入失败：${formatError(error)}`, "bad");
+    } finally {
+      event.target.value = "";
+    }
   });
   el.exportDailyNavBtn?.addEventListener("click", () => {
     exportDailyNavCsv().catch((error) => setVaultStatus(`每日净值导出失败：${formatError(error)}`, "bad"));

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QDII 资产监控看板 v2.0</title>
     <meta name="theme-color" content="#2b8fb8" />
-    <link rel="manifest" href="./manifest.webmanifest?v=20260428-performance-point" />
-    <link rel="stylesheet" href="./styles.css?v=20260428-performance-point" />
+    <link rel="manifest" href="./manifest.webmanifest?v=20260428-history-restore" />
+    <link rel="stylesheet" href="./styles.css?v=20260428-history-restore" />
   </head>
   <body>
     <div class="page-bg"></div>
@@ -313,9 +313,11 @@
                   <button id="export-btn" class="btn btn-lite">导出密文备份</button>
                   <button id="import-btn" class="btn btn-lite">导入密文备份</button>
                   <button id="export-history-btn" class="btn btn-lite">导出事件 JSON</button>
+                  <button id="import-history-btn" class="btn btn-lite">导入事件 JSON</button>
                   <button id="export-daily-nav-btn" class="btn btn-lite">导出净值 CSV</button>
                   <button id="change-pass-btn" class="btn btn-lite">修改口令</button>
                   <input type="file" id="import-file" accept="application/json" hidden />
+                  <input type="file" id="import-history-file" accept="application/json" hidden />
                 </div>
               </div>
             </div>
@@ -565,10 +567,10 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20260428-performance-point" type="module"></script>
+    <script src="./app.js?v=20260428-history-restore" type="module"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js?v=20260428-performance-point").catch(() => {});
+        navigator.serviceWorker.register("./sw.js?v=20260428-history-restore").catch(() => {});
       }
     </script>
   </body>
