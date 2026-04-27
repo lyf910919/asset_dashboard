@@ -176,6 +176,41 @@ body.modal-open {
   width: 100%;
   min-height: 320px;
   display: block;
+  cursor: crosshair;
+  touch-action: manipulation;
+}
+
+.performance-point-detail {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.performance-point-detail[hidden] {
+  display: none;
+}
+
+.performance-point-item {
+  min-width: 0;
+}
+
+.performance-point-label {
+  margin: 0 0 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.performance-point-value {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .performance-meta-grid {
@@ -1740,6 +1775,10 @@ body.is-locked #tab-config #gist-verify-btn {
 
   .performance-chart-wrap canvas {
     min-height: 280px;
+  }
+
+  .performance-point-detail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .display-currency-switch {

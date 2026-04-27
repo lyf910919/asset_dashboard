@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QDII 资产监控看板 v2.0</title>
     <meta name="theme-color" content="#2b8fb8" />
-    <link rel="manifest" href="./manifest.webmanifest?v=20260428-performance-baseline" />
-    <link rel="stylesheet" href="./styles.css?v=20260428-performance-baseline" />
+    <link rel="manifest" href="./manifest.webmanifest?v=20260428-performance-point" />
+    <link rel="stylesheet" href="./styles.css?v=20260428-performance-point" />
   </head>
   <body>
     <div class="page-bg"></div>
@@ -242,6 +242,7 @@
             <div class="performance-chart-wrap">
               <canvas id="performance-chart" width="760" height="340" aria-label="收益率曲线"></canvas>
             </div>
+            <div id="performance-point-detail" class="performance-point-detail" hidden></div>
 
             <div class="performance-meta-grid">
               <article class="panel-lite performance-meta-card">
@@ -564,10 +565,10 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20260428-performance-baseline" type="module"></script>
+    <script src="./app.js?v=20260428-performance-point" type="module"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js?v=20260428-performance-baseline").catch(() => {});
+        navigator.serviceWorker.register("./sw.js?v=20260428-performance-point").catch(() => {});
       }
     </script>
   </body>

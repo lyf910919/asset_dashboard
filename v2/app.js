@@ -14,10 +14,10 @@ import {
   setBundle,
   setConfigValue,
   upsertDailyNav,
-} from "./lib/storage.js?v=20260428-performance-baseline";
-import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260428-performance-baseline";
-import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260428-performance-baseline";
-import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260428-performance-baseline";
+} from "./lib/storage.js?v=20260428-performance-point";
+import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260428-performance-point";
+import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260428-performance-point";
+import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260428-performance-point";
 const STORAGE_KEY = "qdii-vault-encrypted-v1";
 const LEGACY_STORAGE_KEY = "qdii-dashboard-config-v1";
 const REMEMBER_PASS_KEY = "qdii-remember-passphrase-v1";
@@ -239,6 +239,7 @@ const el = {
   performanceScopeTarget: document.querySelector("#performance-scope-target"),
   performanceMetricButtons: [...document.querySelectorAll("[data-performance-metric]")],
   performanceChart: document.querySelector("#performance-chart"),
+  performancePointDetail: document.querySelector("#performance-point-detail"),
   performanceStatus: document.querySelector("#performance-status"),
   performanceTotalReturn: document.querySelector("#performance-total-return"),
   performanceXirr: document.querySelector("#performance-xirr"),
@@ -266,6 +267,8 @@ const state = {
   performanceScopeTarget: "",
   performanceMetricMode: "nav",
   performanceRenderToken: 0,
+  performanceSelectedPointDate: "",
+  performanceChartModel: null,
   autoTimer: null,
   persistTimer: null,
   syncTimer: null,
@@ -911,6 +914,11 @@ function formatPercent(value, digits = 2) {
   if (!Number.isFinite(value)) return "--";
   const prefix = value > 0 ? "+" : "";
   return `${prefix}${value.toFixed(digits)}%`;
+}
+
+function formatReturnRatio(value, digits = 2) {
+  if (!Number.isFinite(value)) return "--";
+  return formatPercent(value * 100, digits);
 }
 
 function formatShareRatio(value, digits = 2) {
@@ -4731,7 +4739,7 @@ function setPerformanceValue(elm, value, { format = "text", currency = getDispla
   if (format === "money") {
     elm.textContent = signed ? formatSignedMoney(value, currency) : formatMoney(value, currency);
   } else if (format === "percent") {
-    elm.textContent = formatPercent(value, 2);
+    elm.textContent = formatReturnRatio(value, 2);
   } else {
     elm.textContent = String(value);
   }
@@ -4742,6 +4750,8 @@ function setPerformanceValue(elm, value, { format = "text", currency = getDispla
 
 function drawEmptyPerformanceChart(message = "暂无收益率数据") {
   if (!el.performanceChart) return;
+  state.performanceChartModel = null;
+  clearPerformancePointDetail();
   const ctx = el.performanceChart.getContext("2d");
   const rect = el.performanceChart.getBoundingClientRect();
   const cssWidth = rect.width > 40 ? rect.width : 720;
@@ -4760,8 +4770,53 @@ function drawEmptyPerformanceChart(message = "暂无收益率数据") {
 
 function formatChartAxisValue(value, metricMode) {
   if (!Number.isFinite(value)) return "--";
-  if (metricMode === "return") return formatPercent(value, 1);
+  if (metricMode === "return") return formatReturnRatio(value, 1);
   return value.toFixed(3);
+}
+
+function clearPerformancePointDetail() {
+  if (!el.performancePointDetail) return;
+  el.performancePointDetail.hidden = true;
+  el.performancePointDetail.innerHTML = "";
+}
+
+function appendPerformancePointItem(fragment, label, value) {
+  const item = document.createElement("div");
+  item.className = "performance-point-item";
+
+  const labelEl = document.createElement("p");
+  labelEl.className = "performance-point-label";
+  labelEl.textContent = label;
+
+  const valueEl = document.createElement("p");
+  valueEl.className = "performance-point-value";
+  valueEl.textContent = value;
+
+  item.append(labelEl, valueEl);
+  fragment.appendChild(item);
+}
+
+function renderPerformancePointDetail(point, metricMode = normalizePerformanceMetricMode(state.performanceMetricMode)) {
+  if (!el.performancePointDetail || !point) {
+    clearPerformancePointDetail();
+    return;
+  }
+
+  const primaryLabel = metricMode === "return" ? "累计收益率" : "净值";
+  const primaryValue = metricMode === "return" ? formatReturnRatio(point.cumulativeReturn, 2) : formatNumber(point.nav, 4);
+  const secondaryLabel = metricMode === "return" ? "净值" : "累计收益率";
+  const secondaryValue = metricMode === "return" ? formatNumber(point.nav, 4) : formatReturnRatio(point.cumulativeReturn, 2);
+
+  const fragment = document.createDocumentFragment();
+  appendPerformancePointItem(fragment, "日期", point.date || "--");
+  appendPerformancePointItem(fragment, primaryLabel, primaryValue);
+  appendPerformancePointItem(fragment, secondaryLabel, secondaryValue);
+  appendPerformancePointItem(fragment, "当日收益", Number.isFinite(point.dailyReturn) ? formatReturnRatio(point.dailyReturn, 2) : "--");
+  appendPerformancePointItem(fragment, "当日市值", formatMoney(point.marketValue));
+
+  el.performancePointDetail.innerHTML = "";
+  el.performancePointDetail.appendChild(fragment);
+  el.performancePointDetail.hidden = false;
 }
 
 function drawPerformanceChart(report, metricMode = normalizePerformanceMetricMode(state.performanceMetricMode)) {
@@ -4832,9 +4887,12 @@ function drawPerformanceChart(report, metricMode = normalizePerformanceMetricMod
   }
 
   const linePoints = points
-    .map((point) => ({
+    .map((point, index) => ({
+      index,
+      point,
       x: toCanvasX(point.date),
       y: toCanvasY(metricMode === "return" ? point.cumulativeReturn : point.nav),
+      value: metricMode === "return" ? point.cumulativeReturn : point.nav,
     }))
     .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y));
 
@@ -4842,6 +4900,15 @@ function drawPerformanceChart(report, metricMode = normalizePerformanceMetricMod
     drawEmptyPerformanceChart("所选区间暂无可绘制的收益率数据");
     return;
   }
+
+  const selectedLinePoint =
+    linePoints.find((point) => point.point.date === state.performanceSelectedPointDate) || linePoints[linePoints.length - 1];
+  state.performanceSelectedPointDate = selectedLinePoint.point.date;
+  state.performanceChartModel = {
+    report,
+    metricMode,
+    linePoints,
+  };
 
   const gradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + innerHeight);
   gradient.addColorStop(0, "rgba(43, 143, 184, 0.26)");
@@ -4875,6 +4942,24 @@ function drawPerformanceChart(report, metricMode = normalizePerformanceMetricMod
   ctx.lineWidth = 2;
   ctx.stroke();
 
+  ctx.save();
+  ctx.strokeStyle = "rgba(128, 87, 57, 0.38)";
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(selectedLinePoint.x, padding.top);
+  ctx.lineTo(selectedLinePoint.x, padding.top + innerHeight);
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.beginPath();
+  ctx.arc(selectedLinePoint.x, selectedLinePoint.y, 6, 0, Math.PI * 2);
+  ctx.fillStyle = "#805739";
+  ctx.fill();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
   const labelDates = [points[0].date, points[Math.floor(points.length / 2)].date, points[points.length - 1].date];
   ctx.fillStyle = "#6b8592";
   ctx.font = '11px "Noto Sans SC", sans-serif';
@@ -4883,6 +4968,24 @@ function drawPerformanceChart(report, metricMode = normalizePerformanceMetricMod
     const x = index === 0 ? padding.left : index === 2 ? padding.left + innerWidth : padding.left + innerWidth / 2;
     ctx.fillText(dateKey, x, cssHeight - 10);
   });
+
+  renderPerformancePointDetail(selectedLinePoint.point, metricMode);
+}
+
+function handlePerformanceChartClick(event) {
+  const model = state.performanceChartModel;
+  if (!model?.linePoints?.length || !el.performanceChart) return;
+
+  const rect = el.performanceChart.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const nearest = model.linePoints.reduce((best, point) => {
+    if (!best) return point;
+    return Math.abs(point.x - clickX) < Math.abs(best.x - clickX) ? point : best;
+  }, null);
+  if (!nearest?.point?.date) return;
+
+  state.performanceSelectedPointDate = nearest.point.date;
+  drawPerformanceChart(model.report, model.metricMode);
 }
 
 function clearPerformancePanel(message = "解锁后可查看收益率曲线。", level = "normal") {
@@ -5059,9 +5162,9 @@ async function renderPerformanceOnly() {
     el.performanceRangeMeta.textContent = `${report.effectiveStartDate || start} 至 ${report.effectiveEndDate || end} · ${label} · ${report.summary.pointCount} 个观测点`;
   }
   if (el.performanceFormulaMeta) {
-    const notes = [`时间加权净值曲线`, `累计收益率 ${formatPercent(report.summary.totalReturn, 2)}`];
+    const notes = [`时间加权净值曲线`, `累计收益率 ${formatReturnRatio(report.summary.totalReturn, 2)}`];
     if (Number.isFinite(report.summary.xirr)) {
-      notes.push(`年化 ${formatPercent(report.summary.xirr, 2)}`);
+      notes.push(`年化 ${formatReturnRatio(report.summary.xirr, 2)}`);
     }
     el.performanceFormulaMeta.textContent = notes.join(" · ");
   }
@@ -6285,6 +6388,8 @@ function bindEvents() {
       }
     });
   });
+
+  el.performanceChart?.addEventListener("click", handlePerformanceChartClick);
 
   el.viewSort.addEventListener("change", () => {
     if (!state.unlocked) return;
