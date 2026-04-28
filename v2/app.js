@@ -14,10 +14,10 @@ import {
   setBundle,
   setConfigValue,
   upsertDailyNav,
-} from "./lib/storage.js?v=20260428-ledger-backfill";
-import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260428-ledger-backfill";
-import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260428-ledger-backfill";
-import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260428-ledger-backfill";
+} from "./lib/storage.js?v=20260428-ledger-preview-clean";
+import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260428-ledger-preview-clean";
+import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260428-ledger-preview-clean";
+import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260428-ledger-preview-clean";
 const STORAGE_KEY = "qdii-vault-encrypted-v1";
 const LEGACY_STORAGE_KEY = "qdii-dashboard-config-v1";
 const REMEMBER_PASS_KEY = "qdii-remember-passphrase-v1";
@@ -1782,12 +1782,27 @@ async function readLedgerBackfillFile(file) {
   return parseYouzhiyouxingLedgerMatrix(matrix, xlsx, name || LEDGER_BACKFILL_SOURCE_LABEL);
 }
 
+function isPreviewHistoryRecord(record, accountId = "") {
+  if (!record?.previewTag) return false;
+  return !accountId || record.accountId === accountId;
+}
+
 function isLedgerBackfillEvent(event, accountId) {
   return (
     event?.accountId === accountId &&
     (event?.type === ACCOUNT_VALUE_SNAPSHOT || event?.type === ACCOUNT_CASH_FLOW) &&
     event?.payload?.source === LEDGER_BACKFILL_SOURCE
   );
+}
+
+function hasLedgerBackfillEvents(events, accountId) {
+  return (Array.isArray(events) ? events : []).some((event) => isLedgerBackfillEvent(event, accountId));
+}
+
+function buildPerformanceEventsForAccount(events, accountId) {
+  const rows = Array.isArray(events) ? events : [];
+  if (!hasLedgerBackfillEvents(rows, accountId)) return rows;
+  return rows.filter((event) => !isPreviewHistoryRecord(event, accountId));
 }
 
 function buildLedgerBackfillEvents(parsed, accountId, fileName) {
@@ -1864,15 +1879,31 @@ async function importLedgerBackfillFile(file) {
   }
 
   const currentPayload = await exportHistoryPayload();
-  const keptEvents = (Array.isArray(currentPayload.events) ? currentPayload.events : []).filter(
-    (event) => !isLedgerBackfillEvent(event, account.id),
-  );
+  let removedPreviewEvents = 0;
+  let removedPreviewDailyNav = 0;
+  const keptEvents = (Array.isArray(currentPayload.events) ? currentPayload.events : []).filter((event) => {
+    if (isLedgerBackfillEvent(event, account.id)) return false;
+    if (isPreviewHistoryRecord(event, account.id)) {
+      removedPreviewEvents += 1;
+      return false;
+    }
+    return true;
+  });
+  const keptDailyNav = (Array.isArray(currentPayload.dailyNav) ? currentPayload.dailyNav : []).filter((row) => {
+    if (isPreviewHistoryRecord(row, account.id)) {
+      removedPreviewDailyNav += 1;
+      return false;
+    }
+    return true;
+  });
   await importHistoryPayload({
     ...currentPayload,
     exportedAt: nowIso(),
     events: [...keptEvents, ...events],
-    dailyNav: Array.isArray(currentPayload.dailyNav) ? currentPayload.dailyNav : [],
+    dailyNav: keptDailyNav,
   });
+  await deleteConfigValue(PERFORMANCE_PREVIEW_BACKUP_KEY);
+  await deleteConfigValue(PERFORMANCE_PREVIEW_META_KEY);
 
   state.performancePreset = "all";
   state.performanceStartDate = "";
@@ -1884,8 +1915,12 @@ async function importLedgerBackfillFile(file) {
 
   const firstDate = valueEvents[0]?.date || "";
   const lastDate = valueEvents[valueEvents.length - 1]?.date || "";
+  const removedText =
+    removedPreviewEvents + removedPreviewDailyNav > 0
+      ? `，已清理演示历史 ${removedPreviewEvents} 条事件 / ${removedPreviewDailyNav} 条净值`
+      : "";
   setVaultStatus(
-    `已回填${parsed.accountName || LEDGER_BACKFILL_SOURCE_LABEL}：${valueEvents.length} 个总资产点，${events.length - valueEvents.length} 条现金流，${firstDate} 至 ${lastDate}`,
+    `已回填${parsed.accountName || LEDGER_BACKFILL_SOURCE_LABEL}：${valueEvents.length} 个总资产点，${events.length - valueEvents.length} 条现金流，${firstDate} 至 ${lastDate}${removedText}`,
     "good",
   );
 }
@@ -5571,7 +5606,8 @@ async function renderPerformanceOnly() {
   }
 
   setPerformanceStatus("正在计算收益率曲线...");
-  const events = await getAllEvents(account.id);
+  const rawEvents = await getAllEvents(account.id);
+  const events = buildPerformanceEventsForAccount(rawEvents, account.id);
   if (renderToken !== state.performanceRenderToken) return;
 
   const catalog = buildPerformanceScopeCatalog({ account, events });

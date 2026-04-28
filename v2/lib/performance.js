@@ -487,9 +487,11 @@ export function computePerformanceReport({
     };
   }
 
-  const relevantEvents = [...(Array.isArray(events) ? events : [])]
+  const accountEvents = [...(Array.isArray(events) ? events : [])]
     .filter((item) => item?.accountId === accountId && item?.date && item.date <= endDate)
     .sort(compareByTimeline);
+  const hasAccountLevelBackfill = accountEvents.some((item) => item?.type === ACCOUNT_VALUE_SNAPSHOT);
+  const relevantEvents = hasAccountLevelBackfill ? accountEvents.filter((item) => !item?.previewTag) : accountEvents;
 
   const useAccountLevelEvents = canUseAccountLevelEvents(scope);
   const baselineCandidates = relevantEvents.filter(

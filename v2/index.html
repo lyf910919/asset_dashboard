@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QDII 资产监控看板 v2.0</title>
     <meta name="theme-color" content="#2b8fb8" />
-    <link rel="manifest" href="./manifest.webmanifest?v=20260428-ledger-backfill" />
-    <link rel="stylesheet" href="./styles.css?v=20260428-ledger-backfill" />
+    <link rel="manifest" href="./manifest.webmanifest?v=20260428-ledger-preview-clean" />
+    <link rel="stylesheet" href="./styles.css?v=20260428-ledger-preview-clean" />
   </head>
   <body>
     <div class="page-bg"></div>
@@ -574,10 +574,10 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20260428-ledger-backfill" type="module"></script>
+    <script src="./app.js?v=20260428-ledger-preview-clean" type="module"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js?v=20260428-ledger-backfill").catch(() => {});
+        navigator.serviceWorker.register("./sw.js?v=20260428-ledger-preview-clean").catch(() => {});
       }
     </script>
   </body>

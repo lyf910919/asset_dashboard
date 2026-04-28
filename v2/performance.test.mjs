@@ -85,6 +85,17 @@ const backfillEvents = [
     payload: { amount: 100, currency: "CNY", source: "youzhiyouxing-ledger" },
   },
   {
+    type: "FULL_SNAPSHOT",
+    accountId,
+    date: "2025-01-05",
+    timestamp: "2025-01-05T07:00:00.000Z",
+    previewTag: "qdii-performance-preview-history-meta-v1",
+    payload: {
+      holdings: [{ ...holding, code: "", manualAmount: 999999, manualAmountCurrency: "CNY" }],
+      settings: {},
+    },
+  },
+  {
     type: "ACCOUNT_VALUE_SNAPSHOT",
     accountId,
     date: "2025-01-10",
