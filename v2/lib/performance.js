@@ -1,6 +1,8 @@
 const SUPPORTED_CURRENCY_CODES = ["USD", "CNY", "HKD", "EUR", "GBP", "JPY", "AUD", "CAD", "SGD"];
 const DEFAULT_GROUP_NAME = "未分组";
 const ASSET_CLASS_ORDER = ["stock", "bond", "gold", "cash"];
+const ACCOUNT_VALUE_SNAPSHOT = "ACCOUNT_VALUE_SNAPSHOT";
+const ACCOUNT_CASH_FLOW = "ACCOUNT_CASH_FLOW";
 const ASSET_CLASS_LABELS = {
   stock: "股票",
   bond: "债券",
@@ -116,6 +118,27 @@ function updateLatestPriceBook(priceBook, payload) {
       currencyLabel: value?.currencyLabel || priceBook[code]?.currencyLabel || null,
     };
   });
+}
+
+function canUseAccountLevelEvents(scope) {
+  const normalizedScope = scope && typeof scope === "object" ? scope : { type: "portfolio" };
+  return !normalizedScope.type || normalizedScope.type === "portfolio";
+}
+
+function readAccountValueSnapshot(event, fxRates, displayCurrencyCode) {
+  const rawValue = parseFloatSafe(event?.payload?.totalAsset ?? event?.payload?.marketValue ?? event?.payload?.value);
+  if (!Number.isFinite(rawValue)) return null;
+  const currency = normalizeCurrencyCode(event?.payload?.currency) || "CNY";
+  return convertAmount(rawValue, currency, displayCurrencyCode, fxRates);
+}
+
+function readAccountCashFlow(event, fxRates, displayCurrencyCode) {
+  const rawAmount = parseFloatSafe(event?.payload?.amount);
+  if (!Number.isFinite(rawAmount) || Math.abs(rawAmount) <= 1e-8) return 0;
+  const currency = normalizeCurrencyCode(event?.payload?.currency) || "CNY";
+  const converted = convertAmount(Math.abs(rawAmount), currency, displayCurrencyCode, fxRates);
+  if (!Number.isFinite(converted)) return 0;
+  return rawAmount < 0 ? -converted : converted;
 }
 
 function resolveHoldingCurrency(holding, priceEntry) {
@@ -468,10 +491,16 @@ export function computePerformanceReport({
     .filter((item) => item?.accountId === accountId && item?.date && item.date <= endDate)
     .sort(compareByTimeline);
 
-  const fullSnapshots = relevantEvents.filter((item) => item?.type === "FULL_SNAPSHOT" && item?.date && item.date <= endDate);
+  const useAccountLevelEvents = canUseAccountLevelEvents(scope);
+  const baselineCandidates = relevantEvents.filter(
+    (item) =>
+      item?.date &&
+      item.date <= endDate &&
+      (item?.type === "FULL_SNAPSHOT" || (useAccountLevelEvents && item?.type === ACCOUNT_VALUE_SNAPSHOT)),
+  );
   const baseline =
-    [...fullSnapshots].reverse().find((item) => item.date <= startDate) ||
-    fullSnapshots.find((item) => item.date >= startDate) ||
+    [...baselineCandidates].reverse().find((item) => item.date <= startDate) ||
+    baselineCandidates.find((item) => item.date >= startDate) ||
     null;
 
   if (!baseline) {
@@ -501,6 +530,10 @@ export function computePerformanceReport({
       }
     });
 
+  const baselineAccountValue =
+    useAccountLevelEvents && baseline?.type === ACCOUNT_VALUE_SNAPSHOT
+      ? readAccountValueSnapshot(baseline, latestFx, displayCurrencyCode)
+      : null;
   const recordsAfterBaseline = relevantEvents.filter((item) => compareByTimeline(item, baseline) > 0);
   const byDate = new Map();
   recordsAfterBaseline.forEach((event) => {
@@ -511,12 +544,40 @@ export function computePerformanceReport({
   const timelineDates = [...new Set([baseline.date, ...byDate.keys()])].sort((left, right) => left.localeCompare(right));
   const timeline = [];
   let lastKnownValue = null;
+  let accountValueSnapshotCount = Number.isFinite(baselineAccountValue) ? 1 : 0;
+  let accountCashFlowCount = 0;
+  let carriedInflow = 0;
+  let carriedOutflow = 0;
 
   timelineDates.forEach((date) => {
     const dayRecords = (byDate.get(date) || []).sort(compareByTimeline);
     const pendingTransitions = [];
+    let forcedMarketValue = date === baseline.date && Number.isFinite(baselineAccountValue) ? baselineAccountValue : null;
+    let directInflow = 0;
+    let directOutflow = 0;
 
     dayRecords.forEach((event) => {
+      if (useAccountLevelEvents && event?.type === ACCOUNT_VALUE_SNAPSHOT) {
+        const value = readAccountValueSnapshot(event, latestFx, displayCurrencyCode);
+        if (Number.isFinite(value)) {
+          forcedMarketValue = value;
+          accountValueSnapshotCount += 1;
+        }
+        return;
+      }
+
+      if (useAccountLevelEvents && event?.type === ACCOUNT_CASH_FLOW) {
+        const amount = readAccountCashFlow(event, latestFx, displayCurrencyCode);
+        if (amount > 0) {
+          directInflow += amount;
+          accountCashFlowCount += 1;
+        } else if (amount < 0) {
+          directOutflow += Math.abs(amount);
+          accountCashFlowCount += 1;
+        }
+        return;
+      }
+
       if (event?.type === "HOLDINGS_CHANGE") {
         const action = String(event?.payload?.action || "").trim().toUpperCase();
 
@@ -576,8 +637,8 @@ export function computePerformanceReport({
       }
     });
 
-    let inflow = 0;
-    let outflow = 0;
+    let inflow = directInflow;
+    let outflow = directOutflow;
     let estimatedFlowCount = 0;
     let unresolvedFlowCount = 0;
     pendingTransitions.forEach((transition) => {
@@ -587,14 +648,16 @@ export function computePerformanceReport({
       if (flow.estimated) estimatedFlowCount += 1;
       if (flow.unresolved) unresolvedFlowCount += 1;
     });
+    inflow += carriedInflow;
+    outflow += carriedOutflow;
 
-    let marketValue = 0;
+    let marketValue = Number.isFinite(forcedMarketValue) ? forcedMarketValue : 0;
     let scopeHoldingCount = 0;
     let valuedHoldingCount = 0;
     let estimatedValueCount = 0;
     let missingValueCount = 0;
 
-    if (!accountDeleted) {
+    if (!accountDeleted && !Number.isFinite(forcedMarketValue)) {
       [...holdings.values()].forEach((holding) => {
         if (!holdingMatchesScope(holding, scope)) return;
         scopeHoldingCount += 1;
@@ -610,9 +673,18 @@ export function computePerformanceReport({
     }
 
     const hasMarketValue =
+      Number.isFinite(forcedMarketValue) ||
       accountDeleted ||
       valuedHoldingCount > 0 ||
-      (scopeHoldingCount === 0 && (inflow > 0 || outflow > 0));
+      (pendingTransitions.length > 0 && scopeHoldingCount === 0 && (inflow > 0 || outflow > 0));
+
+    if (hasMarketValue) {
+      carriedInflow = 0;
+      carriedOutflow = 0;
+    } else {
+      carriedInflow = inflow;
+      carriedOutflow = outflow;
+    }
 
     const point = {
       date,
@@ -720,6 +792,9 @@ export function computePerformanceReport({
   if (missingValueCount > 0 || unresolvedFlowCount > 0) {
     notes.push("部分历史记录缺少完整价格，结果可能偏保守。");
   }
+  if (accountValueSnapshotCount > 0) {
+    notes.push("部分历史使用账户总账回填，只支持整个组合口径，不能拆分到大类、分组或单个资产。");
+  }
 
   return {
     ok: true,
@@ -744,6 +819,8 @@ export function computePerformanceReport({
       estimatedValueCount,
       unresolvedFlowCount,
       missingValueCount,
+      accountValueSnapshotCount,
+      accountCashFlowCount,
     },
     notes,
     availableStartDate: usableTimeline[0]?.date || null,

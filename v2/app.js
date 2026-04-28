@@ -14,10 +14,10 @@ import {
   setBundle,
   setConfigValue,
   upsertDailyNav,
-} from "./lib/storage.js?v=20260428-history-restore";
-import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260428-history-restore";
-import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260428-history-restore";
-import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260428-history-restore";
+} from "./lib/storage.js?v=20260428-ledger-backfill";
+import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260428-ledger-backfill";
+import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260428-ledger-backfill";
+import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260428-ledger-backfill";
 const STORAGE_KEY = "qdii-vault-encrypted-v1";
 const LEGACY_STORAGE_KEY = "qdii-dashboard-config-v1";
 const REMEMBER_PASS_KEY = "qdii-remember-passphrase-v1";
@@ -45,6 +45,11 @@ const PERFORMANCE_METRIC_MODES = ["nav", "return"];
 const PERFORMANCE_PREVIEW_BACKUP_KEY = "qdii-performance-preview-history-backup-v1";
 const PERFORMANCE_PREVIEW_META_KEY = "qdii-performance-preview-history-meta-v1";
 const PERFORMANCE_PREVIEW_DAYS = 180;
+const LEDGER_BACKFILL_SOURCE = "youzhiyouxing-ledger";
+const LEDGER_BACKFILL_SOURCE_LABEL = "有知有行长钱总账";
+const ACCOUNT_VALUE_SNAPSHOT = "ACCOUNT_VALUE_SNAPSHOT";
+const ACCOUNT_CASH_FLOW = "ACCOUNT_CASH_FLOW";
+const SHEETJS_CDN_URL = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
 const ASSET_CLASS_LABELS = {
   stock: "股票",
   bond: "债券",
@@ -131,6 +136,8 @@ const el = {
   exportHistoryBtn: document.querySelector("#export-history-btn"),
   importHistoryBtn: document.querySelector("#import-history-btn"),
   importHistoryFile: document.querySelector("#import-history-file"),
+  importLedgerBackfillBtn: document.querySelector("#import-ledger-backfill-btn"),
+  importLedgerBackfillFile: document.querySelector("#import-ledger-backfill-file"),
   exportDailyNavBtn: document.querySelector("#export-daily-nav-btn"),
   seedPreviewHistoryBtn: document.querySelector("#seed-preview-history-btn"),
   restorePreviewHistoryBtn: document.querySelector("#restore-preview-history-btn"),
@@ -290,6 +297,8 @@ const state = {
   pendingQuoteCodes: new Set(),
   gistUrl: "",
 };
+
+let xlsxLibraryPromise = null;
 
 function nowIso() {
   return new Date().toISOString();
@@ -1501,6 +1510,384 @@ async function importHistoryEventsJson(file) {
   const eventCount = Array.isArray(payload.events) ? payload.events.length : 0;
   const dailyNavCount = Array.isArray(payload.dailyNav) ? payload.dailyNav.length : 0;
   setVaultStatus(`历史事件已导入：${eventCount} 条事件，${dailyNavCount} 条每日净值`, "good");
+}
+
+function ensureXlsxLibrary() {
+  if (globalThis.XLSX?.read && globalThis.XLSX?.utils) {
+    return Promise.resolve(globalThis.XLSX);
+  }
+  if (xlsxLibraryPromise) return xlsxLibraryPromise;
+
+  xlsxLibraryPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = SHEETJS_CDN_URL;
+    script.async = true;
+    script.onload = () => {
+      if (globalThis.XLSX?.read && globalThis.XLSX?.utils) {
+        resolve(globalThis.XLSX);
+        return;
+      }
+      reject(new Error("Excel 解析器加载后不可用"));
+    };
+    script.onerror = () => reject(new Error("Excel 解析器加载失败，请检查网络后重试"));
+    document.head.appendChild(script);
+  }).catch((error) => {
+    xlsxLibraryPromise = null;
+    throw error;
+  });
+
+  return xlsxLibraryPromise;
+}
+
+function parseLedgerNumber(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  const text = String(value ?? "")
+    .trim()
+    .replace(/,/g, "")
+    .replace(/[¥￥\s]/g, "");
+  if (!text) return null;
+  const parsed = Number.parseFloat(text);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseExcelSerialParts(value, xlsx) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return null;
+  const parsed = xlsx?.SSF?.parse_date_code?.(numeric);
+  if (parsed?.y && parsed?.m && parsed?.d) {
+    return {
+      year: parsed.y,
+      month: parsed.m,
+      day: parsed.d,
+      hour: parsed.H || 0,
+      minute: parsed.M || 0,
+      second: parsed.S || 0,
+    };
+  }
+
+  const date = new Date(Math.round((numeric - 25569) * 86400 * 1000));
+  if (Number.isNaN(date.getTime())) return null;
+  return {
+    year: date.getUTCFullYear(),
+    month: date.getUTCMonth() + 1,
+    day: date.getUTCDate(),
+    hour: date.getUTCHours(),
+    minute: date.getUTCMinutes(),
+    second: date.getUTCSeconds(),
+  };
+}
+
+function formatDatePartsKey(parts) {
+  if (!parts?.year || !parts?.month || !parts?.day) return "";
+  const month = `${parts.month}`.padStart(2, "0");
+  const day = `${parts.day}`.padStart(2, "0");
+  return `${parts.year}-${month}-${day}`;
+}
+
+function datePartsToIso(parts, fallbackDateKey, fallbackHour = 15, fallbackMinute = 0) {
+  const dateKey = formatDatePartsKey(parts) || fallbackDateKey;
+  if (!dateKey) return nowIso();
+  const [year, month, day] = dateKey.split("-").map((item) => Number.parseInt(item, 10));
+  const date = new Date(
+    year || 2000,
+    (month || 1) - 1,
+    day || 1,
+    Number.isFinite(Number(parts?.hour)) ? Number(parts.hour) : fallbackHour,
+    Number.isFinite(Number(parts?.minute)) ? Number(parts.minute) : fallbackMinute,
+    Number.isFinite(Number(parts?.second)) ? Number(parts.second) : 0,
+    0,
+  );
+  return date.toISOString();
+}
+
+function parseLedgerDateKey(value, xlsx) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return getLocalDateKey(value);
+  }
+  if (typeof value === "number") {
+    return formatDatePartsKey(parseExcelSerialParts(value, xlsx));
+  }
+
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  const normalized = text.replace(/[./]/g, "-");
+  const matched = normalized.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (matched) {
+    const [, year, month, day] = matched;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+
+  const parsed = new Date(text);
+  return Number.isNaN(parsed.getTime()) ? "" : getLocalDateKey(parsed);
+}
+
+function parseLedgerTimestamp(value, dateKey, fallbackIndex, xlsx) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString();
+  }
+  if (typeof value === "number") {
+    return datePartsToIso(parseExcelSerialParts(value, xlsx), dateKey, 15, fallbackIndex % 60);
+  }
+
+  const text = String(value ?? "").trim();
+  const normalized = text.replace(/[./]/g, "-");
+  const matched = normalized.match(/(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+  if (matched) {
+    const [, year, month, day, hour = "15", minute = `${fallbackIndex % 60}`, second = "0"] = matched;
+    return datePartsToIso(
+      {
+        year: Number.parseInt(year, 10),
+        month: Number.parseInt(month, 10),
+        day: Number.parseInt(day, 10),
+        hour: Number.parseInt(hour, 10),
+        minute: Number.parseInt(minute, 10),
+        second: Number.parseInt(second, 10),
+      },
+      dateKey,
+    );
+  }
+
+  return buildPreviewTimestamp(dateKey, 15, fallbackIndex % 60);
+}
+
+function normalizeLedgerHeader(value) {
+  return String(value ?? "").trim().replace(/\s+/g, "");
+}
+
+function findLedgerHeaderRow(rows) {
+  return rows.findIndex((row) => {
+    const headers = row.map((item) => normalizeLedgerHeader(item));
+    return headers.includes("记录类型") && headers.includes("记账时间") && headers.includes("总资产金额");
+  });
+}
+
+function pickLedgerColumn(headers, names) {
+  return headers.findIndex((header) => names.includes(header));
+}
+
+function normalizeLedgerBackfillRows(payload, fallbackName = LEDGER_BACKFILL_SOURCE_LABEL) {
+  const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+  const currency = normalizeCurrencyCode(payload?.currency || payload?.currencyCode) || "CNY";
+  const accountName = String(payload?.accountName || fallbackName || LEDGER_BACKFILL_SOURCE_LABEL).trim();
+  const byDate = new Map();
+
+  rows.forEach((row, index) => {
+    const date = parseLedgerDateKey(row?.date || row?.记账时间);
+    if (!date) return;
+    const totalAsset = parseLedgerNumber(row?.totalAsset ?? row?.总资产金额);
+    const cashFlow = parseLedgerNumber(row?.cashFlow ?? row?.转入转出金额) || 0;
+    if (!byDate.has(date)) {
+      byDate.set(date, {
+        date,
+        totalAsset: null,
+        cashFlow: 0,
+        timestamp: buildPreviewTimestamp(date, 15, index % 60),
+      });
+    }
+    const item = byDate.get(date);
+    item.cashFlow += cashFlow;
+    if (Number.isFinite(totalAsset)) {
+      item.totalAsset = totalAsset;
+    }
+  });
+
+  return {
+    accountName,
+    currency,
+    rows: [...byDate.values()].sort((left, right) => left.date.localeCompare(right.date)),
+  };
+}
+
+function parseYouzhiyouxingLedgerMatrix(rows, xlsx, fallbackName) {
+  const headerIndex = findLedgerHeaderRow(rows);
+  if (headerIndex < 0) {
+    throw new Error("没有找到有知有行导出的明细表头");
+  }
+
+  const metaHeaders = (rows[0] || []).map((item) => normalizeLedgerHeader(item));
+  const accountNameIndex = metaHeaders.indexOf("账户名称");
+  const accountName =
+    accountNameIndex >= 0 ? String(rows[1]?.[accountNameIndex] || fallbackName || LEDGER_BACKFILL_SOURCE_LABEL).trim() : fallbackName;
+  const headers = (rows[headerIndex] || []).map((item) => normalizeLedgerHeader(item));
+  const typeIndex = pickLedgerColumn(headers, ["记录类型"]);
+  const dateIndex = pickLedgerColumn(headers, ["记账时间"]);
+  const transferIndex = pickLedgerColumn(headers, ["转入转出金额"]);
+  const assetIndex = pickLedgerColumn(headers, ["总资产金额"]);
+  const createdIndex = pickLedgerColumn(headers, ["创建时间"]);
+
+  if (typeIndex < 0 || dateIndex < 0 || assetIndex < 0) {
+    throw new Error("明细表缺少记录类型、记账时间或总资产金额列");
+  }
+
+  const byDate = new Map();
+  rows.slice(headerIndex + 1).forEach((row, offset) => {
+    const rowIndex = headerIndex + 1 + offset;
+    const recordType = String(row[typeIndex] ?? "").trim();
+    const date = parseLedgerDateKey(row[dateIndex], xlsx);
+    if (!date || !recordType) return;
+    const sourceTimestamp = parseLedgerTimestamp(row[createdIndex], date, rowIndex, xlsx);
+    const eventTimestamp = buildPreviewTimestamp(date, 15, rowIndex % 60);
+    if (!byDate.has(date)) {
+      byDate.set(date, {
+        date,
+        totalAsset: null,
+        cashFlow: 0,
+        timestamp: eventTimestamp,
+        assetSourceTimestamp: "",
+        flowSourceTimestamp: "",
+      });
+    }
+
+    const item = byDate.get(date);
+    const cashFlow = transferIndex >= 0 ? parseLedgerNumber(row[transferIndex]) : null;
+    if (recordType === "转入转出" && Number.isFinite(cashFlow)) {
+      item.cashFlow += cashFlow;
+      item.flowSourceTimestamp = sourceTimestamp;
+    }
+
+    const totalAsset = parseLedgerNumber(row[assetIndex]);
+    if (Number.isFinite(totalAsset) && (!item.assetSourceTimestamp || sourceTimestamp >= item.assetSourceTimestamp)) {
+      item.totalAsset = totalAsset;
+      item.timestamp = eventTimestamp;
+      item.assetSourceTimestamp = sourceTimestamp;
+    }
+  });
+
+  const parsedRows = [...byDate.values()]
+    .filter((row) => Number.isFinite(row.totalAsset) || Math.abs(row.cashFlow) > 1e-8)
+    .sort((left, right) => left.date.localeCompare(right.date));
+
+  return {
+    accountName: accountName || LEDGER_BACKFILL_SOURCE_LABEL,
+    currency: "CNY",
+    rows: parsedRows,
+  };
+}
+
+async function readLedgerBackfillFile(file) {
+  const name = String(file?.name || "").trim();
+  if (/\.json$/i.test(name)) {
+    return normalizeLedgerBackfillRows(JSON.parse(await file.text()), name || LEDGER_BACKFILL_SOURCE_LABEL);
+  }
+
+  setVaultStatus("正在加载 Excel 解析器...");
+  const xlsx = await ensureXlsxLibrary();
+  const buffer = await file.arrayBuffer();
+  const workbook = xlsx.read(buffer, { type: "array", cellDates: true });
+  const sheetName = workbook.SheetNames.find((item) => workbook.Sheets[item]) || workbook.SheetNames[0];
+  if (!sheetName) {
+    throw new Error("Excel 文件里没有可读取的工作表");
+  }
+  const matrix = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, raw: true, defval: "" });
+  return parseYouzhiyouxingLedgerMatrix(matrix, xlsx, name || LEDGER_BACKFILL_SOURCE_LABEL);
+}
+
+function isLedgerBackfillEvent(event, accountId) {
+  return (
+    event?.accountId === accountId &&
+    (event?.type === ACCOUNT_VALUE_SNAPSHOT || event?.type === ACCOUNT_CASH_FLOW) &&
+    event?.payload?.source === LEDGER_BACKFILL_SOURCE
+  );
+}
+
+function buildLedgerBackfillEvents(parsed, accountId, fileName) {
+  const currency = normalizeCurrencyCode(parsed?.currency) || "CNY";
+  const accountName = String(parsed?.accountName || LEDGER_BACKFILL_SOURCE_LABEL).trim();
+  const rows = Array.isArray(parsed?.rows) ? parsed.rows : [];
+  const events = [];
+
+  rows.forEach((row, index) => {
+    const date = parseLedgerDateKey(row?.date);
+    if (!date) return;
+    const timestamp = row?.timestamp || buildPreviewTimestamp(date, 15, index % 60);
+    const cashFlow = parseLedgerNumber(row?.cashFlow) || 0;
+    if (Math.abs(cashFlow) > 1e-8) {
+      events.push({
+        type: ACCOUNT_CASH_FLOW,
+        accountId,
+        date,
+        timestamp: buildPreviewTimestamp(date, 14, index % 60),
+        payload: {
+          amount: cashFlow,
+          currency,
+          source: LEDGER_BACKFILL_SOURCE,
+          sourceLabel: LEDGER_BACKFILL_SOURCE_LABEL,
+          accountName,
+          fileName,
+        },
+      });
+    }
+
+    const totalAsset = parseLedgerNumber(row?.totalAsset);
+    if (Number.isFinite(totalAsset)) {
+      events.push({
+        type: ACCOUNT_VALUE_SNAPSHOT,
+        accountId,
+        date,
+        timestamp,
+        payload: {
+          totalAsset,
+          currency,
+          source: LEDGER_BACKFILL_SOURCE,
+          sourceLabel: LEDGER_BACKFILL_SOURCE_LABEL,
+          accountName,
+          fileName,
+        },
+      });
+    }
+  });
+
+  return events.sort((left, right) => {
+    const byDate = left.date.localeCompare(right.date);
+    if (byDate !== 0) return byDate;
+    return String(left.timestamp || "").localeCompare(String(right.timestamp || ""));
+  });
+}
+
+async function importLedgerBackfillFile(file) {
+  if (!state.unlocked) {
+    setVaultStatus("请先解锁后再回填总账历史", "bad");
+    return;
+  }
+
+  const account = getActiveAccount();
+  if (!account) {
+    setVaultStatus("当前没有可回填的账户", "bad");
+    return;
+  }
+
+  const parsed = await readLedgerBackfillFile(file);
+  const events = buildLedgerBackfillEvents(parsed, account.id, file.name || "");
+  const valueEvents = events.filter((event) => event.type === ACCOUNT_VALUE_SNAPSHOT);
+  if (valueEvents.length < 2) {
+    throw new Error("总账回填至少需要 2 个总资产记录点");
+  }
+
+  const currentPayload = await exportHistoryPayload();
+  const keptEvents = (Array.isArray(currentPayload.events) ? currentPayload.events : []).filter(
+    (event) => !isLedgerBackfillEvent(event, account.id),
+  );
+  await importHistoryPayload({
+    ...currentPayload,
+    exportedAt: nowIso(),
+    events: [...keptEvents, ...events],
+    dailyNav: Array.isArray(currentPayload.dailyNav) ? currentPayload.dailyNav : [],
+  });
+
+  state.performancePreset = "all";
+  state.performanceStartDate = "";
+  state.performanceEndDate = "";
+  renderAllPanels();
+  if (state.activeTab === "performance") {
+    await renderPerformanceOnly();
+  }
+
+  const firstDate = valueEvents[0]?.date || "";
+  const lastDate = valueEvents[valueEvents.length - 1]?.date || "";
+  setVaultStatus(
+    `已回填${parsed.accountName || LEDGER_BACKFILL_SOURCE_LABEL}：${valueEvents.length} 个总资产点，${events.length - valueEvents.length} 条现金流，${firstDate} 至 ${lastDate}`,
+    "good",
+  );
 }
 
 async function exportDailyNavCsv() {
@@ -3082,6 +3469,7 @@ function updateLockUI() {
   el.importBtn.disabled = false;
   if (el.exportHistoryBtn) el.exportHistoryBtn.disabled = !state.unlocked;
   if (el.importHistoryBtn) el.importHistoryBtn.disabled = !state.unlocked;
+  if (el.importLedgerBackfillBtn) el.importLedgerBackfillBtn.disabled = !state.unlocked;
   if (el.exportDailyNavBtn) el.exportDailyNavBtn.disabled = !state.unlocked;
   if (el.historyReplayDateInput) el.historyReplayDateInput.disabled = !state.unlocked;
   if (el.historyReplayBtn) el.historyReplayBtn.disabled = !state.unlocked;
@@ -6370,6 +6758,20 @@ function bindEvents() {
       await importHistoryEventsJson(file);
     } catch (error) {
       setVaultStatus(`历史事件导入失败：${formatError(error)}`, "bad");
+    } finally {
+      event.target.value = "";
+    }
+  });
+  el.importLedgerBackfillBtn?.addEventListener("click", () => {
+    el.importLedgerBackfillFile?.click();
+  });
+  el.importLedgerBackfillFile?.addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      await importLedgerBackfillFile(file);
+    } catch (error) {
+      setVaultStatus(`总账历史回填失败：${formatError(error)}`, "bad");
     } finally {
       event.target.value = "";
     }

@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260428-history-restore";
+const ASSET_VERSION = "20260428-ledger-backfill";
 const CACHE_NAME = `qdii-dashboard-v2-${ASSET_VERSION}`;
 const ASSET_LIST = [
   "./",

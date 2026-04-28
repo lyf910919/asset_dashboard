@@ -69,4 +69,56 @@ assert.deepEqual(
   ["2026-04-26", "2026-04-27"],
 );
 
+const backfillEvents = [
+  {
+    type: "ACCOUNT_VALUE_SNAPSHOT",
+    accountId,
+    date: "2024-12-29",
+    timestamp: "2024-12-29T07:00:00.000Z",
+    payload: { totalAsset: 1000, currency: "CNY", source: "youzhiyouxing-ledger" },
+  },
+  {
+    type: "ACCOUNT_CASH_FLOW",
+    accountId,
+    date: "2025-01-05",
+    timestamp: "2025-01-05T06:00:00.000Z",
+    payload: { amount: 100, currency: "CNY", source: "youzhiyouxing-ledger" },
+  },
+  {
+    type: "ACCOUNT_VALUE_SNAPSHOT",
+    accountId,
+    date: "2025-01-10",
+    timestamp: "2025-01-10T07:00:00.000Z",
+    payload: { totalAsset: 1210, currency: "CNY", source: "youzhiyouxing-ledger" },
+  },
+  {
+    type: "FULL_SNAPSHOT",
+    accountId,
+    date: "2026-04-26",
+    timestamp: "2026-04-26T00:00:00.000Z",
+    payload: {
+      holdings: [{ ...holding, code: "", manualAmount: 1331, manualAmountCurrency: "CNY" }],
+      settings: {},
+    },
+  },
+];
+
+const backfillReport = computePerformanceReport({
+  accountId,
+  events: backfillEvents,
+  rangeStart: "2024-12-29",
+  rangeEnd: "2026-04-26",
+  scope: { type: "portfolio" },
+  displayCurrencyCode: "CNY",
+});
+
+assert.equal(backfillReport.ok, true);
+assert.deepEqual(
+  backfillReport.points.map((point) => point.date),
+  ["2024-12-29", "2025-01-10", "2026-04-26"],
+);
+assert.equal(backfillReport.summary.accountValueSnapshotCount, 2);
+assert.equal(backfillReport.summary.accountCashFlowCount, 1);
+assert.ok(Math.abs(backfillReport.summary.totalReturn - 0.21) < 1e-10);
+
 console.log("performance baseline regression: ok");
