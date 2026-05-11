@@ -40,6 +40,15 @@ function isFundCode(code) {
   return /^[0-9]{6}$/.test(String(code || "").trim());
 }
 
+function toDateRank(value) {
+  const text = String(value || "").trim();
+  if (!text) return 0;
+  const match = text.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (!match) return 0;
+  const [, year, month, day] = match;
+  return Number(`${year}${month.padStart(2, "0")}${day.padStart(2, "0")}`);
+}
+
 function normalizeCurrencyCode(value) {
   const code = String(value || "").trim().toUpperCase();
   return SUPPORTED_CURRENCY_CODES.includes(code) ? code : null;
@@ -139,7 +148,7 @@ function enqueueSerial(kind, task) {
   return next;
 }
 
-function isLikelyExchangeFundCode(code) {
+export function isLikelyExchangeFundCode(code) {
   return /^(5\d{5}|15\d{4}|18\d{4})$/.test(String(code || "").trim());
 }
 
@@ -147,13 +156,13 @@ function isSupportedQuoteSource(value) {
   return ["ESTIMATE", "EXCHANGE", "NAV", "OVERSEAS"].includes(String(value || "").trim().toUpperCase());
 }
 
-function getSourceOrder(preferredSource, code) {
+export function getQuoteSourceOrder(preferredSource, code) {
   const source = String(preferredSource || "").trim().toUpperCase();
   const exchangeFund = isLikelyExchangeFundCode(code);
 
   switch (source) {
     case "NAV":
-      return ["NAV", "OVERSEAS", "ESTIMATE", "EXCHANGE"];
+      return exchangeFund ? ["EXCHANGE", "NAV", "ESTIMATE", "OVERSEAS"] : ["NAV", "OVERSEAS", "ESTIMATE", "EXCHANGE"];
     case "OVERSEAS":
       return ["OVERSEAS", "NAV", "ESTIMATE", "EXCHANGE"];
     case "EXCHANGE":
@@ -163,6 +172,16 @@ function getSourceOrder(preferredSource, code) {
     default:
       return exchangeFund ? ["EXCHANGE", "ESTIMATE", "NAV", "OVERSEAS"] : ["ESTIMATE", "NAV", "OVERSEAS", "EXCHANGE"];
   }
+}
+
+export function chooseLatestNavSnapshot(primary, fallback) {
+  const primaryNav = parseFloatSafe(primary?.nav);
+  const fallbackNav = parseFloatSafe(fallback?.nav);
+  const hasPrimary = Number.isFinite(primaryNav);
+  const hasFallback = Number.isFinite(fallbackNav);
+  if (!hasPrimary) return hasFallback ? fallback : primary;
+  if (!hasFallback) return primary;
+  return toDateRank(fallback?.navDate) > toDateRank(primary?.navDate) ? fallback : primary;
 }
 
 async function fetchEstimateJsonp(code) {
@@ -477,7 +496,7 @@ async function fetchSingleFundSnapshot(code, { preferredSource = "ESTIMATE", kno
     throw new Error("基金代码必须是 6 位数字");
   }
 
-  const sourceOrder = getSourceOrder(isSupportedQuoteSource(preferredSource) ? preferredSource : null, code);
+  const sourceOrder = getQuoteSourceOrder(isSupportedQuoteSource(preferredSource) ? preferredSource : null, code);
   const cachedName = String(knownName || "").trim() || null;
   const errors = [];
   let estimatePayload = null;
@@ -546,7 +565,8 @@ async function fetchSingleFundSnapshot(code, { preferredSource = "ESTIMATE", kno
 
     const needsName = !cachedName;
     const needsPingzhongFallback = !Number.isFinite(parseFloatSafe(nav?.nav));
-    if ((needsName || needsPingzhongFallback) && !pingzhong) {
+    const shouldCheckLatestNav = sourceOrder[0] === "NAV";
+    if ((needsName || needsPingzhongFallback || shouldCheckLatestNav) && !pingzhong) {
       try {
         pingzhong = await fetchPingzhongSnapshot(code);
       } catch (error) {
@@ -554,7 +574,7 @@ async function fetchSingleFundSnapshot(code, { preferredSource = "ESTIMATE", kno
       }
     }
 
-    const resolvedNav = Number.isFinite(parseFloatSafe(nav?.nav)) ? nav : pingzhong;
+    const resolvedNav = chooseLatestNavSnapshot(nav, pingzhong);
     const resolvedName = cachedName || pingzhong?.name || code;
     return buildSnapshotFromNav(code, resolvedNav, resolvedName);
   }

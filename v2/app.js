@@ -14,10 +14,10 @@ import {
   setBundle,
   setConfigValue,
   upsertDailyNav,
-} from "./lib/storage.js?v=20260428-ledger-preview-clean";
-import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260428-ledger-preview-clean";
-import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260428-ledger-preview-clean";
-import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260428-ledger-preview-clean";
+} from "./lib/storage.js?v=20260511-nav-etf-latest";
+import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260511-nav-etf-latest";
+import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260511-nav-etf-latest";
+import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260511-nav-etf-latest";
 const STORAGE_KEY = "qdii-vault-encrypted-v1";
 const LEGACY_STORAGE_KEY = "qdii-dashboard-config-v1";
 const REMEMBER_PASS_KEY = "qdii-remember-passphrase-v1";
@@ -1134,7 +1134,11 @@ function buildPreferredSources(codes) {
   codes.forEach((code) => {
     const source = hints[code];
     if (quotePreference === "nav") {
-      selected[code] = source === "OVERSEAS" ? "OVERSEAS" : "NAV";
+      if (source === "OVERSEAS") {
+        selected[code] = "OVERSEAS";
+      } else {
+        selected[code] = isLikelyExchangeFundCode(code) ? "EXCHANGE" : "NAV";
+      }
       return;
     }
 
