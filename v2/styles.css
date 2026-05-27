@@ -952,6 +952,14 @@ input:not([type="checkbox"]):not([type="radio"]):focus {
   margin-bottom: 8px;
 }
 
+.group-target-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .group-target-title {
   margin: 0;
   font-size: 14px;
@@ -1074,6 +1082,14 @@ input:not([type="checkbox"]):not([type="radio"]):focus {
 
 .group-target-status.is-neutral {
   color: #386479;
+}
+
+.group-target-status.is-up {
+  color: var(--danger);
+}
+
+.group-target-status.is-down {
+  color: var(--good);
 }
 
 .group-target-cell {
@@ -2071,6 +2087,15 @@ body.is-locked #tab-config #gist-verify-btn {
 
   .group-target-summary {
     align-self: flex-start;
+  }
+
+  .group-target-actions {
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .target-scope-switch {
+    width: 100%;
   }
 
   .group-target-header,

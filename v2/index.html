@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QDII 资产监控看板 v2.0</title>
     <meta name="theme-color" content="#2b8fb8" />
-    <link rel="manifest" href="./manifest.webmanifest?v=20260511-nav-etf-latest" />
-    <link rel="stylesheet" href="./styles.css?v=20260511-nav-etf-latest" />
+    <link rel="manifest" href="./manifest.webmanifest?v=20260527-fund-targets" />
+    <link rel="stylesheet" href="./styles.css?v=20260527-fund-targets" />
   </head>
   <body>
     <div class="page-bg"></div>
@@ -144,10 +144,18 @@
             <div class="group-target-panel">
               <div class="group-target-head">
                 <div>
-                  <p class="group-target-title">分组目标仓位</p>
-                  <p class="group-target-subtitle">点击分组即可设置目标仓位，偏离 = 当前 - 目标</p>
+                  <p id="target-config-title" class="group-target-title">分组目标仓位</p>
+                  <p id="target-config-subtitle" class="group-target-subtitle">点击分组即可设置目标仓位，偏离 = 当前 - 目标</p>
                 </div>
-                <p id="group-target-summary" class="group-target-summary">未设置目标</p>
+                <div class="group-target-actions">
+                  <div class="pie-display-switch target-scope-switch" role="group" aria-label="目标仓位设置范围切换">
+                    <button type="button" class="pie-display-btn target-scope-btn is-active" data-target-scope="group">
+                      分组
+                    </button>
+                    <button type="button" class="pie-display-btn target-scope-btn" data-target-scope="fund">基金</button>
+                  </div>
+                  <p id="group-target-summary" class="group-target-summary">未设置目标</p>
+                </div>
               </div>
               <div id="group-target-list" class="group-target-list"></div>
               <div class="target-pie-panel">
@@ -161,6 +169,7 @@
                       <div class="pie-mode-switch" role="group" aria-label="目标仓位饼图层级切换">
                         <button type="button" class="pie-mode-btn" data-target-pie-level="class">大类</button>
                         <button type="button" class="pie-mode-btn is-active" data-target-pie-level="group">分组</button>
+                        <button type="button" class="pie-mode-btn" data-target-pie-level="fund">基金</button>
                       </div>
                     </div>
                   </div>
@@ -574,10 +583,10 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20260511-nav-etf-latest" type="module"></script>
+    <script src="./app.js?v=20260527-fund-targets" type="module"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js?v=20260511-nav-etf-latest").catch(() => {});
+        navigator.serviceWorker.register("./sw.js?v=20260527-fund-targets").catch(() => {});
       }
     </script>
   </body>

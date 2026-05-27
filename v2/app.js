@@ -14,10 +14,10 @@ import {
   setBundle,
   setConfigValue,
   upsertDailyNav,
-} from "./lib/storage.js?v=20260511-nav-etf-latest";
-import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260511-nav-etf-latest";
-import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260511-nav-etf-latest";
-import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260511-nav-etf-latest";
+} from "./lib/storage.js?v=20260527-fund-targets";
+import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260527-fund-targets";
+import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260527-fund-targets";
+import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260527-fund-targets";
 const STORAGE_KEY = "qdii-vault-encrypted-v1";
 const LEGACY_STORAGE_KEY = "qdii-dashboard-config-v1";
 const REMEMBER_PASS_KEY = "qdii-remember-passphrase-v1";
@@ -39,6 +39,7 @@ const DEFAULT_GROUP_NAME = "未分组";
 const ASSET_CLASS_ORDER = ["stock", "bond", "gold", "cash"];
 const TREE_DEPTH_ORDER = ["fund", "group", "class"];
 const PIE_LEVEL_ORDER = ["class", "group", "fund"];
+const TARGET_SCOPE_ORDER = ["group", "fund"];
 const PERFORMANCE_PRESET_ORDER = ["3m", "6m", "ytd", "1y", "all", "custom"];
 const PERFORMANCE_SCOPE_TYPES = ["portfolio", "class", "group", "holding"];
 const PERFORMANCE_METRIC_MODES = ["nav", "return"];
@@ -100,7 +101,7 @@ const HOLDING_HISTORY_FIELDS = [
   "groupName",
   "sortOrder",
 ];
-const SETTINGS_HISTORY_FIELDS = ["refreshInterval", "quotePreference", "displayCurrency", "groupTargets"];
+const SETTINGS_HISTORY_FIELDS = ["refreshInterval", "quotePreference", "displayCurrency", "groupTargets", "fundTargets"];
 
 const defaultHoldings = [
   {
@@ -207,6 +208,9 @@ const el = {
   targetPieCanvas: document.querySelector("#target-allocation-pie"),
   targetPieLegend: document.querySelector("#target-pie-legend"),
   targetPieSubtitle: document.querySelector("#target-pie-subtitle"),
+  targetConfigTitle: document.querySelector("#target-config-title"),
+  targetConfigSubtitle: document.querySelector("#target-config-subtitle"),
+  targetScopeButtons: [...document.querySelectorAll("[data-target-scope]")],
   groupTargetSummary: document.querySelector("#group-target-summary"),
   groupTargetList: document.querySelector("#group-target-list"),
   addRowBtn: document.querySelector("#add-row-btn"),
@@ -290,8 +294,10 @@ const state = {
   holdingModalMode: "create",
   editingHoldingId: null,
   pieDisplayMode: "full",
+  targetScope: "group",
   targetPieLevel: "group",
   editingGroupTargetKey: null,
+  editingTargetScope: "group",
   deleteConfirmContext: null,
   quoteDebugByAccount: {},
   pendingQuoteCodes: new Set(),
@@ -427,6 +433,21 @@ function normalizeGroupTargets(input) {
   return normalized;
 }
 
+function normalizeFundTargets(input) {
+  if (!input || typeof input !== "object") return {};
+
+  const normalized = {};
+  Object.entries(input).forEach(([rawKey, rawValue]) => {
+    const key = String(rawKey || "").trim();
+    if (!key) return;
+    const targetShare = normalizeStoredTargetShare(rawValue);
+    if (!(targetShare > 0)) return;
+    normalized[key] = targetShare;
+  });
+
+  return normalized;
+}
+
 function normalizeSortOrder(value) {
   const parsed = Number.parseInt(String(value), 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
@@ -544,6 +565,7 @@ function normalizeAccount(input, index = 0) {
       quotePreference: normalizeQuotePreference(input?.settings?.quotePreference),
       displayCurrency: normalizeDisplayCurrency(input?.settings?.displayCurrency),
       groupTargets: normalizeGroupTargets(input?.settings?.groupTargets),
+      fundTargets: normalizeFundTargets(input?.settings?.fundTargets),
     },
     settingsUpdatedAt: input?.settingsUpdatedAt || nowIso(),
     updatedAt: input?.updatedAt || nowIso(),
@@ -561,6 +583,7 @@ function createAccount(seed = {}) {
       quotePreference: normalizeQuotePreference(seed?.settings?.quotePreference ?? "nav"),
       displayCurrency: normalizeDisplayCurrency(seed?.settings?.displayCurrency ?? "cny"),
       groupTargets: normalizeGroupTargets(seed?.settings?.groupTargets),
+      fundTargets: normalizeFundTargets(seed?.settings?.fundTargets),
     },
     settingsUpdatedAt: seed.settingsUpdatedAt || nowIso(),
     updatedAt: seed.updatedAt || nowIso(),
@@ -571,7 +594,7 @@ function createVaultFromHoldings(holdings) {
   const account = createAccount({
     name: DEFAULT_ACCOUNT_NAME,
     holdings: holdings.map((item) => normalizeHolding(item)),
-    settings: { refreshInterval: 60, quotePreference: "nav", displayCurrency: "cny", groupTargets: {} },
+    settings: { refreshInterval: 60, quotePreference: "nav", displayCurrency: "cny", groupTargets: {}, fundTargets: {} },
   });
   return normalizeVault({
     version: 2,
@@ -589,7 +612,7 @@ function normalizeVault(vault) {
           id: String(vault?.activeAccountId || "legacy-default"),
           name: DEFAULT_ACCOUNT_NAME,
           holdings: Array.isArray(vault?.holdings) ? vault.holdings : [],
-          settings: vault?.settings || { refreshInterval: 60, quotePreference: "nav", displayCurrency: "cny", groupTargets: {} },
+          settings: vault?.settings || { refreshInterval: 60, quotePreference: "nav", displayCurrency: "cny", groupTargets: {}, fundTargets: {} },
           settingsUpdatedAt: vault?.settingsUpdatedAt || nowIso(),
           updatedAt: vault?.updatedAt || nowIso(),
         },
@@ -2488,6 +2511,11 @@ function normalizePieDisplayMode(value) {
   return String(value || "").trim().toLowerCase() === "percent" ? "percent" : "full";
 }
 
+function normalizeTargetScope(value) {
+  const scope = String(value || "").trim().toLowerCase();
+  return TARGET_SCOPE_ORDER.includes(scope) ? scope : "group";
+}
+
 function normalizeTreeDepth(value) {
   const depth = String(value || "").trim().toLowerCase();
   return TREE_DEPTH_ORDER.includes(depth) ? depth : "fund";
@@ -2540,6 +2568,7 @@ function applyDefaultViewModes({ render = false } = {}) {
     syncTreeDepthButtons([]);
   }
   setPieLevel("group", { render: false });
+  setTargetScope("group", { render: false });
   setTargetPieLevel("group", { render: false });
   if (render && state.unlocked) {
     if (state.activeTab === "pie") {
@@ -2611,16 +2640,44 @@ function cyclePieLevel() {
   setPieLevel(nextLevel);
 }
 
-function normalizeTargetPieLevel(value) {
-  return String(value || "").trim().toLowerCase() === "class" ? "class" : "group";
+function syncTargetScopeButtons() {
+  const activeScope = normalizeTargetScope(state.targetScope);
+  el.targetScopeButtons.forEach((button) => {
+    const isActive = normalizeTargetScope(button.dataset.targetScope) === activeScope;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    button.disabled = !state.unlocked;
+  });
+}
+
+function setTargetScope(scope, { render = true } = {}) {
+  state.targetScope = normalizeTargetScope(scope);
+  if (state.targetScope !== "fund" && state.targetPieLevel === "fund") {
+    state.targetPieLevel = "group";
+  }
+  syncTargetScopeButtons();
+  syncTargetPieLevelButtons();
+  if (render && state.unlocked) {
+    renderPieOnly();
+  }
+}
+
+function normalizeTargetPieLevel(value, targetScope = state.targetScope) {
+  const level = String(value || "").trim().toLowerCase();
+  if (level === "class") return "class";
+  if (level === "fund" && normalizeTargetScope(targetScope) === "fund") return "fund";
+  return "group";
 }
 
 function syncTargetPieLevelButtons() {
-  const activeLevel = normalizeTargetPieLevel(state.targetPieLevel);
+  const activeScope = normalizeTargetScope(state.targetScope);
+  const activeLevel = normalizeTargetPieLevel(state.targetPieLevel, activeScope);
   el.targetPieModeButtons.forEach((button) => {
     const isActive = button.dataset.targetPieLevel === activeLevel;
+    const isFundOnlyLevel = button.dataset.targetPieLevel === "fund";
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    button.disabled = !state.unlocked || (isFundOnlyLevel && activeScope !== "fund");
   });
 }
 
@@ -3347,15 +3404,24 @@ function saveHoldingFromModal() {
   closeHoldingModal();
 }
 
-function updateGroupTargetInVault(groupKey, targetShare) {
+function updateTargetInVault(scope, targetKey, targetShare) {
   if (!state.vault) return;
   const account = getActiveAccount();
   if (!account) return;
   const before = cloneForHistory(account.settings || {});
+  const normalizedScope = normalizeTargetScope(scope);
+  const normalizedKey =
+    normalizedScope === "fund"
+      ? String(targetKey || "").trim()
+      : (() => {
+          const { classKey, groupName } = parseGroupCompositeKey(targetKey);
+          return buildGroupCompositeKey(classKey, groupName);
+        })();
+  if (!normalizedKey) return;
 
-  const { classKey, groupName } = parseGroupCompositeKey(groupKey);
-  const normalizedKey = buildGroupCompositeKey(classKey, groupName);
-  const nextTargets = { ...normalizeGroupTargets(account.settings?.groupTargets) };
+  const targetProperty = normalizedScope === "fund" ? "fundTargets" : "groupTargets";
+  const normalizeTargets = normalizedScope === "fund" ? normalizeFundTargets : normalizeGroupTargets;
+  const nextTargets = { ...normalizeTargets(account.settings?.[targetProperty]) };
 
   if (Number.isFinite(targetShare) && targetShare > 0) {
     nextTargets[normalizedKey] = targetShare;
@@ -3363,7 +3429,7 @@ function updateGroupTargetInVault(groupKey, targetShare) {
     delete nextTargets[normalizedKey];
   }
 
-  account.settings.groupTargets = nextTargets;
+  account.settings[targetProperty] = nextTargets;
   const stamp = nowIso();
   account.settingsUpdatedAt = stamp;
   account.updatedAt = stamp;
@@ -3374,6 +3440,10 @@ function updateGroupTargetInVault(groupKey, targetShare) {
   }
 }
 
+function updateGroupTargetInVault(groupKey, targetShare) {
+  updateTargetInVault("group", groupKey, targetShare);
+}
+
 function openGroupTargetModal(groupKey) {
   if (!state.unlocked) {
     setVaultStatus("请先解锁后再设置目标仓位", "bad");
@@ -3381,32 +3451,74 @@ function openGroupTargetModal(groupKey) {
     return;
   }
 
+  const scope = normalizeTargetScope(state.targetScope);
+  const meta = getTargetScopeMeta(scope);
   const { snapshot } = getActiveSnapshot();
-  const row = buildGroupTargetRows(snapshot).find((item) => item.key === groupKey);
+  const targets = readActiveTargets(scope);
+  const row = buildTargetRows(snapshot, targets, scope).find((item) => item.key === groupKey);
   const parsed = row || (() => {
+    if (scope === "fund") {
+      const account = getActiveAccount();
+      const holding = account?.holdings?.find((item) => item.id === groupKey) || null;
+      const metric = holding && !holding.deleted ? snapshot.metrics.get(holding.id) || buildHoldingMetric(holding) : null;
+      const classKey = normalizeAssetClass(holding?.assetClass);
+      const classLabel = ASSET_CLASS_LABELS[classKey] || classKey;
+      const targetShare = Number.isFinite(targets[groupKey]) ? targets[groupKey] : null;
+      const currentAmount = Number.isFinite(metric?.assetAmount) ? metric.assetAmount : 0;
+      const currentShare = snapshot.totalAsset > 0 ? currentAmount / snapshot.totalAsset : 0;
+      const targetAmount = targetShare !== null && snapshot.totalAsset > 0 ? snapshot.totalAsset * targetShare : null;
+      const groupName = holding ? getHoldingGroupName(holding) : DEFAULT_GROUP_NAME;
+      const code = String(holding?.code || "").trim();
+      return {
+        key: String(groupKey || "").trim(),
+        scope: "fund",
+        classKey,
+        classLabel,
+        groupName,
+        name: metric?.name || holding?.name || code || "未知持仓",
+        code,
+        metaLabel: holding ? `${classLabel} / ${groupName}${holding.deleted ? " / 已归档" : ""}` : "未找到持仓",
+        currentAmount,
+        currentShare,
+        targetShare,
+        targetAmount,
+        shareDiff: targetShare !== null ? currentShare - targetShare : null,
+        amountDiff: Number.isFinite(targetAmount) ? currentAmount - targetAmount : null,
+        hasTarget: targetShare !== null,
+      };
+    }
+
     const meta = parseGroupCompositeKey(groupKey);
+    const normalizedKey = buildGroupCompositeKey(meta.classKey, meta.groupName);
+    const targetShare = Number.isFinite(targets[normalizedKey]) ? targets[normalizedKey] : null;
+    const targetAmount = targetShare !== null && snapshot.totalAsset > 0 ? snapshot.totalAsset * targetShare : null;
     return {
-      key: buildGroupCompositeKey(meta.classKey, meta.groupName),
+      key: normalizedKey,
+      scope: "group",
       classKey: meta.classKey,
       classLabel: ASSET_CLASS_LABELS[meta.classKey] || meta.classKey,
       groupName: meta.groupName,
       currentAmount: 0,
       currentShare: 0,
-      targetShare: null,
-      targetAmount: null,
-      shareDiff: null,
-      amountDiff: null,
-      hasTarget: false,
+      targetShare,
+      targetAmount,
+      shareDiff: targetShare !== null ? -targetShare : null,
+      amountDiff: Number.isFinite(targetAmount) ? -targetAmount : null,
+      hasTarget: targetShare !== null,
     };
   })();
 
   state.editingGroupTargetKey = parsed.key;
-  el.groupTargetModalTitle.textContent = "设置分组目标仓位";
-  el.groupTargetModalDesc.textContent = `${parsed.classLabel} / ${parsed.groupName}`;
+  state.editingTargetScope = scope;
+  el.groupTargetModalTitle.textContent = meta.modalTitle;
+  el.groupTargetModalDesc.textContent =
+    scope === "fund"
+      ? `${parsed.metaLabel}${parsed.code ? ` / ${parsed.code}` : ""}`
+      : `${parsed.classLabel} / ${parsed.groupName}`;
   el.groupTargetModalCurrent.textContent = `当前仓位 ${formatShareRatio(parsed.currentShare)} · 当前金额 ${formatMoney(parsed.currentAmount)}`;
   el.groupTargetModalSummary.textContent = `${
     parsed.hasTarget ? `当前目标 ${formatShareRatio(parsed.targetShare)}` : "当前未设置目标"
-  } · 已设目标合计 ${formatShareRatio(getTotalGroupTargetShare())}。留空或填 0 可清除目标。`;
+  } · ${meta.itemLabel}目标合计 ${formatShareRatio(getTotalTargetShare(targets))}。留空或填 0 可清除目标。`;
   el.groupTargetInput.value = parsed.hasTarget ? formatTargetShareInput(parsed.targetShare) : "";
   el.groupTargetClearBtn.hidden = !parsed.hasTarget;
 
@@ -3422,6 +3534,7 @@ function openGroupTargetModal(groupKey) {
 function closeGroupTargetModal() {
   el.groupTargetModal.hidden = true;
   state.editingGroupTargetKey = null;
+  state.editingTargetScope = "group";
   el.groupTargetInput.value = "";
   el.groupTargetClearBtn.hidden = false;
   updateModalOpenState();
@@ -3436,8 +3549,9 @@ function saveGroupTargetFromModal() {
     return;
   }
 
-  updateGroupTargetInVault(state.editingGroupTargetKey, targetShare);
-  const totalTargetShare = getTotalGroupTargetShare();
+  const scope = normalizeTargetScope(state.editingTargetScope);
+  updateTargetInVault(scope, state.editingGroupTargetKey, targetShare);
+  const totalTargetShare = getTotalTargetShare(readActiveTargets(scope));
   renderAllPanels();
   schedulePersist();
   scheduleSync();
@@ -3454,7 +3568,7 @@ function saveGroupTargetFromModal() {
 function clearGroupTargetFromModal() {
   if (!state.unlocked || !state.vault || !state.editingGroupTargetKey) return;
 
-  updateGroupTargetInVault(state.editingGroupTargetKey, null);
+  updateTargetInVault(state.editingTargetScope, state.editingGroupTargetKey, null);
   renderAllPanels();
   schedulePersist();
   scheduleSync();
@@ -3533,6 +3647,8 @@ function updateLockUI() {
   el.pieDisplayButtons.forEach((button) => {
     button.disabled = !state.unlocked;
   });
+  syncTargetScopeButtons();
+  syncTargetPieLevelButtons();
   el.unlockOpenBtn.classList.toggle("is-hidden", state.unlocked);
 }
 
@@ -4795,8 +4911,54 @@ function readActiveGroupTargets() {
   return normalizeGroupTargets(account?.settings?.groupTargets);
 }
 
+function readActiveFundTargets() {
+  const account = getActiveAccount();
+  return normalizeFundTargets(account?.settings?.fundTargets);
+}
+
+function readActiveTargets(scope = state.targetScope) {
+  return normalizeTargetScope(scope) === "fund" ? readActiveFundTargets() : readActiveGroupTargets();
+}
+
+function getTotalTargetShare(targets = readActiveTargets()) {
+  return Object.values(targets).reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
+}
+
 function getTotalGroupTargetShare(groupTargets = readActiveGroupTargets()) {
-  return Object.values(groupTargets).reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
+  return getTotalTargetShare(groupTargets);
+}
+
+function getTargetScopeMeta(scope = state.targetScope) {
+  const normalized = normalizeTargetScope(scope);
+  if (normalized === "fund") {
+    return {
+      scope: "fund",
+      itemLabel: "基金",
+      title: "基金目标仓位",
+      subtitle: "点击基金即可设置目标仓位，偏离 = 当前 - 目标",
+      empty: "暂无基金，新增持仓后可设置目标仓位",
+      modalTitle: "设置基金目标仓位",
+    };
+  }
+
+  return {
+    scope: "group",
+    itemLabel: "分组",
+    title: "分组目标仓位",
+    subtitle: "点击分组即可设置目标仓位，偏离 = 当前 - 目标",
+    empty: "暂无分组，新增持仓后可设置目标仓位",
+    modalTitle: "设置分组目标仓位",
+  };
+}
+
+function updateTargetSectionLabels(scope = state.targetScope) {
+  const meta = getTargetScopeMeta(scope);
+  if (el.targetConfigTitle) {
+    el.targetConfigTitle.textContent = meta.title;
+  }
+  if (el.targetConfigSubtitle) {
+    el.targetConfigSubtitle.textContent = meta.subtitle;
+  }
 }
 
 function buildGroupTargetRows(snapshot, groupTargets = readActiveGroupTargets()) {
@@ -4825,6 +4987,9 @@ function buildGroupTargetRows(snapshot, groupTargets = readActiveGroupTargets())
       shareDiff,
       amountDiff,
       hasTarget: targetShare !== null,
+      scope: "group",
+      name: groupName,
+      metaLabel: ASSET_CLASS_LABELS[classKey] || classKey,
     });
   });
 
@@ -4850,6 +5015,79 @@ function buildGroupTargetRows(snapshot, groupTargets = readActiveGroupTargets())
   return rows;
 }
 
+function buildFundTargetRows(snapshot, fundTargets = readActiveFundTargets()) {
+  const account = getActiveAccount();
+  const holdings = Array.isArray(account?.holdings) ? account.holdings : [];
+  const activeHoldings = accountToActiveHoldings(account);
+  const holdingMap = new Map(holdings.map((holding) => [holding.id, holding]));
+  const keys = new Set([...activeHoldings.map((holding) => holding.id), ...Object.keys(fundTargets)]);
+  const rows = [];
+
+  keys.forEach((key) => {
+    const holding = holdingMap.get(key) || null;
+    const archived = Boolean(holding?.deleted);
+    const metric = holding && !archived ? snapshot.metrics.get(holding.id) || buildHoldingMetric(holding) : null;
+    const classKey = normalizeAssetClass(holding?.assetClass);
+    const classLabel = ASSET_CLASS_LABELS[classKey] || classKey;
+    const groupName = holding ? getHoldingGroupName(holding) : DEFAULT_GROUP_NAME;
+    const currentAmount = Number.isFinite(metric?.assetAmount) ? metric.assetAmount : 0;
+    const currentShare = snapshot.totalAsset > 0 ? currentAmount / snapshot.totalAsset : 0;
+    const targetShare = Number.isFinite(fundTargets[key]) ? fundTargets[key] : null;
+    const targetAmount = targetShare !== null && snapshot.totalAsset > 0 ? snapshot.totalAsset * targetShare : null;
+    const shareDiff = targetShare !== null ? currentShare - targetShare : null;
+    const amountDiff = Number.isFinite(targetAmount) ? currentAmount - targetAmount : null;
+    const code = String(holding?.code || "").trim();
+    const name = metric?.name || holding?.name || code || "未知持仓";
+
+    rows.push({
+      key,
+      classKey,
+      classLabel,
+      groupName,
+      currentAmount,
+      currentShare,
+      targetShare,
+      targetAmount,
+      shareDiff,
+      amountDiff,
+      hasTarget: targetShare !== null,
+      scope: "fund",
+      holding,
+      archived,
+      code,
+      name,
+      metaLabel: holding ? `${classLabel} / ${groupName}${archived ? " / 已归档" : ""}` : "未找到持仓",
+    });
+  });
+
+  rows.sort((a, b) => {
+    const targetRank = Number(b.hasTarget) - Number(a.hasTarget);
+    if (targetRank !== 0) return targetRank;
+
+    if (a.hasTarget && b.hasTarget) {
+      const diffA = Number.isFinite(a.amountDiff) ? Math.abs(a.amountDiff) : Math.abs(a.shareDiff || 0);
+      const diffB = Number.isFinite(b.amountDiff) ? Math.abs(b.amountDiff) : Math.abs(b.shareDiff || 0);
+      if (diffB !== diffA) return diffB - diffA;
+    }
+
+    if (b.currentAmount !== a.currentAmount) {
+      return b.currentAmount - a.currentAmount;
+    }
+
+    const orderDiff = getHoldingOrderValue(a.holding) - getHoldingOrderValue(b.holding);
+    if (orderDiff !== 0) return orderDiff;
+    return a.name.localeCompare(b.name, "zh-CN");
+  });
+
+  return rows;
+}
+
+function buildTargetRows(snapshot, targets = readActiveTargets(), scope = state.targetScope) {
+  return normalizeTargetScope(scope) === "fund"
+    ? buildFundTargetRows(snapshot, targets)
+    : buildGroupTargetRows(snapshot, targets);
+}
+
 function getGroupTargetStatus(row) {
   if (!row?.hasTarget) {
     return { text: "未设目标", className: "" };
@@ -4868,10 +5106,11 @@ function getGroupTargetStatus(row) {
     : { text: "低配", className: "is-down" };
 }
 
-function createGroupTargetHeader() {
+function createGroupTargetHeader(scope = state.targetScope) {
   const header = document.createElement("div");
   header.className = "group-target-header";
-  ["分组", "当前", "目标", "偏离"].forEach((label) => {
+  const meta = getTargetScopeMeta(scope);
+  [meta.itemLabel, "当前", "目标", "偏离"].forEach((label) => {
     const cell = document.createElement("span");
     cell.className = "group-target-header-cell";
     cell.textContent = label;
@@ -4898,6 +5137,8 @@ function createGroupTargetValueCell(valueText, amountText, valueClassName = "") 
 }
 
 function clearGroupTargetSection(message) {
+  updateTargetSectionLabels();
+  syncTargetScopeButtons();
   if (el.groupTargetSummary) {
     el.groupTargetSummary.textContent = "未设置目标";
     el.groupTargetSummary.classList.remove("is-bad");
@@ -4914,28 +5155,32 @@ function clearGroupTargetSection(message) {
 function renderGroupTargetSection(snapshot) {
   if (!el.groupTargetList || !el.groupTargetSummary) return;
 
-  const groupTargets = readActiveGroupTargets();
-  const rows = buildGroupTargetRows(snapshot, groupTargets);
-  const totalTargetShare = getTotalGroupTargetShare(groupTargets);
+  const scope = normalizeTargetScope(state.targetScope);
+  const meta = getTargetScopeMeta(scope);
+  const targets = readActiveTargets(scope);
+  const rows = buildTargetRows(snapshot, targets, scope);
+  const totalTargetShare = getTotalTargetShare(targets);
 
   el.groupTargetSummary.textContent =
-    Object.keys(groupTargets).length > 0 ? `已设目标合计 ${formatShareRatio(totalTargetShare)}` : "未设置目标";
+    Object.keys(targets).length > 0 ? `已设目标合计 ${formatShareRatio(totalTargetShare)}` : "未设置目标";
   el.groupTargetSummary.classList.toggle("is-bad", totalTargetShare > 1.0001);
+  updateTargetSectionLabels(scope);
+  syncTargetScopeButtons();
 
   el.groupTargetList.innerHTML = "";
   if (rows.length === 0) {
-    clearGroupTargetSection("暂无分组，新增持仓后可设置目标仓位");
+    clearGroupTargetSection(meta.empty);
     return;
   }
 
   const fragment = document.createDocumentFragment();
-  fragment.appendChild(createGroupTargetHeader());
+  fragment.appendChild(createGroupTargetHeader(scope));
   rows.forEach((row) => {
     const status = getGroupTargetStatus(row);
     const item = document.createElement("button");
     item.type = "button";
     item.className = "group-target-item";
-    item.setAttribute("aria-label", `设置 ${row.classLabel} / ${row.groupName} 目标仓位`);
+    item.setAttribute("aria-label", `设置 ${row.scope === "fund" ? row.name : `${row.classLabel} / ${row.groupName}`} 目标仓位`);
     item.addEventListener("click", () => openGroupTargetModal(row.key));
 
     const title = document.createElement("div");
@@ -4943,11 +5188,11 @@ function renderGroupTargetSection(snapshot) {
 
     const nameEl = document.createElement("span");
     nameEl.className = "group-target-name";
-    nameEl.textContent = row.groupName;
+    nameEl.textContent = row.scope === "fund" ? row.name : row.groupName;
 
     const classEl = document.createElement("span");
     classEl.className = "group-target-class";
-    classEl.textContent = row.classLabel;
+    classEl.textContent = row.scope === "fund" ? row.metaLabel : row.classLabel;
 
     const statusEl = document.createElement("span");
     statusEl.className = "group-target-status";
@@ -4975,32 +5220,62 @@ function renderGroupTargetSection(snapshot) {
   el.groupTargetList.appendChild(fragment);
 }
 
-function targetPieLevelSubtitle(level, totalTargetShare) {
+function targetPieLevelSubtitle(level, totalTargetShare, scope = state.targetScope) {
   const summary = `已设目标合计 ${formatShareRatio(totalTargetShare)}`;
+  const normalizedScope = normalizeTargetScope(scope);
+  if (normalizedScope === "fund") {
+    if (level === "class") return `${summary}，按大类汇总基金目标仓位`;
+    if (level === "fund") return `${summary}，按基金展示目标仓位`;
+    return `${summary}，按分组汇总基金目标仓位`;
+  }
   if (level === "class") {
     return `${summary}，按大类展示目标仓位`;
   }
   return `${summary}，按分组展示目标仓位`;
 }
 
-function buildTargetPieSeries(level, snapshot, groupTargets = readActiveGroupTargets()) {
-  const normalizedLevel = normalizeTargetPieLevel(level);
-  const totalTargetShare = getTotalGroupTargetShare(groupTargets);
+function buildTargetPieSeries(level, snapshot, targets = readActiveTargets(), scope = state.targetScope) {
+  const normalizedScope = normalizeTargetScope(scope);
+  const normalizedLevel = normalizeTargetPieLevel(level, normalizedScope);
+  const totalTargetShare = getTotalTargetShare(targets);
   if (totalTargetShare <= 0) {
     return { items: [], totalBase: 0, totalTargetShare };
   }
 
   const bucket = new Map();
-  Object.entries(groupTargets).forEach(([key, targetShare]) => {
-    if (!(targetShare > 0)) return;
-    const { classKey, groupName } = parseGroupCompositeKey(key);
-    const label =
-      normalizedLevel === "class"
-        ? ASSET_CLASS_LABELS[classKey] || classKey
-        : `${groupName} · ${ASSET_CLASS_LABELS[classKey] || classKey}`;
-    const current = bucket.get(label) || 0;
-    bucket.set(label, current + targetShare);
-  });
+  if (normalizedScope === "fund") {
+    const account = getActiveAccount();
+    const holdingMap = new Map((Array.isArray(account?.holdings) ? account.holdings : []).map((holding) => [holding.id, holding]));
+    Object.entries(targets).forEach(([key, targetShare]) => {
+      if (!(targetShare > 0)) return;
+      const holding = holdingMap.get(key) || null;
+      const metric = holding && !holding.deleted ? snapshot.metrics.get(holding.id) || buildHoldingMetric(holding) : null;
+      const classKey = normalizeAssetClass(holding?.assetClass);
+      const classLabel = ASSET_CLASS_LABELS[classKey] || classKey;
+      const groupName = holding ? getHoldingGroupName(holding) : DEFAULT_GROUP_NAME;
+      const code = String(holding?.code || "").trim();
+      const fundName = metric?.name || holding?.name || code || "未知持仓";
+      const label =
+        normalizedLevel === "class"
+          ? classLabel
+          : normalizedLevel === "fund"
+            ? `${fundName}${code ? ` (${code})` : ""}`
+            : `${groupName} · ${classLabel}`;
+      const current = bucket.get(label) || 0;
+      bucket.set(label, current + targetShare);
+    });
+  } else {
+    Object.entries(targets).forEach(([key, targetShare]) => {
+      if (!(targetShare > 0)) return;
+      const { classKey, groupName } = parseGroupCompositeKey(key);
+      const label =
+        normalizedLevel === "class"
+          ? ASSET_CLASS_LABELS[classKey] || classKey
+          : `${groupName} · ${ASSET_CLASS_LABELS[classKey] || classKey}`;
+      const current = bucket.get(label) || 0;
+      bucket.set(label, current + targetShare);
+    });
+  }
 
   const items = [...bucket.entries()]
     .map(([label, value]) => ({
@@ -5065,12 +5340,14 @@ function renderTargetPieLegend(items, snapshot, displayMode = "full") {
 function renderTargetPieSection(snapshot) {
   if (!el.targetPieCanvas || !el.targetPieSubtitle || !el.targetPieLegend) return;
 
-  const level = normalizeTargetPieLevel(state.targetPieLevel);
+  const scope = normalizeTargetScope(state.targetScope);
+  const targets = readActiveTargets(scope);
+  const level = normalizeTargetPieLevel(state.targetPieLevel, scope);
   const displayMode = normalizePieDisplayMode(state.pieDisplayMode);
-  const { items, totalBase, totalTargetShare } = buildTargetPieSeries(level, snapshot);
+  const { items, totalBase, totalTargetShare } = buildTargetPieSeries(level, snapshot, targets, scope);
   syncTargetPieLevelButtons();
   el.targetPieSubtitle.textContent =
-    items.length > 0 ? targetPieLevelSubtitle(level, totalTargetShare) : "设置分组目标仓位后即可查看整体分布";
+    items.length > 0 ? targetPieLevelSubtitle(level, totalTargetShare, scope) : `设置${getTargetScopeMeta(scope).itemLabel}目标仓位后即可查看整体分布`;
 
   drawPieChart(items, totalBase, displayMode, {
     canvas: el.targetPieCanvas,
@@ -6305,6 +6582,8 @@ function lockVault() {
   state.pendingQuoteCodes.clear();
   state.collapsedClassKeys.clear();
   state.collapsedGroupKeys.clear();
+  state.targetScope = "group";
+  state.targetPieLevel = "group";
 
   if (state.autoTimer) clearInterval(state.autoTimer);
   if (state.persistTimer) clearTimeout(state.persistTimer);
@@ -6942,6 +7221,13 @@ function bindEvents() {
     });
   });
 
+  el.targetScopeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      if (!state.unlocked) return;
+      setTargetScope(button.dataset.targetScope);
+    });
+  });
+
   el.targetPieModeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       if (!state.unlocked) return;
@@ -7012,6 +7298,7 @@ async function init() {
   syncPerformanceMetricButtons();
   syncDisplayCurrencyButtons();
   setPieLevel(el.pieLevel?.value || "group", { render: false });
+  setTargetScope(state.targetScope || "group", { render: false });
   setTargetPieLevel(state.targetPieLevel || "group", { render: false });
   if (el.performanceScopeType) {
     el.performanceScopeType.value = normalizePerformanceScopeType(state.performanceScopeType);
