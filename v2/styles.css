@@ -1100,6 +1100,11 @@ input:not([type="checkbox"]):not([type="radio"]):focus {
   gap: 2px;
 }
 
+.group-target-cell::before {
+  display: none;
+  content: attr(data-label);
+}
+
 .group-target-cell-value {
   display: block;
   font-size: 13px;
@@ -2108,8 +2113,71 @@ body.is-locked #tab-config #gist-verify-btn {
     padding: 0 6px;
   }
 
+  .group-target-list.is-fund-target-list .group-target-header {
+    display: none;
+  }
+
   .group-target-title-cell {
     gap: 4px;
+  }
+
+  .group-target-item.is-fund-target {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    padding: 9px 10px;
+  }
+
+  .group-target-item.is-fund-target .group-target-title-cell {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 5px 6px;
+    align-items: start;
+    padding-bottom: 7px;
+    border-bottom: 1px solid #e4edf1;
+  }
+
+  .group-target-item.is-fund-target .group-target-name {
+    grid-column: 1 / -1;
+    display: block;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+  }
+
+  .group-target-item.is-fund-target .group-target-class {
+    justify-self: start;
+    width: fit-content;
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  .group-target-item.is-fund-target .group-target-status {
+    justify-self: end;
+    margin-left: 0;
+    padding-top: 2px;
+  }
+
+  .group-target-item.is-fund-target .group-target-cell {
+    align-items: flex-start;
+    gap: 3px;
+    padding-top: 1px;
+  }
+
+  .group-target-item.is-fund-target .group-target-cell::before {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .group-target-item.is-fund-target .group-target-cell-value,
+  .group-target-item.is-fund-target .group-target-cell-amount {
+    text-align: left;
   }
 
   .group-target-name {

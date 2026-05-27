@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260527-fund-targets";
+const ASSET_VERSION = "20260527-fund-targets-mobile";
 const CACHE_NAME = `qdii-dashboard-v2-${ASSET_VERSION}`;
 const ASSET_LIST = [
   "./",

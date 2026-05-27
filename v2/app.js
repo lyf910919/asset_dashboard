@@ -14,10 +14,10 @@ import {
   setBundle,
   setConfigValue,
   upsertDailyNav,
-} from "./lib/storage.js?v=20260527-fund-targets";
-import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260527-fund-targets";
-import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260527-fund-targets";
-import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260527-fund-targets";
+} from "./lib/storage.js?v=20260527-fund-targets-mobile";
+import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260527-fund-targets-mobile";
+import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260527-fund-targets-mobile";
+import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260527-fund-targets-mobile";
 const STORAGE_KEY = "qdii-vault-encrypted-v1";
 const LEGACY_STORAGE_KEY = "qdii-dashboard-config-v1";
 const REMEMBER_PASS_KEY = "qdii-remember-passphrase-v1";
@@ -5119,9 +5119,12 @@ function createGroupTargetHeader(scope = state.targetScope) {
   return header;
 }
 
-function createGroupTargetValueCell(valueText, amountText, valueClassName = "") {
+function createGroupTargetValueCell(valueText, amountText, valueClassName = "", label = "") {
   const cell = document.createElement("div");
   cell.className = "group-target-cell";
+  if (label) {
+    cell.dataset.label = label;
+  }
 
   const valueEl = document.createElement("strong");
   valueEl.className = "group-target-cell-value";
@@ -5145,6 +5148,7 @@ function clearGroupTargetSection(message) {
   }
 
   if (!el.groupTargetList) return;
+  el.groupTargetList.classList.remove("is-fund-target-list");
   el.groupTargetList.innerHTML = "";
   const empty = document.createElement("div");
   empty.className = "group-target-empty";
@@ -5166,6 +5170,7 @@ function renderGroupTargetSection(snapshot) {
   el.groupTargetSummary.classList.toggle("is-bad", totalTargetShare > 1.0001);
   updateTargetSectionLabels(scope);
   syncTargetScopeButtons();
+  el.groupTargetList.classList.toggle("is-fund-target-list", scope === "fund");
 
   el.groupTargetList.innerHTML = "";
   if (rows.length === 0) {
@@ -5180,6 +5185,7 @@ function renderGroupTargetSection(snapshot) {
     const item = document.createElement("button");
     item.type = "button";
     item.className = "group-target-item";
+    item.classList.add(row.scope === "fund" ? "is-fund-target" : "is-group-target");
     item.setAttribute("aria-label", `设置 ${row.scope === "fund" ? row.name : `${row.classLabel} / ${row.groupName}`} 目标仓位`);
     item.addEventListener("click", () => openGroupTargetModal(row.key));
 
@@ -5203,15 +5209,18 @@ function renderGroupTargetSection(snapshot) {
 
     item.append(
       title,
-      createGroupTargetValueCell(formatShareRatio(row.currentShare), formatCompactMoney(row.currentAmount)),
+      createGroupTargetValueCell(formatShareRatio(row.currentShare), formatCompactMoney(row.currentAmount), "", "当前"),
       createGroupTargetValueCell(
         row.hasTarget ? formatShareRatio(row.targetShare) : "未设置",
         Number.isFinite(row.targetAmount) ? formatCompactMoney(row.targetAmount) : row.hasTarget ? "--" : "点击设置",
+        "",
+        "目标",
       ),
       createGroupTargetValueCell(
         row.hasTarget ? formatTargetShareDiff(row.shareDiff) : "--",
         row.hasTarget && Number.isFinite(row.amountDiff) ? formatSignedCompactMoney(row.amountDiff) : "--",
         row.hasTarget && Number.isFinite(row.shareDiff) ? status.className : "",
+        "偏离",
       ),
     );
     fragment.appendChild(item);
