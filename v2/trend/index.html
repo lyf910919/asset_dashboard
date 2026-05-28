@@ -205,13 +205,61 @@
       .metric strong { font-size:16px; }
       .quadrants { grid-template-columns:1fr; }
     }
+    .ov-asset-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+    .ov-asset-bar select{border:1px solid var(--border);border-radius:999px;padding:7px 12px;background:var(--surface-2);color:var(--text-secondary);cursor:pointer;font:inherit;font-size:13px}
+    .ov-price-row{display:flex;align-items:baseline;gap:10px;margin:0 0 16px;flex-wrap:wrap}
+    .ov-price{font-size:36px;font-weight:800;color:var(--text-primary)}
+    .ov-change{font-size:18px;font-weight:700}
+    .ov-change.up{color:var(--red)}.ov-change.down{color:var(--green)}
+    .ov-atr{font-size:13px;color:var(--text-muted);align-self:center}
+    .ov-block{margin-bottom:18px}
+    .ov-block-title{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px}
+    .ov-indicators{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+    .ov-ind{padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2)}
+    .ov-ind-label{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+    .ov-ind-value{font-size:20px;font-weight:800}
+    .ov-bar-wrap{margin-top:5px;height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+    .ov-bar-fill{height:100%;border-radius:3px}
+    .ov-interp{padding:12px 14px;border-radius:var(--radius-sm);border:1px solid;margin-top:2px}
+    .ov-interp.green{background:var(--green-bg);border-color:#6ee7b7;color:#065f46}
+    .ov-interp.yellow{background:var(--yellow-bg);border-color:#fcd34d;color:#92400e}
+    .ov-interp.red{background:var(--red-bg);border-color:#fca5a5;color:#991b1b}
+    .ov-interp.neutral{background:var(--surface-2);border-color:var(--border);color:var(--text-secondary)}
+    .ov-interp-title{font-weight:800;font-size:14px;margin-bottom:4px}
+    .ov-interp-desc{font-size:13px;line-height:1.6}
+    .ov-ma-ladder{display:flex;flex-direction:column;gap:6px}
+    .ov-ma-row{display:grid;grid-template-columns:54px 1fr 72px;align-items:center;gap:8px;font-size:13px}
+    .ov-ma-label{color:var(--text-muted);font-size:12px}
+    .ov-ma-track{height:8px;background:#e2e8f0;border-radius:4px;overflow:visible;position:relative}
+    .ov-ma-dot{position:absolute;top:0;height:100%;width:8px;border-radius:4px;transform:translateX(-50%)}
+    .ov-ma-val{text-align:right;font-variant-numeric:tabular-nums;color:var(--text-secondary)}
+    .ov-vol-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .ov-vol-row{display:grid;grid-template-columns:76px 1fr 90px;align-items:center;gap:8px}
+    .ov-vol-label{color:var(--text-muted);font-size:12px}
+    .ov-vol-track{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+    .ov-vol-bar{height:100%;border-radius:4px}
+    .ov-vol-val{text-align:right;font-variant-numeric:tabular-nums;font-size:12px;color:var(--text-secondary)}
+    .ov-proj-note{font-size:12px;color:var(--text-muted);margin-bottom:8px;padding:8px 10px;background:var(--surface-2);border-radius:var(--radius-sm);border:1px solid var(--border)}
+    .ov-conclusion{padding:16px;border-radius:var(--radius-sm);border:2px solid}
+    .ov-conclusion.green{background:var(--green-bg);border-color:var(--green)}
+    .ov-conclusion.yellow{background:var(--yellow-bg);border-color:var(--yellow)}
+    .ov-conclusion.red{background:var(--red-bg);border-color:var(--red)}
+    .ov-conclusion.neutral{background:var(--surface-2);border-color:var(--border)}
+    .ov-con-title{font-size:18px;font-weight:800;margin-bottom:8px}
+    .ov-con-signals{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+    .ov-signal-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid}
+    .ov-signal-tag.pass{background:var(--green-bg);border-color:#6ee7b7;color:#065f46}
+    .ov-signal-tag.warn{background:var(--yellow-bg);border-color:#fcd34d;color:#92400e}
+    .ov-signal-tag.fail{background:var(--red-bg);border-color:#fca5a5;color:#991b1b}
+    .ov-con-stop{font-size:13px;color:var(--text-secondary);margin-top:6px}
   </style>
 </head>
 <body>
   <nav class="topbar">
     <div class="brand">趋势规则系统</div>
     <div class="nav-links" aria-label="区块导航">
-      <button class="nav-tab active" data-view="status">持仓状态</button>
+      <button class="nav-tab active" data-view="overview">趋势概览</button>
+      <button class="nav-tab" data-view="status">持仓状态</button>
       <button class="nav-tab" data-view="market">市场状态</button>
       <button class="nav-tab" data-view="entry">入场</button>
       <button class="nav-tab" data-view="position-calc">仓位</button>
@@ -242,7 +290,13 @@
       </div>
     </section>
 
-        <section id="status" class="section view-panel active">
+        <section id="overview" class="section view-panel active">
+          <div class="section-head"><h2>趋势概览</h2><span id="ovStamp" class="subtle"></span></div>
+          <div id="ovAssetBar" class="ov-asset-bar"></div>
+          <div id="ovContent"></div>
+        </section>
+
+        <section id="status" class="section view-panel">
           <div class="section-head"><h2>§0A 持仓状态</h2><span id="positionStamp" class="subtle"></span></div>
           <div id="positionTabs" class="tabs"></div>
           <h3>静态参数</h3><div id="staticGrid" class="metric-grid"></div>
@@ -357,6 +411,11 @@
         script:"data/generated/index-volume-931643.js",
         global:"__INDEX_VOLUME_931643__",
       },
+      "1.000688":{
+        json:"data/generated/index-volume-000688.json",
+        script:"data/generated/index-volume-000688.js",
+        global:"__INDEX_VOLUME_000688__",
+      },
     };
     const state = {
       activeId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
@@ -384,9 +443,12 @@
         currentRSI: clean(over.currentRSI ?? base.currentRSI), currentADX: clean(over.currentADX ?? base.currentADX),
         diPlus: clean(base.diPlus), diMinus: clean(base.diMinus),
         highestClose: clean(over.highestClose ?? base.highestClose ?? cfg.highestClose),
-        ma20: clean(base.ma20), ma20Prev: clean(base.ma20Prev), close: clean(base.signalClose ?? base.close),
+        ma5: clean(base.ma5), ma10: clean(base.ma10),
+        ma20: clean(base.ma20), ma20Prev: clean(base.ma20Prev), ma60: clean(base.ma60),
+        close: clean(base.signalClose ?? base.close),
         tradeClose: clean(base.close), tradeMa20: clean(base.tradeMa20), priceChangePct: clean(base.priceChangePct),
-        volume: clean(base.volume), volumePrev: clean(base.volumePrev), volumeMa20: clean(base.volumeMa20),
+        volume: clean(base.volume), volumePrev: clean(base.volumePrev),
+        volumeMa5: clean(base.volumeMa5), volumeMa10: clean(base.volumeMa10), volumeMa20: clean(base.volumeMa20),
         volumeAmount: clean(base.volumeAmount), volumeAmountPrev: clean(base.volumeAmountPrev),
         volumeAmountMa20: clean(base.volumeAmountMa20), volumeCoverage: base.volumeCoverage,
         volumeUpdatedAt: base.volumeUpdatedAt, volumeScope: base.volumeScope, volumeIsIndex: !!base.volumeIsIndex,
@@ -572,6 +634,8 @@
       const latest = data.latest;
       next.volume = +latest.volumeHands;
       next.volumePrev = nullableNum(latest.previousVolumeHands);
+      next.volumeMa5 = nullableNum(latest.volumeMa5Hands);
+      next.volumeMa10 = nullableNum(latest.volumeMa10Hands);
       next.volumeMa20 = nullableNum(latest.volumeMa20Hands);
       next.volumeAmount = nullableNum(latest.amountYuan);
       next.volumeAmountPrev = nullableNum(latest.previousAmountYuan);
@@ -725,9 +789,12 @@
           next.highestClose = highestCloseSinceEntry(tradeRows, cfg.openedAt, cfg.highestClose);
           next.close = tradeRows[tradeRows.length - 1]?.close ?? null;
           next.signalClose = signalRows[signalRows.length - 1]?.close ?? null;
+          next.ma5 = sma(closes, 5); next.ma10 = sma(closes, 10);
           next.ma20 = sma(closes, 20); next.ma20Prev = sma(closes.slice(0, -1), 20);
+          next.ma60 = sma(closes, 60);
           next.tradeMa20 = sma(tradeCloses, 20);
           next.volume = volumeLatest?.volume ?? null; next.volumePrev = volumePrev?.volume ?? null;
+          next.volumeMa5 = sma(volumeSeries, 5); next.volumeMa10 = sma(volumeSeries, 10);
           next.volumeMa20 = sma(volumeSeries, 20);
           next.priceChangePct = volumeLatest && volumePrev?.close ? (volumeLatest.close / volumePrev.close - 1) * 100 : null;
           next.volumeScope = volumeRows ? `${cfg.signalName || "信号指数"}（指数成交量）` : "指数量能不可得";
@@ -781,17 +848,298 @@
       const el = $(id);
       if (document.activeElement !== el) el.value = Number.isFinite(value) ? String(+value.toFixed(id === "detailAtr" ? 4 : 3)) : "";
     }
+    // ===== 趋势概览 helper functions =====
+    function volText(v) {
+      if (!Number.isFinite(v)) return "—";
+      if (v >= 1e8) return (v/1e8).toFixed(2)+"亿手";
+      if (v >= 1e4) return (v/1e4).toFixed(1)+"万手";
+      return v.toFixed(0)+"手";
+    }
+    function tradingMinutesElapsed() {
+      const now = new Date();
+      const h = now.getHours(), m = now.getMinutes();
+      const totalMins = h * 60 + m;
+      const amStart = 9*60+30, amEnd = 11*60+30;
+      const pmStart = 13*60, pmEnd = 15*60;
+      if (totalMins < amStart) return 0;
+      if (totalMins >= pmEnd) return 240;
+      let elapsed = 0;
+      if (totalMins <= amEnd) { elapsed = totalMins - amStart; }
+      else if (totalMins < pmStart) { elapsed = 120; }
+      else { elapsed = 120 + (totalMins - pmStart); }
+      return Math.max(0, elapsed);
+    }
+    // U-shape cumulative distribution table [elapsed_min, cum_pct]
+    const INTRADAY_DIST = [[0,0],[30,.18],[60,.30],[90,.43],[120,.55],[150,.63],[180,.75],[210,.87],[240,1.0]];
+    function intradayCumPct(elapsed) {
+      const d = INTRADAY_DIST;
+      if (elapsed <= 0) return 0; if (elapsed >= 240) return 1;
+      for (let i = 1; i < d.length; i++) {
+        if (elapsed <= d[i][0]) {
+          const t = (elapsed - d[i-1][0]) / (d[i][0] - d[i-1][0]);
+          return d[i-1][1] + t * (d[i][1] - d[i-1][1]);
+        }
+      }
+      return 1;
+    }
+    function projectVolume(currentVol) {
+      if (!Number.isFinite(currentVol) || currentVol <= 0) return null;
+      const elapsed = tradingMinutesElapsed();
+      if (elapsed <= 0 || elapsed >= 240) return null;
+      const cumPct = intradayCumPct(elapsed);
+      if (cumPct <= 0) return null;
+      return currentVol / cumPct;
+    }
+    function interpretTrendIndicators(adx, rsi) {
+      if (!Number.isFinite(adx) || !Number.isFinite(rsi)) {
+        return {cls:"neutral", title:"等待数据", desc:"指标数据加载中，请稍候刷新。"};
+      }
+      if (adx < 20) {
+        if (rsi < 40) return {cls:"yellow", title:"震荡偏弱", desc:"ADX<20 无明显趋势，RSI偏低，价格可能继续寻底，暂勿追多。"};
+        if (rsi > 60) return {cls:"yellow", title:"震荡偏强", desc:"ADX<20 无明显趋势，RSI偏高，上方阻力较大，等待方向选择。"};
+        return {cls:"neutral", title:"横盘震荡", desc:"ADX<20 趋势不明，处于盘整区间，等待放量突破后再做判断。"};
+      }
+      if (adx < 25) {
+        if (rsi >= 55) return {cls:"yellow", title:"趋势萌芽·多头初现", desc:"ADX 20-25 趋势初期，RSI高于中轴，方向偏多但力度待验证，可小仓观察。"};
+        if (rsi <= 45) return {cls:"yellow", title:"趋势萌芽·偏弱", desc:"ADX 20-25 趋势初期，RSI低于中轴，下行压力存在，谨慎操作。"};
+        return {cls:"yellow", title:"趋势萌芽·方向待定", desc:"ADX 20-25 有趋势苗头，RSI中性，等待 ADX 突破25确认方向。"};
+      }
+      if (adx < 40) {
+        if (rsi > 80) return {cls:"yellow", title:"强势趋势·超买警戒", desc:"ADX 25-40 趋势明确，但RSI>80 短期超买，注意回调风险，收紧保护线。"};
+        if (rsi >= 60) return {cls:"green", title:"趋势确立·多头动能充足", desc:"ADX 25-40 趋势明确，RSI 60-80 处于强势区间。可持有仓位，观察加仓机会。"};
+        if (rsi >= 45) return {cls:"green", title:"趋势确立·动能中性", desc:"ADX 25-40 趋势确认，RSI中性偏高，价格大概率维持趋势方向，持有为主。"};
+        return {cls:"red", title:"趋势向下·空头确认", desc:"ADX 25-40 趋势明确，RSI<45 空头占优，优先检查止损线是否触发。"};
+      }
+      // adx >= 40
+      if (rsi > 75) return {cls:"yellow", title:"强趋势末段·过热", desc:"ADX≥40 强势趋势，RSI高位，可能进入趋势末段，收紧 Chandelier 保护线，准备减仓。"};
+      if (rsi >= 50) return {cls:"green", title:"强趋势·中后期持有", desc:"ADX≥40 趋势强劲，RSI中高位，趋势仍在延续，持有并跟踪四线止损。"};
+      return {cls:"red", title:"强势下跌·空头主导", desc:"ADX≥40 下跌趋势强劲，RSI低位，止损优先，禁止抄底。"};
+    }
+    function interpretMAAlignment(price, ma5, ma10, ma20, ma60) {
+      if (![price,ma5,ma10,ma20].every(Number.isFinite)) {
+        return {cls:"neutral", title:"均线数据加载中", desc:"等待K线数据计算均线。", aboves:[]};
+      }
+      const has60 = Number.isFinite(ma60);
+      const aboves = [
+        {label:"MA5",  val:ma5,  above: price > ma5},
+        {label:"MA10", val:ma10, above: price > ma10},
+        {label:"MA20", val:ma20, above: price > ma20},
+        ...(has60 ? [{label:"MA60", val:ma60, above: price > ma60}] : []),
+      ];
+      const aboveCount = aboves.filter(x=>x.above).length;
+      const total = aboves.length;
+      const perfectBull = aboves.every(x=>x.above) && price>ma5 && ma5>ma10 && ma10>ma20 && (!has60||ma20>ma60);
+      const perfectBear = aboves.every(x=>!x.above) && price<ma5 && ma5<ma10 && ma10<ma20 && (!has60||ma20<ma60);
+      if (perfectBull) return {cls:"green", title:"完美多头排列", desc:`价格>${['MA5','MA10','MA20',...(has60?['MA60']:[])].join('>')}，多头排列完整，趋势最强信号。`, aboves};
+      if (perfectBear) return {cls:"red", title:"完美空头排列", desc:`价格<MA5<MA10<MA20${has60?'<MA60':''}，空头排列完整，下跌趋势强烈。`, aboves};
+      if (aboveCount === total) return {cls:"green", title:"全线站上均线", desc:"价格站上所有均线，均线排列尚未完美但多头占优。", aboves};
+      if (aboveCount === 0) return {cls:"red", title:"全线跌破均线", desc:"价格跌破所有均线，空头完全主导。", aboves};
+      const nearMA20 = Math.abs(price - ma20) / ma20 < 0.012;
+      if (nearMA20 && aboveCount >= total - 1) return {cls:"yellow", title:"MA20关键支撑测试", desc:`价格在MA20（${fmt(ma20)}）附近（±1.2%），是多头趋势的重要支撑位，密切关注。`, aboves};
+      if (price > ma20 && price < ma60) return {cls:"yellow", title:"中期多头·长期压力待突破", desc:`价格高于MA5/MA10/MA20但低于MA60，需突破长期均线才能确认全面多头。`, aboves};
+      if (aboveCount >= total - 1) return {cls:"yellow", title:"均线多头为主·局部破位", desc:`${total-aboveCount}条均线尚未突破，整体偏多但需观察企稳。`, aboves};
+      return {cls:"yellow", title:"均线多空混杂", desc:`价格站上 ${aboveCount}/${total} 条均线，趋势方向不明朗，等待均线理顺。`, aboves};
+    }
+    function interpretVolume(vol, projVol, vma5, vma10, vma20, priceChangePct) {
+      const isOpen = tradingMinutesElapsed() > 0 && tradingMinutesElapsed() < 240;
+      const compareVol = (isOpen && Number.isFinite(projVol)) ? projVol : vol;
+      if (!Number.isFinite(compareVol) || !Number.isFinite(priceChangePct)) {
+        return {cls:"neutral", title:"量能数据加载中", desc:"等待成交量数据。"};
+      }
+      const aboveMa20 = Number.isFinite(vma20) && compareVol >= vma20;
+      const aboveMa10 = Number.isFinite(vma10) && compareVol >= vma10;
+      const aboveMa5 = Number.isFinite(vma5) && compareVol >= vma5;
+      const isUp = priceChangePct >= 0;
+      const amplified = aboveMa5 && aboveMa10 && aboveMa20;
+      const shrunk = !aboveMa5 && !aboveMa10 && !aboveMa20;
+      if (isUp && amplified) return {cls:"green", title:"放量上涨", desc:"价格上涨且成交量高于5/10/20日均量，量价齐升，趋势得到强力确认。"};
+      if (isUp && aboveMa20 && !aboveMa5) return {cls:"green", title:"温和放量上涨", desc:"价格上涨，量能高于20日均线但未明显放量，趋势健康延续。"};
+      if (isUp && shrunk) return {cls:"yellow", title:"缩量上涨", desc:"价格上涨但成交量低于均线，动能不足，可能是短线反弹，关注后续是否放量确认。"};
+      if (isUp) return {cls:"yellow", title:"量价温和上涨", desc:"价格上涨，量能处于均线附近，趋势延续性一般，持有为主。"};
+      if (!isUp && amplified) return {cls:"red", title:"放量下跌", desc:"价格下跌且成交量明显放大，空头主动砸盘，优先检查止损线，禁止加仓。"};
+      if (!isUp && shrunk) return {cls:"green", title:"缩量回调", desc:"价格回落但成交量萎缩，属正常休整，止损线管理不动，不因回调提前出场。"};
+      return {cls:"yellow", title:"温和量能回调", desc:"价格小幅下跌，量能在均线附近，属常规回调，关注支撑位。"};
+    }
+    function overallConclusion(indInterp, maInterp, volInterp, m, cfg) {
+      const r = compute(cfg, m);
+      const scoreMap = {green:2, yellow:1, red:0, neutral:1};
+      const score = (scoreMap[indInterp.cls]||1) + (scoreMap[maInterp.cls]||1) + (scoreMap[volInterp.cls]||1);
+      let cls, title, advice;
+      if (score >= 5) { cls="green"; title="趋势强势，建议持有"; advice="多头信号全面确认，可持有仓位并跟踪四线止损上移。"; }
+      else if (score >= 4) { cls="green"; title="趋势偏多，持有观察"; advice="主要信号偏多，持有仓位，注意量能和均线是否出现异常。"; }
+      else if (score >= 3) { cls="yellow"; title="趋势中性，谨慎持有"; advice="信号出现分歧，优先遵守止损规则，不主动加仓，等待信号统一。"; }
+      else if (score >= 2) { cls="yellow"; title="趋势偏弱，加强监控"; advice="多个信号转弱，严格跟踪保护线，如触发止损需坚决执行。"; }
+      else { cls="red"; title="趋势转弱，优先防守"; advice="多数信号转空，检查止损线是否已触发，禁止任何形式加仓。"; }
+      const tags = [
+        {label:"趋势指标", cls: indInterp.cls === "green" ? "pass" : indInterp.cls === "red" ? "fail" : "warn"},
+        {label:"均线排列", cls: maInterp.cls === "green" ? "pass" : maInterp.cls === "red" ? "fail" : "warn"},
+        {label:"量能", cls: volInterp.cls === "green" ? "pass" : volInterp.cls === "red" ? "fail" : "warn"},
+      ];
+      const stopRef = Number.isFinite(r.finalStop) ? `止损参考：${fmt(r.finalStop)}（${r.winner}）` : "";
+      return {cls, title, advice, tags, stopRef};
+    }
+    function renderOverview() {
+      const id = state.activeId;
+      const cfg = POSITIONS_CONFIG[id];
+      const m = marketOf(id);
+      const projVol = projectVolume(m.volume);
+      const elapsed = tradingMinutesElapsed();
+      const isOpen = elapsed > 0 && elapsed < 240;
+
+      // ---- Price row ----
+      const changeCls = !Number.isFinite(m.changePct) ? "" : m.changePct >= 0 ? "up" : "down";
+      const changeSign = Number.isFinite(m.changePct) && m.changePct > 0 ? "+" : "";
+      const priceRow = `<div class="ov-price-row">
+        <span class="ov-price num">${Number.isFinite(m.currentPrice) ? m.currentPrice.toFixed(3) : "—"}</span>
+        <span class="ov-change ${changeCls}">${Number.isFinite(m.changePct) ? changeSign+m.changePct.toFixed(2)+"%" : "—"}</span>
+        <span class="ov-atr">ATR₁₄ ${fmt(m.currentATR,4)}</span>
+      </div>`;
+
+      // ---- Trend indicators block ----
+      const rsiPct = Number.isFinite(m.currentRSI) ? Math.min(100,m.currentRSI) : 0;
+      const adxPct = Number.isFinite(m.currentADX) ? Math.min(100,m.currentADX*1.5) : 0;
+      const rsiColor = !Number.isFinite(m.currentRSI) ? "#94a3b8" : m.currentRSI>70 ? "#dc2626" : m.currentRSI>50 ? "#059669" : "#d97706";
+      const adxColor = !Number.isFinite(m.currentADX) ? "#94a3b8" : m.currentADX>=25 ? "#2563eb" : m.currentADX>=20 ? "#d97706" : "#94a3b8";
+      const indBlock = `<div class="ov-block">
+        <div class="ov-block-title">趋势指标（信号指数）</div>
+        <div class="ov-indicators">
+          <div class="ov-ind">
+            <div class="ov-ind-label">ATR₁₄</div>
+            <div class="ov-ind-value num">${fmt(m.currentATR,4)}</div>
+          </div>
+          <div class="ov-ind">
+            <div class="ov-ind-label">RSI₁₄</div>
+            <div class="ov-ind-value num" style="color:${rsiColor}">${fmt(m.currentRSI,1)}</div>
+            <div class="ov-bar-wrap"><div class="ov-bar-fill" style="width:${rsiPct}%;background:${rsiColor}"></div></div>
+          </div>
+          <div class="ov-ind">
+            <div class="ov-ind-label">ADX₁₄ (+DI ${fmt(m.diPlus,1)} / -DI ${fmt(m.diMinus,1)})</div>
+            <div class="ov-ind-value num" style="color:${adxColor}">${fmt(m.currentADX,1)}</div>
+            <div class="ov-bar-wrap"><div class="ov-bar-fill" style="width:${adxPct}%;background:${adxColor}"></div></div>
+          </div>
+        </div>`;
+      const indInterp = interpretTrendIndicators(m.currentADX, m.currentRSI);
+      const indInterpHtml = `<div class="ov-interp ${indInterp.cls}">
+        <div class="ov-interp-title">${indInterp.title}</div>
+        <div class="ov-interp-desc">${indInterp.desc}</div>
+      </div></div>`;
+
+      // ---- MA alignment block ----
+      const maInterp = interpretMAAlignment(m.close, m.ma5, m.ma10, m.ma20, m.ma60);
+      const maVals = [
+        {label:"价格", val:m.close, color:"#1e40af", isPrice:true},
+        {label:"MA5",  val:m.ma5,  color:"#059669"},
+        {label:"MA10", val:m.ma10, color:"#d97706"},
+        {label:"MA20", val:m.ma20, color:"#dc2626"},
+        {label:"MA60", val:m.ma60, color:"#7c3aed"},
+      ].filter(x => Number.isFinite(x.val));
+      let maRows = "";
+      if (maVals.length >= 2) {
+        const allVals = maVals.map(x=>x.val);
+        const minV = Math.min(...allVals)*0.998, maxV = Math.max(...allVals)*1.002;
+        const range = maxV - minV || 1;
+        maRows = maVals.map(x => {
+          const pct = ((x.val - minV) / range * 92 + 4).toFixed(1);
+          const abovePrice = !x.isPrice && Number.isFinite(m.close) && x.val <= m.close;
+          const dotColor = x.isPrice ? x.color : (abovePrice ? "#059669" : "#dc2626");
+          return `<div class="ov-ma-row">
+            <span class="ov-ma-label">${x.label}</span>
+            <div class="ov-ma-track"><div class="ov-ma-dot" style="left:${pct}%;background:${dotColor}"></div></div>
+            <span class="ov-ma-val" style="color:${x.color}">${x.val.toFixed(3)}</span>
+          </div>`;
+        }).join("");
+      } else { maRows = `<div class="subtle">等待均线数据…</div>`; }
+      const maBlock = `<div class="ov-block">
+        <div class="ov-block-title">均线排列（信号指数收盘价）</div>
+        <div class="ov-ma-ladder">${maRows}</div>
+        <div class="ov-interp ${maInterp.cls}" style="margin-top:10px">
+          <div class="ov-interp-title">${maInterp.title}</div>
+          <div class="ov-interp-desc">${maInterp.desc}</div>
+        </div>
+      </div>`;
+
+      // ---- Volume block ----
+      const compareVol = (isOpen && Number.isFinite(projVol)) ? projVol : m.volume;
+      const volInterp = interpretVolume(m.volume, projVol, m.volumeMa5, m.volumeMa10, m.volumeMa20, m.priceChangePct);
+      const volEntries = [
+        {label: isOpen ? "今日量(实时)" : "今日量", val: m.volume, isToday:true},
+        ...(isOpen && Number.isFinite(projVol) ? [{label:"预计全天量", val:projVol, isProj:true}] : []),
+        {label:"5日均量",  val: m.volumeMa5},
+        {label:"10日均量", val: m.volumeMa10},
+        {label:"20日均量", val: m.volumeMa20},
+      ].filter(x => Number.isFinite(x.val));
+      let volRows = "";
+      if (volEntries.length >= 2) {
+        const maxV = Math.max(...volEntries.map(x=>x.val));
+        volRows = volEntries.map(x => {
+          const barPct = (x.val / maxV * 100).toFixed(1);
+          const barColor = x.isToday ? "#2563eb" : x.isProj ? "#7c3aed" : "#94a3b8";
+          const valStr = volText(x.val) + (x.isProj ? " (预估)" : "");
+          return `<div class="ov-vol-row">
+            <span class="ov-vol-label">${x.label}</span>
+            <div class="ov-vol-track"><div class="ov-vol-bar" style="width:${barPct}%;background:${barColor}"></div></div>
+            <span class="ov-vol-val">${valStr}</span>
+          </div>`;
+        }).join("");
+      } else { volRows = `<div class="subtle">等待量能数据…</div>`; }
+      let projNote = "";
+      if (isOpen && Number.isFinite(projVol)) {
+        const cumPct = (intradayCumPct(elapsed)*100).toFixed(0);
+        projNote = `<div class="ov-proj-note">
+          日内量预估：当前进度约 ${cumPct}%（基于A股U型量能分布模型，9:30-15:00 共240分钟），
+          预计全天量 = 实时量 ÷ 历史同期完成率，供参考。
+        </div>`;
+      }
+      const volBlock = `<div class="ov-block">
+        <div class="ov-block-title">量能分析（${m.volumeScope || "信号指数"}）</div>
+        ${projNote}
+        <div class="ov-vol-rows">${volRows}</div>
+        <div class="ov-interp ${volInterp.cls}">
+          <div class="ov-interp-title">${volInterp.title}</div>
+          <div class="ov-interp-desc">${volInterp.desc}</div>
+        </div>
+      </div>`;
+
+      // ---- Overall conclusion ----
+      const con = overallConclusion(indInterp, maInterp, volInterp, m, cfg);
+      const tagsHtml = con.tags.map(t=>`<span class="ov-signal-tag ${t.cls}">${t.label}</span>`).join("");
+      const conBlock = `<div class="ov-block">
+        <div class="ov-block-title">综合趋势结论</div>
+        <div class="ov-conclusion ${con.cls}">
+          <div class="ov-con-title">${con.title}</div>
+          <div class="ov-con-signals">${tagsHtml}</div>
+          <div class="ov-interp-desc">${con.advice}</div>
+          ${con.stopRef ? `<div class="ov-con-stop">${con.stopRef}</div>` : ""}
+        </div>
+      </div>`;
+
+      $("ovContent").innerHTML = priceRow + indBlock + indInterpHtml + maBlock + volBlock + conBlock;
+      $("ovStamp").textContent = cfg.signalName ? `信号：${cfg.signalName}` : "";
+    }
+    // ===== end 趋势概览 =====
     function renderAll() {
-      renderTabs(); renderPositionPanel(); renderMatrix(); renderDonchian(); renderGates();
+      renderTabs(); renderOverview(); renderPositionPanel(); renderMatrix(); renderDonchian(); renderGates();
       renderVolumeState(); renderPositionCalc(); renderPyramid(); renderStopDetail(); renderExitTree(); renderRisk();
     }
     function renderTabs() {
-      const html = ids().map(id => {
-        const c = POSITIONS_CONFIG[id];
-        return `<button class="tab ${id === state.activeId ? "active" : ""}" data-pos="${id}">${id} ${c.name}</button>`;
-      }).join("");
+      const allIds = ids();
+      const MAX_TABS = 5;
+      let html;
+      if (allIds.length <= MAX_TABS) {
+        html = allIds.map(id => {
+          const c = POSITIONS_CONFIG[id];
+          return `<button class="tab ${id === state.activeId ? "active" : ""}" data-pos="${id}">${id} ${c.name}</button>`;
+        }).join("");
+      } else {
+        html = `<select class="tab" onchange="state.activeId=this.value;renderAll()">` +
+          allIds.map(id => {
+            const c = POSITIONS_CONFIG[id];
+            return `<option value="${id}" ${id === state.activeId ? "selected" : ""}>${id} ${c.name}</option>`;
+          }).join("") + `</select>`;
+      }
       $("positionTabs").innerHTML = html;
       $("marketTabs").innerHTML = html;
+      $("ovAssetBar").innerHTML = html;
     }
     function metric(label, value, cls="") {
       return `<div class="metric"><label>${label}</label><strong class="num ${cls}">${value}</strong></div>`;
@@ -1095,7 +1443,7 @@
     }
     function closeModal() { $("modal").classList.remove("show"); }
     function showView(viewId, updateHash=true) {
-      if (!$(viewId)) viewId = "status";
+      if (!$(viewId)) viewId = "overview";
       document.querySelectorAll(".view-panel").forEach(panel => panel.classList.toggle("active", panel.id === viewId));
       document.querySelectorAll(".nav-tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === viewId));
       if (updateHash) history.replaceState(null, "", "#" + viewId);
@@ -1141,7 +1489,7 @@
         state.market[id] = { currentPrice:null, currentATR:null, currentRSI:null, currentADX:null, highestClose:c.highestClose };
       });
       renderAll(); syncInputsFromMarket(); refreshAll();
-      showView(location.hash ? location.hash.slice(1) : "status", false);
+      showView(location.hash ? location.hash.slice(1) : "overview", false);
     }
     seedState();
   </script>
