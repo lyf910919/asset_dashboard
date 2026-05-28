@@ -34,11 +34,20 @@ jobs:
         working-directory: v2/trend
         run: python scripts/build_index_volume.py
 
+      - name: Build 000688 constituent aggregate volume
+        working-directory: v2/trend
+        run: |
+          python scripts/build_index_volume.py \
+            --constituents data/index_constituents/000688.json \
+            --output data/generated/index-volume-000688.json \
+            --js-output data/generated/index-volume-000688.js
+
       - name: Commit generated trend data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add v2/trend/data/generated/index-volume-931643.json v2/trend/data/generated/index-volume-931643.js
+          git add v2/trend/data/generated/index-volume-000688.json v2/trend/data/generated/index-volume-000688.js
           git diff --cached --quiet || git commit -m "Update trend volume data"
           git push
 
