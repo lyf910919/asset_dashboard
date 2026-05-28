@@ -183,6 +183,8 @@ def build_payload(config, results, failures, min_success_rate):
     rows = aggregate(results)
     latest = rows[-1] if rows else {}
     prev = rows[-2] if len(rows) >= 2 else {}
+    last5  = rows[-5:]  if len(rows) >= 5  else rows
+    last10 = rows[-10:] if len(rows) >= 10 else rows
     last20 = rows[-20:] if len(rows) >= 20 else rows
     total = len(config["constituents"])
     success_count = len(results)
@@ -195,7 +197,7 @@ def build_payload(config, results, failures, min_success_rate):
         else None
     )
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "indexCode": config["indexCode"],
         "indexName": config["indexName"],
         "generatedAt": now_cst(),
@@ -215,6 +217,8 @@ def build_payload(config, results, failures, min_success_rate):
             "date": latest.get("date"),
             "volumeHands": latest.get("volumeHands"),
             "amountYuan": latest.get("amountYuan") if complete_amount(latest) else None,
+            "volumeMa5Hands":  moving_average(last5,  "volumeHands"),
+            "volumeMa10Hands": moving_average(last10, "volumeHands"),
             "volumeMa20Hands": moving_average(last20, "volumeHands"),
             "amountMa20Yuan": amount_average(last20),
             "previousVolumeHands": prev.get("volumeHands"),
@@ -267,8 +271,10 @@ def main():
         encoding="utf-8",
     )
     js_output_path.parent.mkdir(parents=True, exist_ok=True)
+    index_code = config.get("indexCode", "UNKNOWN").replace(".", "_")
+    js_var_name = f"__INDEX_VOLUME_{index_code}__"
     js_output_path.write_text(
-        "window.__INDEX_VOLUME_931643__ = "
+        f"window.{js_var_name} = "
         + json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
         + ";\n",
         encoding="utf-8",
