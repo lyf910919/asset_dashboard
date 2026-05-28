@@ -80,11 +80,24 @@ body.modal-open {
   font-weight: 700;
   color: var(--muted);
   cursor: pointer;
+  text-decoration: none;
 }
 
 .tab-btn.is-active {
   background: linear-gradient(120deg, var(--primary), var(--primary-2));
   color: #fff;
+}
+
+.trend-panel-link {
+  border-color: #c5dce6;
+  background: #f8fcfe;
+  color: var(--primary);
+}
+
+.trend-panel-link::after {
+  content: "↗";
+  margin-left: 4px;
+  font-size: 12px;
 }
 
 .tab-content {

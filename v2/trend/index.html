@@ -1,0 +1,1149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="趋势规则">
+  <meta name="theme-color" content="#1e40af">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>科技成长趋势规则系统</title>
+  <style>
+    :root {
+      --bg:#f0f4f8; --surface:#ffffff; --surface-2:#f8fafc;
+      --border:#e2e8f0; --border-focus:#93c5fd; --primary:#1e40af;
+      --primary-light:#dbeafe; --secondary:#0369a1; --green:#059669;
+      --green-bg:#d1fae5; --yellow:#d97706; --yellow-bg:#fef3c7;
+      --red:#dc2626; --red-bg:#fee2e2; --blue-info:#2563eb;
+      --blue-info-bg:#dbeafe; --pink-bg:#fce7f3; --pink:#be185d;
+      --text-primary:#1e293b; --text-secondary:#475569; --text-muted:#94a3b8;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md:0 4px 12px rgba(0,0,0,0.10);
+      --radius:12px; --radius-sm:8px;
+    }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      margin:0; background:var(--bg); color:var(--text-primary);
+      font-family:'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-width:320px; overflow-x:hidden;
+    }
+    button, input { font:inherit; }
+    a { color:inherit; text-decoration:none; }
+    .num { font-variant-numeric:tabular-nums; }
+    .topbar {
+      position:sticky; top:0; z-index:20; display:grid;
+      grid-template-columns:auto 1fr auto; align-items:center; gap:12px;
+      padding:10px max(12px, env(safe-area-inset-left)) 10px max(12px, env(safe-area-inset-left));
+      background:rgba(240,244,248,0.94); border-bottom:1px solid var(--border);
+      backdrop-filter:blur(14px);
+    }
+    .brand { font-size:14px; font-weight:800; color:var(--primary); white-space:nowrap; }
+    .nav-links {
+      display:flex; gap:6px; overflow-x:auto; white-space:nowrap;
+      scrollbar-width:none; padding:2px 0;
+    }
+    .nav-links::-webkit-scrollbar { display:none; }
+    .nav-links button {
+      padding:7px 10px; border:1px solid transparent; border-radius:999px;
+      color:var(--text-secondary); font-size:12px; background:rgba(255,255,255,0.55);
+      cursor:pointer; white-space:nowrap;
+    }
+    .nav-links button.active { background:var(--primary); color:white; }
+    .statusbar { display:flex; align-items:center; gap:8px; white-space:nowrap; font-size:12px; }
+    .dot { width:8px; height:8px; border-radius:50%; display:inline-block; background:var(--yellow); }
+    .dot.ok { background:var(--green); } .dot.bad { background:var(--red); }
+    .refresh {
+      border:1px solid var(--border); background:var(--surface); color:var(--primary);
+      border-radius:999px; width:30px; height:30px; cursor:pointer;
+    }
+    .switch { position:relative; display:inline-flex; align-items:center; gap:6px; }
+    .switch input { position:absolute; opacity:0; }
+    .slider { width:38px; height:22px; background:#cbd5e1; border-radius:999px; position:relative; cursor:pointer; }
+    .slider::after {
+      content:""; position:absolute; width:18px; height:18px; top:2px; left:2px;
+      background:white; border-radius:50%; box-shadow:var(--shadow-sm); transition:transform .18s ease;
+    }
+    .switch input:checked + .slider { background:var(--primary); }
+    .switch input:checked + .slider::after { transform:translateX(16px); }
+    main { max-width:960px; margin:0 auto; padding:16px 12px 48px; min-width:0; }
+    .section {
+      margin:16px 0; padding:16px; background:var(--surface);
+      border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-sm);
+      scroll-margin-top:74px; min-width:0; width:100%; max-width:100%;
+    }
+    .section.warn { background:linear-gradient(0deg, rgba(254,243,199,.45), rgba(255,255,255,.96)); }
+    .section-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+    h1, h2, h3 { margin:0; line-height:1.2; }
+    h1 { font-size:24px; }
+    h2 { font-size:18px; }
+    h3 { font-size:15px; color:var(--text-primary); }
+    .muted { color:var(--text-muted); }
+    .subtle { color:var(--text-secondary); font-size:13px; }
+    #positionStamp { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .grid-2 { display:grid; grid-template-columns:minmax(0, 1fr); gap:16px; }
+    .grid-2 > * { min-width:0; }
+    .view-panel { display:none; }
+    .view-panel.active { display:block; }
+    .tabs { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:12px; width:100%; max-width:100%; min-width:0; }
+    .tab {
+      border:1px solid var(--border); border-radius:999px; background:var(--surface-2);
+      padding:8px 12px; color:var(--text-secondary); cursor:pointer; white-space:nowrap;
+    }
+    .tab.active { background:var(--primary); border-color:var(--primary); color:white; }
+    .metric-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin:10px 0; min-width:0; width:100%; max-width:100%; }
+    .metric {
+      min-height:70px; padding:10px; border:1px solid var(--border); border-radius:var(--radius-sm);
+      background:var(--surface-2); display:flex; flex-direction:column; justify-content:space-between;
+    }
+    .metric label { font-size:12px; color:var(--text-muted); }
+    .metric strong { font-size:18px; color:var(--text-primary); overflow-wrap:anywhere; }
+    .positive { color:var(--red) !important; } .negative { color:var(--green) !important; }
+    .yellow { color:var(--yellow) !important; } .deep-green { color:#b91c1c !important; font-weight:800; }
+    .stop-grid { display:grid; grid-template-columns:1fr; gap:8px; margin-top:12px; }
+    .stop-card {
+      position:relative; padding:12px; border:1px solid var(--border); border-radius:var(--radius-sm);
+      background:var(--surface-2); min-height:112px;
+    }
+    .stop-card.win { border:2px solid var(--primary); background:linear-gradient(0deg, #eff6ff, #fff); }
+    .stop-title { display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; }
+    .badge {
+      display:inline-flex; align-items:center; justify-content:center; min-width:24px; height:24px;
+      padding:0 7px; border-radius:999px; background:var(--primary-light); color:var(--primary);
+      font-size:12px; font-weight:800;
+    }
+    .info {
+      border:0; background:#e2e8f0; color:#64748b; width:22px; height:22px;
+      border-radius:50%; cursor:pointer; margin-left:auto; font-size:13px; line-height:22px;
+    }
+    .stop-value { font-size:26px; font-weight:800; margin-top:10px; }
+    .stop-note { font-size:12px; color:var(--text-secondary); margin-top:6px; }
+    .final-banner {
+      margin-top:12px; padding:14px; border-radius:var(--radius-sm);
+      background:var(--blue-info-bg); color:var(--primary); border:1px solid #bfdbfe;
+      text-align:center; font-weight:800;
+    }
+    .viz { margin-top:12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:white; overflow:hidden; max-width:100%; }
+    svg { display:block; width:100%; height:auto; }
+    .control-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0; }
+    .field { display:flex; flex-direction:column; gap:5px; }
+    .field span { font-size:12px; color:var(--text-muted); }
+    .field input {
+      width:100%; border:1px solid var(--border); border-radius:var(--radius-sm);
+      padding:10px; background:white; color:var(--text-primary);
+    }
+    .field input:focus { outline:2px solid var(--border-focus); border-color:var(--border-focus); }
+    .matrix-wrap { overflow-x:auto; margin-top:10px; max-width:100%; min-width:0; }
+    table { width:100%; border-collapse:separate; border-spacing:0; font-size:12px; }
+    th, td { border:1px solid var(--border); padding:8px; text-align:center; min-width:72px; }
+    th { background:#eef2f7; color:var(--text-secondary); font-weight:700; }
+    td.cell-red { background:var(--red-bg); color:var(--red); }
+    td.cell-yellow { background:var(--yellow-bg); color:var(--yellow); }
+    td.cell-green { background:var(--green-bg); color:var(--green); }
+    td.cell-blue { background:var(--primary-light); color:var(--primary); }
+    td.cell-pink { background:var(--pink-bg); color:var(--pink); }
+    td.active-cell { outline:2px solid var(--blue-info); outline-offset:-3px; font-weight:800; }
+    .advice { margin-top:10px; padding:12px; border-radius:var(--radius-sm); background:var(--surface-2); font-size:18px; font-weight:800; text-align:center; }
+    .quadrants { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+    .quad { padding:10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2); min-height:118px; }
+    .quad.active { border:2px solid var(--blue-info); background:#eff6ff; }
+    .quad strong { display:block; margin-bottom:6px; }
+    .quad p { margin:0; color:var(--text-secondary); font-size:12px; line-height:1.5; }
+    .gate-list { display:grid; gap:8px; }
+    .gate {
+      display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center;
+      padding:10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);
+    }
+    .gate input[type="number"] { width:78px; border:1px solid var(--border); border-radius:8px; padding:8px; }
+    .gate input[type="checkbox"] { width:22px; height:22px; accent-color:var(--green); }
+    .signal { font-weight:800; min-width:28px; text-align:center; }
+    .ok-text { color:var(--green); } .no-text { color:var(--red); }
+    .summary { margin-top:10px; padding:12px; border-radius:var(--radius-sm); font-weight:700; }
+    .summary.ok { background:var(--green-bg); color:var(--green); }
+    .summary.warn { background:var(--yellow-bg); color:var(--yellow); }
+    .calc-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    .output-list { display:grid; gap:8px; }
+    .line-item { display:flex; justify-content:space-between; gap:10px; padding:10px; border-bottom:1px solid var(--border); }
+    .line-item:last-child { border-bottom:0; }
+    .k-table tr.active-k td { background:#eff6ff; color:var(--primary); font-weight:800; }
+    .detail-card { margin-top:10px; padding:14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2); }
+    .detail-card.win { border:2px solid var(--primary); background:#eff6ff; }
+    .risk-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+    .risk-card { padding:18px; text-align:center; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2); }
+    .risk-card strong { display:block; font-size:30px; margin:10px 0; color:var(--primary); }
+    .modal-overlay {
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background:rgba(0,0,0,.5); z-index:50; padding:18px;
+    }
+    .modal-overlay.show { display:flex; }
+    .modal-content {
+      width:min(680px, 100%); max-height:86vh; overflow:auto; background:white;
+      border-radius:var(--radius); box-shadow:var(--shadow-md);
+    }
+    .modal-header { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:16px; border-bottom:1px solid var(--border); }
+    .modal-close { border:0; background:var(--surface-2); border-radius:50%; width:34px; height:34px; font-size:22px; cursor:pointer; }
+    .modal-body { padding:16px; color:var(--text-secondary); line-height:1.75; }
+    .modal-body table { margin:8px 0; }
+    .pill { display:inline-block; padding:3px 8px; border-radius:999px; background:var(--primary-light); color:var(--primary); font-size:12px; font-weight:700; }
+    @media (min-width:720px) {
+      main { padding:24px 18px 64px; }
+      .grid-2 { grid-template-columns:minmax(0, 1fr); align-items:start; }
+      .metric-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); }
+      .stop-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); }
+      .calc-grid { grid-template-columns:1fr 1.2fr; }
+      .risk-grid { grid-template-columns:repeat(3, 1fr); }
+    }
+    @media (max-width:620px) {
+      .topbar { grid-template-columns:1fr auto; }
+      .nav-links { grid-column:1 / -1; order:3; }
+      .status-text { display:none; }
+      h1 { font-size:21px; }
+      .metric strong { font-size:16px; }
+      .quadrants { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="topbar">
+    <div class="brand">趋势规则系统</div>
+    <div class="nav-links" aria-label="区块导航">
+      <button class="nav-tab active" data-view="status">持仓状态</button>
+      <button class="nav-tab" data-view="market">市场状态</button>
+      <button class="nav-tab" data-view="entry">入场</button>
+      <button class="nav-tab" data-view="position-calc">仓位</button>
+      <button class="nav-tab" data-view="pyramid">加仓</button>
+      <button class="nav-tab" data-view="stop-detail">四线止损</button>
+      <button class="nav-tab" data-view="exit">出场</button>
+      <button class="nav-tab" data-view="risk">风控</button>
+    </div>
+    <div class="statusbar">
+      <span id="statusDot" class="dot"></span>
+      <span id="statusText" class="status-text">行情 待刷新</span>
+      <button id="refreshBtn" class="refresh" title="刷新行情">↺</button>
+      <label class="switch" title="每30秒自动刷新">
+        <input id="autoRefresh" type="checkbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section intro">
+      <div class="section-head">
+        <div>
+          <h1>科技成长趋势规则系统</h1>
+          <div class="subtle">持仓止损、入场闸门、加仓节奏与账户风控的一页式观察台</div>
+        </div>
+        <span id="dataMode" class="pill">静态配置</span>
+      </div>
+    </section>
+
+        <section id="status" class="section view-panel active">
+          <div class="section-head"><h2>§0A 持仓状态</h2><span id="positionStamp" class="subtle"></span></div>
+          <div id="positionTabs" class="tabs"></div>
+          <h3>静态参数</h3><div id="staticGrid" class="metric-grid"></div>
+          <h3>实时行情</h3><div id="quoteGrid" class="metric-grid"></div>
+          <h3>技术指标</h3><div id="techGrid" class="metric-grid"></div>
+          <h3>四线止损</h3><div id="stopCards" class="stop-grid"></div>
+          <div id="finalStop" class="final-banner"></div>
+          <div id="priceViz" class="viz"></div>
+        </section>
+
+        <section id="market" class="section view-panel">
+          <div class="section-head"><h2>§0B 市场状态</h2></div>
+          <div id="marketTabs" class="tabs"></div>
+          <div id="marketContext" class="subtle" style="margin:-4px 0 12px;"></div>
+          <h3>ADX × RSI 热力矩阵</h3>
+          <div class="control-row">
+            <label class="field"><span>ADX</span><input id="matrixAdx" type="number" step="0.1"></label>
+            <label class="field"><span>RSI</span><input id="matrixRsi" type="number" step="0.1"></label>
+          </div>
+          <div id="matrix" class="matrix-wrap"></div>
+          <div id="matrixAdvice" class="advice">等待指标</div>
+          <h3 style="margin-top:16px;">量价状态 <button class="info" data-modal="modal-volume-scope">ⓘ</button></h3>
+          <div id="volumeState" class="summary"></div>
+          <div id="volumeStats" class="metric-grid"></div>
+          <div id="quadrants" class="quadrants"></div>
+        </section>
+
+    <section id="entry" class="section view-panel">
+      <div class="section-head"><h2>§1 入场信号与四闸门</h2></div>
+      <div id="donchianViz" class="viz"></div>
+      <div class="subtle" style="margin:8px 0 14px;">突破过去 N 日最高价（不含当日），次日开盘入场。</div>
+      <div id="gates" class="gate-list"></div>
+      <div id="gateSummary" class="summary warn"></div>
+    </section>
+
+    <section id="position-calc" class="section view-panel">
+      <div class="section-head"><h2>§2 仓位计算器</h2></div>
+      <div class="calc-grid">
+        <div>
+          <label class="field"><span>成本价（计划入场价）</span><input id="planPrice" type="number" step="0.001"></label>
+          <label class="field" style="margin-top:10px;"><span>开仓日 ATR14</span><input id="planAtr" type="number" step="0.0001"></label>
+          <label class="field" style="margin-top:10px;"><span>风险预算（趋势账户%）</span><input id="riskBudget" type="number" step="0.1" value="1.0"></label>
+        </div>
+        <div>
+          <div id="positionOutputs" class="output-list"></div>
+          <div id="ladderTable" class="matrix-wrap" style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pyramid" class="section view-panel">
+      <div class="section-head"><h2>§3 加仓金字塔</h2><button class="info" data-modal="modal-pyramid">ⓘ</button></div>
+      <div id="pyramidViz" class="viz"></div>
+      <div class="summary warn">
+        禁止加仓：高位分歧（日内回撤或上影线 ≥ 1.2%）；RSI ≥ 80；ADX > 50 且 RSI > 75；今日刚开仓。
+      </div>
+    </section>
+
+    <section id="stop-detail" class="section view-panel">
+      <div class="section-head"><h2>§4 四线止损详细推导</h2></div>
+      <div class="metric-grid">
+        <label class="field"><span>当前价</span><input id="detailPrice" type="number" step="0.001"></label>
+        <label class="field"><span>持仓最高收盘 HH</span><input id="detailHh" type="number" step="0.001"></label>
+        <label class="field"><span>当前 ATR14</span><input id="detailAtr" type="number" step="0.0001"></label>
+        <label class="field"><span>当前 RSI14</span><input id="detailRsi" type="number" step="0.1"></label>
+        <label class="field"><span>当前 ADX14</span><input id="detailAdx" type="number" step="0.1"></label>
+      </div>
+      <h3 style="margin-top:16px;">Chandelier k 自适应</h3>
+      <div id="kTable" class="matrix-wrap"></div>
+      <div id="kExplain" class="summary"></div>
+      <h3 style="margin-top:16px;">R-Ladder 阶梯图</h3>
+      <div id="ladderViz" class="viz" style="overflow-x:auto;"></div>
+      <div id="detailStopCards"></div>
+      <div id="detailFinal" class="final-banner"></div>
+    </section>
+
+    <section id="exit" class="section view-panel">
+      <div class="section-head"><h2>§5 出场触发决策树</h2></div>
+      <div id="exitTree" class="viz"></div>
+    </section>
+
+    <section id="risk" class="section view-panel">
+      <div class="section-head"><h2>§6 账户风控数字</h2></div>
+      <div id="riskCards" class="risk-grid"></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <div class="modal-header"><h2 id="modalTitle"></h2><button id="modalClose" class="modal-close">×</button></div>
+      <div id="modalBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    const POSITIONS_CONFIG = {
+      "159781": {
+        name:"科创创业ETF易方达", secid:"0.159781", signalSecid:"2.931643",
+        signalName:"科创创业50", cost:1.188, entryATR:0.050, initialStop:1.101,
+        ratchet:1.222, highestClose:1.300, openedAt:null, positionPct:1.5,
+      },
+      "588000": {
+        name:"科创50ETF", secid:"1.588000", signalSecid:"1.000688",
+        signalName:"科创50", cost:1.998, entryATR:0.0927, initialStop:1.813,
+        ratchet:1.840, highestClose:1.998, openedAt:"2026-05-25", positionPct:0.5,
+      }
+    };
+    const ACCOUNT_CONFIG = { trendAccountPct:3.0, maxLossPct:-10.0 };
+    const INDEX_VOLUME_FILES = {
+      "2.931643":{
+        json:"data/generated/index-volume-931643.json",
+        script:"data/generated/index-volume-931643.js",
+        global:"__INDEX_VOLUME_931643__",
+      },
+    };
+    const state = {
+      activeId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
+      autoTimer:null, matrixTouched:false, planTouched:false,
+      gateOverrides:{ poolWidth:false }
+    };
+    const $ = (id) => document.getElementById(id);
+    const ids = () => Object.keys(POSITIONS_CONFIG);
+    const isNum = (v) => Number.isFinite(Number(v));
+    const clean = (v) => Number.isFinite(v) ? v : null;
+    const nullableNum = (v) => v == null ? null : (Number.isFinite(+v) ? +v : null);
+    function fmt(v, d=3) { return Number.isFinite(v) ? v.toFixed(d) : "—"; }
+    function fmtPct(v, d=2) { return Number.isFinite(v) ? (v > 0 ? "+" : "") + v.toFixed(d) + "%" : "—"; }
+    function fmtR(v) { return Number.isFinite(v) ? (v > 0 ? "+" : "") + v.toFixed(2) + "R" : "—"; }
+    function secKey(row) { return `${row.f13}.${row.f12}`; }
+    function posCfg() { return POSITIONS_CONFIG[state.activeId]; }
+    function marketOf(id=state.activeId) {
+      const cfg = POSITIONS_CONFIG[id];
+      const base = state.market[id] || {};
+      const over = state.overrides[id] || {};
+      return {
+        currentPrice: clean(over.currentPrice ?? base.currentPrice),
+        changePct: clean(base.changePct), high: clean(base.high), low: clean(base.low),
+        open: clean(base.open), quoteTime: base.quoteTime, currentATR: clean(over.currentATR ?? base.currentATR),
+        currentRSI: clean(over.currentRSI ?? base.currentRSI), currentADX: clean(over.currentADX ?? base.currentADX),
+        diPlus: clean(base.diPlus), diMinus: clean(base.diMinus),
+        highestClose: clean(over.highestClose ?? base.highestClose ?? cfg.highestClose),
+        ma20: clean(base.ma20), ma20Prev: clean(base.ma20Prev), close: clean(base.signalClose ?? base.close),
+        tradeClose: clean(base.close), tradeMa20: clean(base.tradeMa20), priceChangePct: clean(base.priceChangePct),
+        volume: clean(base.volume), volumePrev: clean(base.volumePrev), volumeMa20: clean(base.volumeMa20),
+        volumeAmount: clean(base.volumeAmount), volumeAmountPrev: clean(base.volumeAmountPrev),
+        volumeAmountMa20: clean(base.volumeAmountMa20), volumeCoverage: base.volumeCoverage,
+        volumeUpdatedAt: base.volumeUpdatedAt, volumeScope: base.volumeScope, volumeIsIndex: !!base.volumeIsIndex,
+      };
+    }
+    function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
+
+    function fetchQuotes(secids) {
+      return new Promise((resolve, reject) => {
+        const cbName = "emCb_" + Date.now() + Math.floor(Math.random() * 1000);
+        const script = document.createElement("script");
+        const timer = setTimeout(() => {
+          delete window[cbName]; script.remove(); reject(new Error("timeout"));
+        }, 8000);
+        window[cbName] = (data) => {
+          clearTimeout(timer); delete window[cbName]; script.remove(); resolve(data);
+        };
+        const fields = "f12,f13,f14,f2,f3,f4,f5,f6,f7,f15,f16,f17,f20,f124";
+        script.src = "https://push2.eastmoney.com/api/qt/ulist.np/get"
+          + `?cb=${cbName}&fltt=2&secids=${secids.join(",")}&fields=${fields}`;
+        script.onerror = () => { clearTimeout(timer); delete window[cbName]; script.remove(); reject(new Error("script")); };
+        document.head.appendChild(script);
+      });
+    }
+    function fetchSinaQuotes(secids) {
+      return new Promise((resolve, reject) => {
+        const symbols = [...new Set(secids.map(toSinaSymbol).filter(Boolean))];
+        if (!symbols.length) { reject(new Error("no sina quote symbols")); return; }
+        const script = document.createElement("script");
+        script.charset = "gb18030";
+        const timer = setTimeout(() => { script.remove(); reject(new Error("sina quote timeout")); }, 8000);
+        script.onload = () => {
+          clearTimeout(timer); script.remove();
+          const bySymbol = {};
+          symbols.forEach(symbol => {
+            const raw = window["hq_str_" + symbol];
+            if (!raw) return;
+            const p = raw.split(",");
+            const open = +p[1], prev = +p[2], current = +p[3], high = +p[4], low = +p[5];
+            if (![open, prev, current, high, low].every(Number.isFinite)) return;
+            bySymbol[symbol] = {
+              current, open, high, low, changePct:prev ? (current / prev - 1) * 100 : null,
+              volume:+p[8] || null, amount:+p[9] || null, stamp:sinaStamp(p[30], p[31])
+            };
+          });
+          const rows = {};
+          secids.forEach(secid => {
+            const quote = bySymbol[toSinaSymbol(secid)];
+            if (!quote) return;
+            rows[secid] = { f2:quote.current, f3:quote.changePct, f15:quote.high,
+              f16:quote.low, f17:quote.open, f5:quote.volume, f6:quote.amount, f124:quote.stamp };
+          });
+          Object.keys(rows).length ? resolve(rows) : reject(new Error("sina quote empty"));
+        };
+        script.onerror = () => { clearTimeout(timer); script.remove(); reject(new Error("sina quote script")); };
+        script.src = `https://hq.sinajs.cn/list=${symbols.join(",")}`;
+        document.head.appendChild(script);
+      });
+    }
+    function sinaStamp(date, time) {
+      const stamp = date && time ? Date.parse(`${date}T${time}+08:00`) / 1000 : null;
+      return Number.isFinite(stamp) ? stamp : null;
+    }
+    function timeoutFetch(url, ms=8000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), ms);
+      return fetch(url, { signal:controller.signal }).finally(() => clearTimeout(timer));
+    }
+    function eastmoneyKlineUrl(secid) {
+      return "https://push2his.eastmoney.com/api/qt/stock/kline/get"
+        + `?secid=${secid}&klt=101&fqt=1&beg=0&end=20500101`
+        + "&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61";
+    }
+    function parseEMKlines(klines) {
+      return klines.map((item) => {
+        const p = item.split(",");
+        return { date:p[0], open:+p[1], close:+p[2], high:+p[3], low:+p[4], volume:+p[5] };
+      }).filter(r => [r.open, r.close, r.high, r.low].every(Number.isFinite));
+    }
+    function toYahooSymbol(secid) {
+      if (secid === "2.931643") return "159781.SZ";
+      const [m, code] = secid.split(".");
+      if (!code) return null;
+      return `${code}.${m === "0" ? "SZ" : "SS"}`;
+    }
+    function parseYahooKlines(data) {
+      const result = data?.chart?.result?.[0];
+      const ts = result?.timestamp || [];
+      const q = result?.indicators?.quote?.[0] || {};
+      return ts.map((t, i) => ({
+        date:new Date(t * 1000).toISOString().slice(0, 10),
+        open:+q.open?.[i], high:+q.high?.[i], low:+q.low?.[i],
+        close:+q.close?.[i], volume:+(q.volume?.[i] || 0) / 100
+      })).filter(r => [r.open, r.close, r.high, r.low].every(Number.isFinite));
+    }
+    function toSinaSymbol(secid) {
+      if (secid === "2.931643") return "sz159781";
+      const [market, code] = secid.split(".");
+      if (!code) return null;
+      if (market === "0") return "sz" + code;
+      if (market === "1") return "sh" + code;
+      return null;
+    }
+    function fetchSinaKlines(secid) {
+      return new Promise((resolve, reject) => {
+        const symbol = toSinaSymbol(secid);
+        if (!symbol) { reject(new Error("no sina symbol")); return; }
+        const cbName = "sinaKlineCb" + Date.now() + Math.floor(Math.random() * 1000);
+        const script = document.createElement("script");
+        script.charset = "gbk";
+        const timer = setTimeout(() => {
+          delete window[cbName]; script.remove(); reject(new Error("sina timeout"));
+        }, 8000);
+        window[cbName] = (rows) => {
+          clearTimeout(timer); delete window[cbName]; script.remove();
+          const parsed = (rows || []).map(row => ({
+            date:row.day, open:+row.open, high:+row.high, low:+row.low,
+            close:+row.close, volume:+row.volume || 0
+          })).filter(r => [r.open, r.close, r.high, r.low].every(Number.isFinite));
+          parsed.isVolumeProxy = secid === "2.931643";
+          parsed.length >= 30 ? resolve(parsed) : reject(new Error("sina empty"));
+        };
+        script.onerror = () => {
+          clearTimeout(timer); delete window[cbName]; script.remove(); reject(new Error("sina script"));
+        };
+        script.src = `https://money.finance.sina.com.cn/quotes_service/api/jsonp.php/${cbName}/CN_MarketData.getKLineData?symbol=${symbol}&scale=240&ma=no&datalen=180`;
+        document.head.appendChild(script);
+      });
+    }
+    async function fetchKlines(secid) {
+      try {
+        return await fetchSinaKlines(secid);
+      } catch (sinaError) {
+      }
+      try {
+        const resp = await timeoutFetch(eastmoneyKlineUrl(secid), 8000);
+        const data = await resp.json();
+        const rows = parseEMKlines(data?.data?.klines || []);
+        if (rows.length >= 30) return rows;
+        throw new Error("empty eastmoney kline");
+      } catch (e) {
+        const symbol = toYahooSymbol(secid);
+        if (!symbol) throw e;
+        const resp = await timeoutFetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=6mo&interval=1d`, 8000);
+        const rows = parseYahooKlines(await resp.json());
+        if (rows.length >= 30) return rows;
+        throw new Error("empty yahoo kline");
+      }
+    }
+    async function fetchGeneratedIndexVolume(secid) {
+      const spec = INDEX_VOLUME_FILES[secid];
+      if (!spec) return null;
+      let data = null;
+      try {
+        const sep = spec.json.includes("?") ? "&" : "?";
+        const resp = await timeoutFetch(`${spec.json}${sep}t=${Date.now()}`, 5000);
+        if (!resp.ok) throw new Error("index volume json");
+        data = await resp.json();
+      } catch (jsonError) {
+        data = await loadGeneratedIndexVolumeScript(spec);
+      }
+      const latest = data?.latest;
+      if (!latest?.date || !Number.isFinite(+latest.volumeHands)) throw new Error("index volume empty");
+      return data;
+    }
+    function loadGeneratedIndexVolumeScript(spec) {
+      return new Promise((resolve, reject) => {
+        if (window[spec.global]) { resolve(window[spec.global]); return; }
+        const script = document.createElement("script");
+        const timer = setTimeout(() => { script.remove(); reject(new Error("index volume script timeout")); }, 5000);
+        script.onload = () => {
+          clearTimeout(timer); script.remove();
+          window[spec.global] ? resolve(window[spec.global]) : reject(new Error("index volume script empty"));
+        };
+        script.onerror = () => {
+          clearTimeout(timer); script.remove(); reject(new Error("index volume script"));
+        };
+        script.src = spec.script;
+        document.head.appendChild(script);
+      });
+    }
+    function applyGeneratedIndexVolume(next, cfg, data) {
+      const latest = data.latest;
+      next.volume = +latest.volumeHands;
+      next.volumePrev = nullableNum(latest.previousVolumeHands);
+      next.volumeMa20 = nullableNum(latest.volumeMa20Hands);
+      next.volumeAmount = nullableNum(latest.amountYuan);
+      next.volumeAmountPrev = nullableNum(latest.previousAmountYuan);
+      next.volumeAmountMa20 = nullableNum(latest.amountMa20Yuan);
+      const aggregateChange = nullableNum(latest.priceChangePct);
+      if (Number.isFinite(aggregateChange)) next.priceChangePct = aggregateChange;
+      const ok = data.success?.ok;
+      const coverage = `${data.success?.count ?? latest.constituentCount}/${data.success?.total ?? 50}`;
+      next.volumeScope = `${cfg.signalName || "信号指数"}（成分股聚合${ok ? "" : "，部分缺失"}）`;
+      next.volumeCoverage = `${coverage} · ${latest.date}`;
+      next.volumeUpdatedAt = data.generatedAt || null;
+      next.volumeIsIndex = true;
+    }
+    function calcATR(rows, n=14) {
+      if (!rows || rows.length < n + 1) return null;
+      const trs = [];
+      for (let i = 1; i < rows.length; i++) {
+        const h = rows[i].high, l = rows[i].low, pc = rows[i - 1].close;
+        trs.push(Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc)));
+      }
+      let atr = trs.slice(0, n).reduce((a, b) => a + b, 0) / n;
+      for (let i = n; i < trs.length; i++) atr = (atr * (n - 1) + trs[i]) / n;
+      return atr;
+    }
+    function calcRSI(rows, n=14) {
+      if (!rows || rows.length < n + 1) return null;
+      const closes = rows.map(r => r.close);
+      let gains = 0, losses = 0;
+      for (let i = closes.length - n; i < closes.length; i++) {
+        const diff = closes[i] - closes[i - 1];
+        if (diff >= 0) gains += diff; else losses -= diff;
+      }
+      if (losses === 0) return 100;
+      const rs = (gains / n) / (losses / n);
+      return 100 - 100 / (1 + rs);
+    }
+    function calcADX(rows, n=14) {
+      if (!rows || rows.length < n * 2 + 1) return null;
+      const plusDM = [], minusDM = [], tr = [];
+      for (let i = 1; i < rows.length; i++) {
+        const up = rows[i].high - rows[i - 1].high;
+        const down = rows[i - 1].low - rows[i].low;
+        plusDM.push(up > down && up > 0 ? up : 0);
+        minusDM.push(down > up && down > 0 ? down : 0);
+        tr.push(Math.max(rows[i].high - rows[i].low, Math.abs(rows[i].high - rows[i - 1].close), Math.abs(rows[i].low - rows[i - 1].close)));
+      }
+      const wilderSum = (values) => {
+        let current = values.slice(0, n).reduce((a, b) => a + b, 0);
+        const out = [current];
+        for (let i = n; i < values.length; i++) { current = current - current / n + values[i]; out.push(current); }
+        return out;
+      };
+      const trS = wilderSum(tr), plusS = wilderSum(plusDM), minusS = wilderSum(minusDM);
+      const dx = trS.map((v, i) => {
+        const p = v ? 100 * plusS[i] / v : 0;
+        const m = v ? 100 * minusS[i] / v : 0;
+        return { dx:p + m ? 100 * Math.abs(p - m) / (p + m) : 0, p, m };
+      });
+      if (dx.length < n) return null;
+      let adx = dx.slice(0, n).reduce((a, b) => a + b.dx, 0) / n;
+      for (let i = n; i < dx.length; i++) adx = (adx * (n - 1) + dx[i].dx) / n;
+      const last = dx[dx.length - 1];
+      return [adx, last.p, last.m];
+    }
+    function sma(values, n) {
+      return values.length >= n ? values.slice(-n).reduce((a, b) => a + b, 0) / n : null;
+    }
+    function highestCloseSinceEntry(rows, openedAt, fallback) {
+      const usable = openedAt ? rows.filter(r => r.date >= openedAt) : rows;
+      const maxClose = Math.max(...usable.map(r => r.close).filter(Number.isFinite));
+      return Number.isFinite(maxClose) ? Math.max(maxClose, fallback || 0) : fallback || null;
+    }
+    function kFrom(rsi, adx) {
+      let base = 3.0, reason = "RSI<60 → 基础3.0";
+      if (Number.isFinite(rsi) && rsi >= 80) { base = 1.5; reason = "RSI≥80 → 基础1.5"; }
+      else if (Number.isFinite(rsi) && rsi >= 70) { base = 2.0; reason = "RSI70~80 → 基础2.0"; }
+      else if (Number.isFinite(rsi) && rsi >= 60) { base = 2.5; reason = "RSI60~70 → 基础2.5"; }
+      const adjusted = Number.isFinite(adx) && adx > 50 ? Math.max(1.0, base - 0.3) : base;
+      const adxText = Number.isFinite(adx) && adx > 50 ? "，ADX>50 → -0.3" : "，ADX≤50 → 不调整";
+      return { base, k:adjusted, text:reason + adxText };
+    }
+    function compute(cfg, market) {
+      const R = 2 * cfg.entryATR;
+      const floatR = Number.isFinite(market.currentPrice) ? (market.currentPrice - cfg.cost) / R : null;
+      const line1 = cfg.initialStop;
+      let line2 = null;
+      if (Number.isFinite(floatR)) {
+        if (floatR >= 3.0) line2 = cfg.cost + R * 1.5;
+        else if (floatR >= 2.0) line2 = cfg.cost + R * 0.75;
+        else if (floatR >= 1.0) line2 = cfg.cost + R * 0.25;
+        else if (floatR >= 0.5) line2 = cfg.cost;
+      }
+      const kInfo = kFrom(market.currentRSI, market.currentADX);
+      const line3 = Number.isFinite(market.highestClose) && Number.isFinite(market.currentATR)
+        ? market.highestClose - kInfo.k * market.currentATR : null;
+      const line4 = cfg.ratchet;
+      const candidates = {"①初始止损":line1, "②R-Ladder":line2, "③Chandelier":line3, "④棘轮记忆":line4};
+      const valid = Object.entries(candidates).filter(([, v]) => Number.isFinite(v));
+      const best = valid.reduce((a, b) => b[1] > a[1] ? b : a, valid[0] || ["—", null]);
+      return { R, floatR, k:kInfo.k, kInfo, line1, line2, line3, line4, finalStop:best[1], winner:best[0], candidates };
+    }
+    async function refreshAll() {
+      setStatus("loading", "行情 刷新中");
+      const secids = [...new Set(ids().flatMap(id => [POSITIONS_CONFIG[id].secid, POSITIONS_CONFIG[id].signalSecid]))];
+      let quoteRows = {}, quoteOk = false, kOkCount = 0;
+      try {
+        const data = await fetchQuotes(secids);
+        for (const row of data?.data?.diff || []) quoteRows[secKey(row)] = row;
+        quoteOk = Object.keys(quoteRows).length > 0;
+      } catch (e) {
+        try {
+          quoteRows = await fetchSinaQuotes(secids);
+          quoteOk = true;
+        } catch (fallbackError) {
+          quoteOk = false;
+        }
+      }
+      await Promise.all(ids().map(async (id) => {
+        const cfg = POSITIONS_CONFIG[id];
+        const current = state.market[id] || {};
+        const quote = quoteRows[cfg.secid] || {};
+        const signalQuote = quoteRows[cfg.signalSecid] || {};
+        const next = {...current};
+        if (quoteOk && Number.isFinite(+quote.f2)) {
+          next.currentPrice = +quote.f2; next.changePct = +quote.f3; next.high = +quote.f15;
+          next.low = +quote.f16; next.open = +quote.f17; next.quoteTime = +quote.f124 || null;
+        }
+        try {
+          const tradeRows = await fetchKlines(cfg.secid);
+          const signalRows = cfg.signalSecid ? await fetchKlines(cfg.signalSecid).catch(() => {
+            tradeRows.isVolumeProxy = true; return tradeRows;
+          }) : tradeRows;
+          const adx = calcADX(signalRows);
+          const closes = signalRows.map(r => r.close);
+          const tradeCloses = tradeRows.map(r => r.close);
+          const volumeRows = cfg.signalSecid && !signalRows.isVolumeProxy ? signalRows : null;
+          const volumeSeries = volumeRows ? volumeRows.map(r => r.volume).filter(Number.isFinite) : [];
+          const latest = tradeRows[tradeRows.length - 1];
+          const prev = tradeRows[tradeRows.length - 2];
+          const volumeLatest = volumeRows?.[volumeRows.length - 1];
+          const volumePrev = volumeRows?.[volumeRows.length - 2];
+          if (!Number.isFinite(next.currentPrice) && latest) next.currentPrice = latest.close;
+          if (!Number.isFinite(next.high) && latest) next.high = latest.high;
+          if (!Number.isFinite(next.low) && latest) next.low = latest.low;
+          if (!Number.isFinite(next.open) && latest) next.open = latest.open;
+          if (!Number.isFinite(next.changePct) && latest && prev?.close) next.changePct = (latest.close / prev.close - 1) * 100;
+          next.currentATR = calcATR(tradeRows);
+          next.currentRSI = calcRSI(signalRows);
+          next.currentADX = adx?.[0] ?? null;
+          next.diPlus = adx?.[1] ?? null; next.diMinus = adx?.[2] ?? null;
+          next.highestClose = highestCloseSinceEntry(tradeRows, cfg.openedAt, cfg.highestClose);
+          next.close = tradeRows[tradeRows.length - 1]?.close ?? null;
+          next.signalClose = signalRows[signalRows.length - 1]?.close ?? null;
+          next.ma20 = sma(closes, 20); next.ma20Prev = sma(closes.slice(0, -1), 20);
+          next.tradeMa20 = sma(tradeCloses, 20);
+          next.volume = volumeLatest?.volume ?? null; next.volumePrev = volumePrev?.volume ?? null;
+          next.volumeMa20 = sma(volumeSeries, 20);
+          next.priceChangePct = volumeLatest && volumePrev?.close ? (volumeLatest.close / volumePrev.close - 1) * 100 : null;
+          next.volumeScope = volumeRows ? `${cfg.signalName || "信号指数"}（指数成交量）` : "指数量能不可得";
+          next.volumeIsIndex = !!volumeRows;
+          if (!volumeRows && cfg.signalSecid) {
+            try {
+              applyGeneratedIndexVolume(next, cfg, await fetchGeneratedIndexVolume(cfg.signalSecid));
+            } catch (volumeError) {
+            }
+          }
+          kOkCount += 1;
+        } catch (e) {
+          next.currentATR ??= null; next.currentRSI ??= null; next.currentADX ??= null;
+        }
+        if (Number.isFinite(+signalQuote.f2)) next.signalPrice = +signalQuote.f2;
+        if (Number.isFinite(+signalQuote.f3)) {
+          next.signalChangePct = +signalQuote.f3;
+          if (!Number.isFinite(next.priceChangePct)) next.priceChangePct = +signalQuote.f3;
+        }
+        state.market[id] = next;
+      }));
+      const clock = new Date().toLocaleTimeString("zh-CN", {hour12:false});
+      const label = quoteOk ? `行情 ${clock}` : (kOkCount ? `K线 ${clock} · 实时失败` : "行情 获取失败");
+      setStatus(quoteOk && kOkCount === ids().length ? "ok" : quoteOk || kOkCount ? "partial" : "bad", label);
+      $("dataMode").textContent = quoteOk ? "实时联动" : (kOkCount ? "K线驱动" : "静态降级");
+      syncInputsFromMarket();
+      renderAll();
+    }
+    function setStatus(type, text) {
+      const dot = $("statusDot");
+      dot.className = "dot" + (type === "ok" ? " ok" : type === "bad" ? " bad" : "");
+      setText("statusText", text);
+    }
+    function syncInputsFromMarket() {
+      const m = marketOf(), c = posCfg();
+      if (!state.matrixTouched) {
+        $("matrixAdx").value = Number.isFinite(m.currentADX) ? m.currentADX.toFixed(1) : "";
+        $("matrixRsi").value = Number.isFinite(m.currentRSI) ? m.currentRSI.toFixed(1) : "";
+      }
+      if (!state.planTouched) {
+        $("planPrice").value = fmt(m.currentPrice ?? c.cost, 3);
+        $("planAtr").value = fmt(m.currentATR ?? c.entryATR, 4);
+      }
+      updateDetailInput("detailPrice", m.currentPrice);
+      updateDetailInput("detailHh", m.highestClose);
+      updateDetailInput("detailAtr", m.currentATR);
+      updateDetailInput("detailRsi", m.currentRSI);
+      updateDetailInput("detailAdx", m.currentADX);
+    }
+    function updateDetailInput(id, value) {
+      const el = $(id);
+      if (document.activeElement !== el) el.value = Number.isFinite(value) ? String(+value.toFixed(id === "detailAtr" ? 4 : 3)) : "";
+    }
+    function renderAll() {
+      renderTabs(); renderPositionPanel(); renderMatrix(); renderDonchian(); renderGates();
+      renderVolumeState(); renderPositionCalc(); renderPyramid(); renderStopDetail(); renderExitTree(); renderRisk();
+    }
+    function renderTabs() {
+      const html = ids().map(id => {
+        const c = POSITIONS_CONFIG[id];
+        return `<button class="tab ${id === state.activeId ? "active" : ""}" data-pos="${id}">${id} ${c.name}</button>`;
+      }).join("");
+      $("positionTabs").innerHTML = html;
+      $("marketTabs").innerHTML = html;
+    }
+    function metric(label, value, cls="") {
+      return `<div class="metric"><label>${label}</label><strong class="num ${cls}">${value}</strong></div>`;
+    }
+    function floatClass(v) {
+      if (!Number.isFinite(v)) return "";
+      if (v < 0) return "negative";
+      if (v < .5) return "muted";
+      if (v < 1) return "yellow";
+      if (v < 2) return "positive";
+      return "deep-green";
+    }
+    function renderPositionPanel() {
+      const c = posCfg(), m = marketOf(), r = compute(c, m);
+      $("positionStamp").textContent = c.signalName ? `信号：${c.signalName}` : "";
+      $("staticGrid").innerHTML = [
+        metric("成本价", fmt(c.cost)), metric("开仓ATR14", fmt(c.entryATR, 4)),
+        metric("R单位", fmt(r.R, 3)), metric("仓位", `${fmt(c.positionPct, 1)}%`)
+      ].join("");
+      $("quoteGrid").innerHTML = [
+        metric("当前价", fmt(m.currentPrice)), metric("涨跌幅", fmtPct(m.changePct), m.changePct >= 0 ? "positive" : "negative"),
+        metric("今日高", fmt(m.high)), metric("今日低", fmt(m.low))
+      ].join("");
+      $("techGrid").innerHTML = [
+        metric("ATR14", fmt(m.currentATR, 4), !Number.isFinite(m.currentATR) ? "yellow" : ""),
+        metric("RSI14", fmt(m.currentRSI, 1)), metric("ADX14", fmt(m.currentADX, 1)),
+        metric("浮盈(R值)", fmtR(r.floatR), floatClass(r.floatR))
+      ].join("");
+      renderStopCards("stopCards", c, m, r, false);
+      $("finalStop").innerHTML = `★ 最终止损 <span class="num">${fmt(r.finalStop)}</span> <span class="subtle">[${r.winner} 胜出]</span>`;
+      $("priceViz").innerHTML = priceSvg(c, m, r);
+    }
+    function stopRows(c, m, r) {
+      const ladderInactive = !Number.isFinite(r.line2);
+      const ladderNote = ladderInactive
+        ? `未触发：需≥+0.5R，触发价 ${fmt(c.cost + r.R * 0.5)} → 保本 ${fmt(c.cost)}`
+        : `浮盈 ${fmtR(r.floatR)} 对应阶梯`;
+      return [
+        {key:"①初始止损", no:"①", name:"初始止损", value:r.line1, note:`成本 ${fmt(c.cost)} - R ${fmt(r.R)}`, modal:"modal-initial-stop"},
+        {key:"②R-Ladder", no:"②", name:"R-Ladder", value:r.line2, display:ladderInactive ? "未触发" : null, note:ladderNote, modal:"modal-r-ladder"},
+        {key:"③Chandelier", no:"③", name:"Chandelier", value:r.line3, note:`k=${fmt(r.k, 1)}，HH=${fmt(m.highestClose)}`, modal:"modal-chandelier"},
+        {key:"④棘轮记忆", no:"④", name:"棘轮记忆", value:r.line4, note:`上一保护线 ${fmt(c.ratchet)}`, modal:"modal-ratchet"},
+      ];
+    }
+    function renderStopCards(target, c, m, r, detail) {
+      $(target).innerHTML = stopRows(c, m, r).map(row => `
+        <div class="${detail ? "detail-card" : "stop-card"} ${r.winner === row.key ? "win" : ""}">
+          <div class="stop-title"><span class="badge">${row.no}</span>${row.name}
+            ${r.winner === row.key ? "<span class='pill'>胜出</span>" : ""}<button class="info" data-modal="${row.modal}">ⓘ</button></div>
+          ${detail ? `<div class="subtle" style="margin-top:10px;">公式：${formulaText(row.key)}</div>` : ""}
+          <div class="stop-note">${row.note}</div>
+          <div class="stop-value num">${row.display || fmt(row.value)}</div>
+        </div>`).join("");
+    }
+    function formulaText(key) {
+      return {"①初始止损":"成本 - R", "②R-Ladder":"按浮盈R倍数上移保护线", "③Chandelier":"HH - k × ATR14", "④棘轮记忆":"上一保护线，只升不降"}[key];
+    }
+    function priceSvg(c, m, r) {
+      const lines = [
+        {name:"①初始止损", value:r.line1, color:"var(--red)"},
+        {name:"②R-Ladder", value:r.line2, color:"var(--yellow)"},
+        {name:"③Chandelier", value:r.line3, color:"var(--primary)"},
+        {name:"④棘轮记忆", value:r.line4, color:"var(--secondary)"},
+        {name:"成本线", value:c.cost, color:"var(--text-muted)", dash:"5 4"},
+      ].filter(x => Number.isFinite(x.value));
+      const vals = [...lines.map(x => x.value), m.currentPrice].filter(Number.isFinite);
+      if (!vals.length) return `<svg viewBox="0 0 640 120"><text x="24" y="64" fill="#94a3b8">等待行情</text></svg>`;
+      const min = Math.min(...vals) * 0.97, max = Math.max(...vals) * 1.02;
+      const y = (v) => 100 - (v - min) / (max - min || 1) * 82;
+      const drawn = lines.map(l => `<g><line x1="62" x2="596" y1="${y(l.value)}" y2="${y(l.value)}" stroke="${l.color}" stroke-width="${r.finalStop === l.value ? 3 : 1.6}" stroke-dasharray="${l.dash || ""}"><title>${l.name} ${fmt(l.value)}</title></line><text x="20" y="${y(l.value)+4}" font-size="11" fill="${l.color}">${l.name.slice(0,2)}</text><text x="602" y="${y(l.value)+4}" font-size="11" fill="${l.color}">${fmt(l.value)}</text></g>`).join("");
+      const point = Number.isFinite(m.currentPrice) ? `<circle cx="328" cy="${y(m.currentPrice)}" r="5" fill="var(--green)"><title>当前价 ${fmt(m.currentPrice)}</title></circle><text x="340" y="${y(m.currentPrice)+4}" font-size="12" fill="var(--green)">当前 ${fmt(m.currentPrice)}</text>` : "";
+      return `<svg viewBox="0 0 640 120" role="img" aria-label="价格线与四线止损">${drawn}${point}</svg>`;
+    }
+    const matrixRows = [
+      {label:"ADX<20", test:a => a < 20, cells:["震荡禁入","震荡禁入","震荡禁入","震荡禁入","震荡禁入"]},
+      {label:"ADX20-25", test:a => a >= 20 && a < 25, cells:["萌芽观察","萌芽观察","萌芽观察","过热谨慎","过热谨慎"]},
+      {label:"ADX25-40", test:a => a >= 25 && a < 40, cells:["趋势偏弱","最佳区间","最佳区间","持有不追","偏热"]},
+      {label:"ADX40-55", test:a => a >= 40 && a < 55, cells:["观察","中后期","中后期","收紧保护","收紧保护"]},
+      {label:"ADX≥55", test:a => a >= 55, cells:["末段警惕","末段收割","末段收割","末段收割","极端过热"]},
+    ];
+    const rsiCols = [
+      {label:"RSI<50", test:r => r < 50}, {label:"RSI50-60", test:r => r >= 50 && r < 60},
+      {label:"RSI60-70", test:r => r >= 60 && r < 70}, {label:"RSI70-80", test:r => r >= 70 && r < 80},
+      {label:"RSI≥80", test:r => r >= 80},
+    ];
+    function cellClass(text) {
+      if (text.includes("震荡")) return "cell-red";
+      if (text.includes("最佳")) return "cell-green";
+      if (text.includes("中后期") || text.includes("持有")) return "cell-blue";
+      if (text.includes("收紧") || text.includes("末段") || text.includes("过热") || text.includes("偏热")) return "cell-pink";
+      return "cell-yellow";
+    }
+    function bucketIndex(items, value) { return Number.isFinite(value) ? Math.max(0, items.findIndex(x => x.test(value))) : -1; }
+    function renderMatrix() {
+      const cfg = posCfg(), m = marketOf();
+      $("marketContext").textContent = `${state.activeId} ${cfg.name} · 信号口径：${cfg.signalName || cfg.name} · ADX ${fmt(m.currentADX, 1)} / RSI ${fmt(m.currentRSI, 1)}`;
+      const adx = parseFloat($("matrixAdx").value), rsi = parseFloat($("matrixRsi").value);
+      const ri = bucketIndex(matrixRows, adx), ci = bucketIndex(rsiCols, rsi);
+      const head = `<tr><th></th>${rsiCols.map(c => `<th>${c.label}</th>`).join("")}</tr>`;
+      const body = matrixRows.map((row, i) => `<tr><th>${row.label}</th>${row.cells.map((cell, j) => `<td class="${cellClass(cell)} ${i === ri && j === ci ? "active-cell" : ""}">${cell}</td>`).join("")}</tr>`).join("");
+      $("matrix").innerHTML = `<table>${head}${body}</table>`;
+      const advice = ri >= 0 && ci >= 0 ? matrixRows[ri].cells[ci] : "等待指标";
+      $("matrixAdvice").textContent = advice;
+    }
+    function volumeScenario(m) {
+      if (!m.volumeIsIndex) return { key:"指数量能不可得", action:"当前无法取得该信号指数的历史成交量，因此不做量价象限判断。", cls:"warn" };
+      const has = [m.volume, m.volumePrev, m.volumeMa20, m.priceChangePct].every(Number.isFinite);
+      if (!has) return { key:"等待数据", action:"等待成交量和价格数据拉取完成。", cls:"warn" };
+      if (m.priceChangePct >= 0 && m.volume >= m.volumeMa20 && m.volume >= m.volumePrev) {
+        return { key:"放量上涨", action:"上涨有量能确认；允许持有，加仓仍必须服从加仓规则。", cls:"ok" };
+      }
+      if (m.priceChangePct >= 0) {
+        return { key:"缩量反弹", action:"反弹质量一般；不作为追涨依据，等待突破和闸门确认。", cls:"warn" };
+      }
+      if (m.volume >= m.volumeMa20) {
+        return { key:"放量下跌", action:"下跌带量；优先检查保护线和趋势破坏条件，禁止主动加仓。", cls:"warn" };
+      }
+      return { key:"缩量回调", action:"回撤量能不足；按止损线管理，不因回调本身提前出场。", cls:"ok" };
+    }
+    function renderVolumeState() {
+      const m = marketOf(), s = volumeScenario(m);
+      const stateBox = $("volumeState");
+      stateBox.className = "summary " + s.cls;
+      const coverage = m.volumeCoverage ? ` · 覆盖 ${m.volumeCoverage}` : "";
+      const updated = m.volumeUpdatedAt ? ` · 生成 ${m.volumeUpdatedAt.replace("T", " ").slice(0, 16)}` : "";
+      stateBox.innerHTML = `<strong>${s.key}</strong><div>${s.action}</div><div class="subtle">量能口径：${m.volumeScope || "—"}${coverage}${updated}</div>`;
+      const volumeStats = [
+        metric("指数涨跌", fmtPct(m.priceChangePct), Number.isFinite(m.priceChangePct) ? (m.priceChangePct >= 0 ? "positive" : "negative") : ""),
+        metric("今日量", volumeText(m.volume)),
+        metric("20日均量", volumeText(m.volumeMa20)),
+        metric("昨日量", volumeText(m.volumePrev)),
+      ];
+      if (Number.isFinite(m.volumeAmount)) volumeStats.splice(1, 0, metric("今日成交额", amountText(m.volumeAmount)));
+      $("volumeStats").innerHTML = volumeStats.join("");
+      const cards = [
+        ["放量上涨", "价涨且今日量>20日均、≥昨日量。趋势得到确认。"],
+        ["缩量反弹", "价涨但量能不足。更像反抽或等待确认。"],
+        ["放量下跌", "价跌且量能高于20日均。优先看保护线。"],
+        ["缩量回调", "价跌但量能不足。通常按正常回撤处理。"],
+      ];
+      $("quadrants").innerHTML = cards.map(([name, desc]) => `<div class="quad ${name === s.key ? "active" : ""}"><strong>${name}</strong><p>${desc}</p></div>`).join("");
+    }
+    function volumeText(v) {
+      if (!Number.isFinite(v)) return "—";
+      if (v >= 1e8) return (v / 1e8).toFixed(2) + "亿";
+      if (v >= 1e4) return (v / 1e4).toFixed(2) + "万";
+      return v.toFixed(0);
+    }
+    function amountText(v) {
+      if (!Number.isFinite(v)) return "—";
+      if (v >= 1e8) return (v / 1e8).toFixed(2) + "亿";
+      if (v >= 1e4) return (v / 1e4).toFixed(2) + "万";
+      return v.toFixed(0);
+    }
+    function renderDonchian() {
+      $("donchianViz").innerHTML = `<svg viewBox="0 0 720 160" aria-label="Donchian突破示意">
+        <rect width="720" height="160" fill="#fff"/>
+        <polyline points="30,122 96,116 160,104 226,110 290,86 354,78 420,70 486,58 552,48 620,28 680,22" fill="none" stroke="#2563eb" stroke-width="4"/>
+        <line x1="40" x2="680" y1="74" y2="74" stroke="#d97706" stroke-width="2" stroke-dasharray="7 6"/>
+        <line x1="40" x2="680" y1="48" y2="48" stroke="#7c3aed" stroke-width="2" stroke-dasharray="7 6"/>
+        <text x="48" y="68" font-size="13" fill="#d97706">D20 前高</text><text x="48" y="42" font-size="13" fill="#7c3aed">D55 前高</text>
+        <path d="M526 74 L552 52 L578 74" fill="none" stroke="#059669" stroke-width="3"/>
+        <text x="545" y="96" font-size="14" fill="#059669" font-weight="700">突破 → 信号触发</text>
+      </svg>`;
+    }
+    function renderGates() {
+      const m = marketOf();
+      const adxValue = parseFloat($("gateAdx")?.value || m.currentADX || "");
+      const maUpAuto = Number.isFinite(m.ma20) && Number.isFinite(m.ma20Prev) ? m.ma20 >= m.ma20Prev : false;
+      const closeAboveAuto = Number.isFinite(m.close) && Number.isFinite(m.ma20) ? m.close > m.ma20 : false;
+      const defs = [
+        {id:"gateAdx", no:"①", name:"ADX > 25", desc:"趋势强度闸门", pass:Number.isFinite(adxValue) && adxValue > 25, control:`<input id="gateAdx" type="number" step="0.1" value="${Number.isFinite(adxValue) ? adxValue.toFixed(1) : ""}">`},
+        {id:"gateMa", no:"②", name:"MA20 上行", desc:`今日MA20 ${fmt(m.ma20)} / 昨日 ${fmt(m.ma20Prev)}`, pass:$("gateMa")?.checked ?? maUpAuto, control:`<input id="gateMa" type="checkbox" ${($("gateMa")?.checked ?? maUpAuto) ? "checked" : ""}>`},
+        {id:"gateClose", no:"③", name:"收盘价 > MA20", desc:`收盘 ${fmt(m.close)} / MA20 ${fmt(m.ma20)}`, pass:$("gateClose")?.checked ?? closeAboveAuto, control:`<input id="gateClose" type="checkbox" ${($("gateClose")?.checked ?? closeAboveAuto) ? "checked" : ""}>`},
+        {id:"gatePool", no:"④", name:"池内宽度 ≥ 50%", desc:"需人工确认标的池强度", pass:state.gateOverrides.poolWidth, control:`<input id="gatePool" type="checkbox" ${state.gateOverrides.poolWidth ? "checked" : ""}>`},
+      ];
+      $("gates").innerHTML = defs.map(g => `<div class="gate"><span class="badge">${g.no}</span><div><strong>${g.name}</strong><div class="subtle">${g.desc}</div></div><div>${g.control}<div class="signal ${g.pass ? "ok-text" : "no-text"}">${g.pass ? "✓" : "✗"}</div></div></div>`).join("");
+      const bad = defs.filter(g => !g.pass).map(g => g.name);
+      const sum = $("gateSummary");
+      sum.className = "summary " + (bad.length ? "warn" : "ok");
+      sum.textContent = bad.length ? `⚠ 闸门未通过：${bad.join("、")}` : "✓ 四闸门全部通过，可开仓";
+    }
+    function renderPositionCalc() {
+      const price = parseFloat($("planPrice").value), atr = parseFloat($("planAtr").value);
+      const R = Number.isFinite(atr) ? 2 * atr : null;
+      const stop = Number.isFinite(price) && Number.isFinite(R) ? price - R : null;
+      const dist = Number.isFinite(price) && Number.isFinite(R) ? R / price * 100 : null;
+      $("positionOutputs").innerHTML = [
+        `<div class="line-item"><span>R 单位 <button class="info" data-modal="modal-r-unit">ⓘ</button></span><strong class="num">${fmt(R)}</strong></div>`,
+        `<div class="line-item"><span>初始止损价 <button class="info" data-modal="modal-initial-stop">ⓘ</button></span><strong class="num">${fmt(stop)}</strong></div>`,
+        `<div class="line-item"><span>止损距离%</span><strong class="num">${fmt(dist, 2)}%</strong></div>`
+      ].join("");
+      const validPlan = Number.isFinite(price) && Number.isFinite(R);
+      const rows = [
+        ["+0.5R", .5, 0], ["+1R", 1, .25], ["+2R", 2, .75], ["+3R", 3, 1.5], ["+4R+", 4, null]
+      ].map(([label, trigger, protect]) => {
+        const triggerPrice = validPlan ? price + R * trigger : null;
+        const protectPrice = validPlan && protect != null ? price + R * protect : null;
+        return `<tr><td>${label}</td><td class="num">${fmt(triggerPrice)}</td><td class="num">${protect == null ? "交给 Chandelier" : fmt(protectPrice)}</td></tr>`;
+      }).join("");
+      $("ladderTable").innerHTML = `<table><tr><th>里程碑</th><th>触发价</th><th>保护线上移至</th></tr>${rows}</table>`;
+    }
+    function renderPyramid() {
+      const m = marketOf(), base = m.currentPrice ?? posCfg().cost, atr = m.currentATR ?? posCfg().entryATR;
+      $("pyramidViz").innerHTML = `<svg viewBox="0 0 760 230" aria-label="加仓金字塔">
+        <rect width="760" height="230" fill="#fff"/>
+        <polygon points="130,160 550,160 610,205 70,205" fill="#dbeafe" stroke="#1e40af"/><text x="340" y="188" text-anchor="middle" font-size="16" font-weight="700" fill="#1e40af">第1笔 1% | Donchian D20/D55 突破</text>
+        <polygon points="185,105 495,105 550,150 130,150" fill="#d1fae5" stroke="#059669"/><text x="340" y="133" text-anchor="middle" font-size="15" font-weight="700" fill="#059669">第2笔 +0.5% | +0.5N 且浮盈≥+0.5R</text>
+        <polygon points="245,50 435,50 490,95 190,95" fill="#fef3c7" stroke="#d97706"/><text x="340" y="78" text-anchor="middle" font-size="15" font-weight="700" fill="#d97706">第3笔 +0.5% | +1.0N 且浮盈≥+1R</text>
+        <line x1="628" x2="690" y1="182" y2="182" stroke="#64748b" marker-end="url(#arr)"/><text x="698" y="187" font-size="13" fill="#475569">${fmt(base)}</text>
+        <line x1="558" x2="690" y1="126" y2="126" stroke="#64748b" marker-end="url(#arr)"/><text x="698" y="131" font-size="13" fill="#475569">${fmt(base + .5 * atr)}</text>
+        <line x1="500" x2="690" y1="72" y2="72" stroke="#64748b" marker-end="url(#arr)"/><text x="698" y="77" font-size="13" fill="#475569">${fmt(base + atr)}</text>
+        <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/></marker></defs>
+      </svg>`;
+    }
+    function renderStopDetail() {
+      const c = posCfg(), m = marketOf(), r = compute(c, m);
+      const rows = [
+        ["RSI ≥ 80", "1.5", "1.2", m.currentRSI >= 80],
+        ["RSI 70~80", "2.0", "1.7", m.currentRSI >= 70 && m.currentRSI < 80],
+        ["RSI 60~70", "2.5", "2.2", m.currentRSI >= 60 && m.currentRSI < 70],
+        ["RSI < 60", "3.0", "3.0", !Number.isFinite(m.currentRSI) || m.currentRSI < 60],
+      ].map(x => `<tr class="${x[3] ? "active-k" : ""}"><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td><td>${Number.isFinite(m.currentADX) && m.currentADX > 50 ? x[2] : x[1]}</td><td>${kMeaning(x[0])}</td></tr>`).join("");
+      $("kTable").innerHTML = `<table class="k-table"><tr><th>RSI条件</th><th>基础k</th><th>ADX>50后</th><th>最终k</th><th>含义</th></tr>${rows}</table>`;
+      $("kExplain").textContent = `当前 k = ${fmt(r.k, 1)}（${r.kInfo.text}）`;
+      $("ladderViz").innerHTML = ladderSvg(c, r);
+      renderStopCards("detailStopCards", c, m, r, true);
+      $("detailFinal").innerHTML = `★ 最终止损 <span class="num">${fmt(r.finalStop)}</span><div class="subtle">四线取最大值，${r.winner} 胜出；若高于当前棘轮值，收盘后写回 last_protection_line。</div>`;
+    }
+    function kMeaning(cond) {
+      return cond.includes("80") ? "极度超买，大幅收紧" : cond.includes("70") ? "加速段，收紧" : cond.includes("60") ? "正常趋势，标准" : "趋势初期，宽松";
+    }
+    function ladderSvg(c, r) {
+      const stages = [
+        {x:20, label:"初始", protect:c.initialStop, threshold:-Infinity},
+        {x:145, label:"+0.5R", protect:c.cost, threshold:.5},
+        {x:270, label:"+1R", protect:c.cost + r.R * .25, threshold:1},
+        {x:395, label:"+2R", protect:c.cost + r.R * .75, threshold:2},
+        {x:520, label:"+3R", protect:c.cost + r.R * 1.5, threshold:3},
+        {x:645, label:"+4R+", protect:null, threshold:4},
+      ];
+      const active = Number.isFinite(r.floatR) ? stages.reduce((idx, s, i) => r.floatR >= s.threshold ? i : idx, 0) : 0;
+      const blocks = stages.map((s, i) => {
+        const fill = i < active ? "#d1fae5" : i === active ? "#dbeafe" : "#f8fafc";
+        const stroke = i === active ? "#2563eb" : i < active ? "#059669" : "#cbd5e1";
+        return `<rect x="${s.x}" y="${80 - i * 7}" width="104" height="62" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${i === active ? 2 : 1}"/>
+          <text x="${s.x + 52}" y="${102 - i * 7}" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">${s.label}</text>
+          <text x="${s.x + 52}" y="${124 - i * 7}" text-anchor="middle" font-size="12" fill="#475569">${s.protect == null ? "Chandelier" : fmt(s.protect)}</text>`;
+      }).join("");
+      return `<svg viewBox="0 0 770 160" style="min-width:760px"><rect width="770" height="160" fill="#fff"/>${blocks}<text x="20" y="30" font-size="13" fill="#475569">当前浮盈：${fmtR(r.floatR)}</text></svg>`;
+    }
+    function renderExitTree() {
+      const r = compute(posCfg(), marketOf());
+      $("exitTree").innerHTML = `<svg viewBox="0 0 900 500" aria-label="出场决策树">
+        <rect width="900" height="500" fill="#fff"/>
+        ${node(330,24,240,58,"今日收盘 ≤ 最终止损线？", `止损线 ${fmt(r.finalStop)}`, "#dbeafe", "#1e40af")}
+        ${node(90,150,190,64,"硬止损", "次日开盘清仓", "#fee2e2", "#dc2626")}
+        ${node(385,142,320,72,"MA20下行且收盘<MA20 连续2日？", "趋势结构确认", "#f8fafc", "#475569")}
+        ${node(330,275,170,64,"趋势破坏", "清仓", "#fee2e2", "#dc2626")}
+        ${node(590,275,250,64,"持仓>30日且浮盈<+0.5R？", `当前 ${fmtR(r.floatR)}`, "#f8fafc", "#475569")}
+        ${node(545,405,140,58,"时间止损", "减半仓", "#fef3c7", "#d97706")}
+        ${node(735,405,140,58,"持有观察", "维持止损", "#d1fae5", "#059669")}
+        ${edge(330,82,185,150,"是")}${edge(570,82,545,142,"否")}${edge(505,214,415,275,"是")}${edge(645,214,715,275,"否")}${edge(690,339,615,405,"是")}${edge(780,339,805,405,"否")}
+      </svg>`;
+    }
+    function node(x, y, w, h, title, sub, fill, color) {
+      return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="${fill}" stroke="${color}"/><text x="${x + w/2}" y="${y + 25}" text-anchor="middle" font-size="14" font-weight="700" fill="${color}">${title}</text><text x="${x + w/2}" y="${y + 46}" text-anchor="middle" font-size="12" fill="#475569">${sub}</text>`;
+    }
+    function edge(x1,y1,x2,y2,label) {
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#94a3b8" stroke-width="1.5"/><text x="${mx}" y="${my-6}" font-size="12" fill="#475569">${label}</text>`;
+    }
+    function renderRisk() {
+      const used = ids().reduce((sum, id) => sum + POSITIONS_CONFIG[id].positionPct, 0);
+      $("riskCards").innerHTML = [
+        `<div class="risk-card"><div>趋势账户上限</div><strong class="num">${fmt(ACCOUNT_CONFIG.trendAccountPct, 1)}%</strong><div class="subtle">占总资产<br>当前已用：${fmt(used, 1)}%</div></div>`,
+        `<div class="risk-card"><div>单仓初始风险</div><strong class="num">1%</strong><div class="subtle">占趋势账户<br>单笔最大亏损</div></div>`,
+        `<div class="risk-card"><div>账户熔断线</div><strong class="num">${fmt(ACCOUNT_CONFIG.maxLossPct, 1)}%</strong><div class="subtle">触发后暂停开新仓<br>只管现有仓位</div></div>`
+      ].join("");
+    }
+    const MODALS = {
+      "modal-r-unit":["R 单位是什么？","<p>R = 2 × ATR14，且使用开仓日锁定的 ATR。它把不同价格、不同波动率的标的统一到同一把尺子上。</p><p>示例：开仓 ATR14=0.050，则 R=0.100；价格从1.188涨到1.288，就是 +1R。</p>"],
+      "modal-initial-stop":["① 初始止损线","<p>公式：成本 - R。开仓日固定，之后不下移。</p><p>它负责过滤正常波动之外的失败入场，避免刚入场就被小噪音扫出。</p>"],
+      "modal-r-ladder":["② R-Ladder 阶梯保护","<table><tr><th>浮盈</th><th>保护线</th></tr><tr><td>+0.5R</td><td>成本</td></tr><tr><td>+1R</td><td>成本+0.25R</td></tr><tr><td>+2R</td><td>成本+0.75R</td></tr><tr><td>+3R</td><td>成本+1.5R</td></tr><tr><td>+4R+</td><td>交给 Chandelier</td></tr></table><p>核心是让赢单尽量不变成亏单。</p>"],
+      "modal-chandelier":["③ Chandelier 吊灯止损","<p>公式：HH - k × ATR14。HH 是持仓以来最高收盘价，使用收盘价而不是最高价，能减少盘中尖峰带来的保护线误抬升。</p><p>k 会随 RSI 和 ADX 自适应：越过热、趋势越强，保护线越收紧。</p>"],
+      "modal-ratchet":["④ 棘轮记忆","<p>棘轮线是上一轮收盘后写回的保护线，只升不降。</p><p>如果今天计算出的最终止损高于当前棘轮值，收盘确认后应同步更新持仓状态。</p>"],
+      "modal-final-stop":["最终止损 = max(①②③④)","<p>四条线分别代表固定风险、盈利保护、趋势追踪和历史记忆。取最大值，是为了永远采用最能保护本金与利润的那条线。</p><p>决策以收盘价为准，不用盘中刺穿立即触发。</p>"],
+      "modal-atr":["ATR14 是什么？","<p>ATR 衡量真实波动范围，会纳入跳空影响。TR=max(高-低, |高-昨收|, |低-昨收|)，再做 Wilder 平滑。</p>"],
+      "modal-rsi":["RSI14 是什么？","<p>RSI 衡量最近上涨力量和下跌力量的相对强弱。60以上通常说明多方占优，70以上进入加速，80以上容易过热。</p>"],
+      "modal-adx":["ADX14 是什么？","<p>ADX 衡量趋势强度，不告诉方向，只告诉趋势是否成形。+DI 与 -DI 给出方向力量，ADX 越高，趋势越强也越可能进入后段。</p>"],
+      "modal-donchian":["Donchian 突破","<p>Donchian 通道来自 Richard Donchian。D20 偏短期，D55 偏中长期。A股环境下要叠加趋势闸门和标的池宽度，避免在震荡市频繁假突破。</p>"],
+      "modal-volume-scope":["量价状态的量能口径","<p>这里的成交量应该看信号指数，而不是 ETF 本身。ETF 成交量会受二级市场流动性、申赎和套利影响，不能完整代表指数成分股整体是否放量。</p><p>科创创业50 的样本按季度调整，日常盯盘使用本地维护的当季成分股清单，由自动脚本聚合 50 只成分股成交量和成交额，生成静态数据给手机端读取。</p><p>如果直接指数成交量或成分股聚合都不可得，本页会显示“指数量能不可得”，不会用 ETF 量冒充指数量能。</p>"],
+      "modal-pyramid":["加仓金字塔","<p>只给赢单加仓，不给亏单补仓。间隔使用 0.5N/1.0N，并要求浮盈达到对应 R 值，最多三笔。</p><p>这样可以把风险集中给已经证明方向正确的仓位。</p>"]
+    };
+    function openModal(id) {
+      const data = MODALS[id];
+      if (!data) return;
+      $("modalTitle").textContent = data[0];
+      $("modalBody").innerHTML = data[1];
+      $("modal").classList.add("show");
+    }
+    function closeModal() { $("modal").classList.remove("show"); }
+    function showView(viewId, updateHash=true) {
+      if (!$(viewId)) viewId = "status";
+      document.querySelectorAll(".view-panel").forEach(panel => panel.classList.toggle("active", panel.id === viewId));
+      document.querySelectorAll(".nav-tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === viewId));
+      if (updateHash) history.replaceState(null, "", "#" + viewId);
+      window.scrollTo({ top:0, behavior:"auto" });
+    }
+    document.addEventListener("click", (e) => {
+      const navTab = e.target.closest("[data-view]");
+      if (navTab) showView(navTab.dataset.view);
+      const modalBtn = e.target.closest("[data-modal]");
+      if (modalBtn) openModal(modalBtn.dataset.modal);
+      const tab = e.target.closest("[data-pos]");
+      if (tab) {
+        state.activeId = tab.dataset.pos; state.matrixTouched = false; state.planTouched = false;
+        syncInputsFromMarket(); renderAll();
+      }
+    });
+    ["matrixAdx","matrixRsi"].forEach(id => $(id).addEventListener("input", () => { state.matrixTouched = true; renderMatrix(); }));
+    ["planPrice","planAtr","riskBudget"].forEach(id => $(id).addEventListener("input", () => { state.planTouched = true; renderPositionCalc(); renderPyramid(); }));
+    ["detailPrice","detailHh","detailAtr","detailRsi","detailAdx"].forEach(id => $(id).addEventListener("input", () => {
+      const map = { detailPrice:"currentPrice", detailHh:"highestClose", detailAtr:"currentATR", detailRsi:"currentRSI", detailAdx:"currentADX" };
+      state.overrides[state.activeId] ||= {};
+      state.overrides[state.activeId][map[id]] = parseFloat($(id).value);
+      if (id === "detailRsi" || id === "detailAdx") {
+        $("matrixAdx").value = $("detailAdx").value; $("matrixRsi").value = $("detailRsi").value; state.matrixTouched = true;
+      }
+      renderAll();
+    }));
+    document.addEventListener("input", (e) => {
+      if (e.target.id === "gatePool") state.gateOverrides.poolWidth = e.target.checked;
+      if (["gateAdx","gateMa","gateClose","gatePool"].includes(e.target.id)) renderGates();
+    });
+    $("refreshBtn").addEventListener("click", refreshAll);
+    $("autoRefresh").addEventListener("change", (e) => {
+      clearInterval(state.autoTimer);
+      if (e.target.checked) state.autoTimer = setInterval(refreshAll, 30000);
+    });
+    $("modalClose").addEventListener("click", closeModal);
+    $("modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+    function seedState() {
+      ids().forEach(id => {
+        const c = POSITIONS_CONFIG[id];
+        state.market[id] = { currentPrice:null, currentATR:null, currentRSI:null, currentADX:null, highestClose:c.highestClose };
+      });
+      renderAll(); syncInputsFromMarket(); refreshAll();
+      showView(location.hash ? location.hash.slice(1) : "status", false);
+    }
+    seedState();
+  </script>
+</body>
+</html>

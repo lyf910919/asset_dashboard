@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260527-fund-targets-mobile";
+const ASSET_VERSION = "20260528-trend-panel";
 const CACHE_NAME = `qdii-dashboard-v2-${ASSET_VERSION}`;
 const ASSET_LIST = [
   "./",
@@ -7,6 +7,10 @@ const ASSET_LIST = [
   `./app.js?v=${ASSET_VERSION}`,
   "./icon.svg",
   `./manifest.webmanifest?v=${ASSET_VERSION}`,
+  "./trend/index.html",
+  "./trend/manifest.json",
+  "./trend/data/generated/index-volume-931643.json",
+  "./trend/data/generated/index-volume-931643.js",
 ];
 function isNetworkFirstPath(pathname) {
   return (
@@ -58,6 +62,9 @@ self.addEventListener("fetch", (event) => {
         .catch(async () => {
           const cached = await caches.match(event.request);
           if (cached) return cached;
+          if (url.pathname.endsWith("/trend/")) {
+            return caches.match("./trend/index.html");
+          }
           if (url.pathname.endsWith("/")) {
             return caches.match("./index.html");
           }

@@ -1,0 +1,23 @@
+{
+  "name": "科技成长趋势规则系统",
+  "short_name": "趋势规则",
+  "description": "科技成长趋势交易完整规则可视化，含实时持仓止损推导",
+  "start_url": "./rules.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f0f4f8",
+  "theme_color": "#1e40af",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='42' fill='%231e40af'/%3E%3Ctext x='96' y='122' text-anchor='middle' font-size='94' font-family='Arial, sans-serif' font-weight='800' fill='white'%3E%E8%B6%8B%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231e40af'/%3E%3Ctext x='256' y='326' text-anchor='middle' font-size='250' font-family='Arial, sans-serif' font-weight='800' fill='white'%3E%E8%B6%8B%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
