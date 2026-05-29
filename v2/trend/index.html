@@ -260,6 +260,9 @@
     .sd-summary-winner{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:2px}
     .sd-summary-val{font-size:38px;font-weight:800;color:var(--primary);margin:2px 0 12px;font-variant-numeric:tabular-nums}
     .sd-summary-rows{display:grid;gap:5px}
+    .sd-price-info{display:flex;justify-content:space-between;align-items:center;padding:6px 0 12px;font-size:13px;font-weight:700}
+    .sd-price-cur{font-variant-numeric:tabular-nums;color:var(--text-secondary)}
+    .sd-price-dist{font-variant-numeric:tabular-nums}
     .sd-summary-row{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-radius:6px;font-size:13px}
     .sd-summary-row.winner{background:var(--primary);color:white;font-weight:800}
     .sd-summary-row.other{background:white;color:var(--text-secondary);border:1px solid var(--border)}
@@ -291,6 +294,40 @@
     .sd-time-tag.ok{background:var(--green-bg);border-color:#6ee7b7;color:#065f46}
     .sd-time-tag.warn{background:var(--yellow-bg);border-color:#fcd34d;color:#92400e}
     .sd-asset-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+    /* ── Position status / trade log ── */
+    .pos-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+    .pos-sum-card{padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border)}
+    .pos-sum-label{font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+    .pos-sum-val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px}
+    .pos-sum-val.positive{color:var(--red)}.pos-sum-val.negative{color:var(--green)}.pos-sum-val.neutral{color:var(--text-primary)}
+    .tl-header{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:10px}
+    .tl-list{display:grid;gap:8px;margin-bottom:14px}
+    .tl-item{padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:start}
+    .tl-item.buy{border-left:4px solid var(--red)}.tl-item.sell{border-left:4px solid var(--green)}
+    .tl-row1{display:flex;align-items:center;gap:8px}
+    .tl-type{font-size:12px;font-weight:800;padding:2px 8px;border-radius:999px}
+    .tl-type.buy{background:var(--red-bg);color:var(--red)}.tl-type.sell{background:var(--green-bg);color:var(--green)}
+    .tl-date{font-size:13px;font-weight:700;color:var(--text-primary)}
+    .tl-details{font-size:12px;color:var(--text-secondary);margin-top:3px;font-variant-numeric:tabular-nums;line-height:1.6}
+    .tl-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+    .tl-btn{font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer}
+    .tl-btn:hover{background:var(--border)}
+    .tl-btn.del{color:var(--red);border-color:var(--red-bg)}
+    .tl-empty{padding:20px 0;text-align:center;color:var(--text-muted);font-size:13px}
+    .tl-add-btn{width:100%;padding:11px;border-radius:var(--radius-sm);border:2px dashed var(--border);background:transparent;color:var(--primary);font-weight:700;font-size:14px;cursor:pointer;margin-bottom:18px}
+    .tl-add-btn:hover{background:var(--primary-light)}
+    .tl-form{padding:14px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border);margin-bottom:14px;display:grid;gap:10px}
+    .tl-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .tl-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--text-secondary)}
+    .tl-form input,.tl-form select{padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);font:inherit;font-size:13px}
+    .tl-form-actions{display:flex;gap:8px;justify-content:flex-end}
+    .tl-form-save{padding:8px 18px;border-radius:var(--radius-sm);background:var(--primary);color:white;border:none;font-weight:700;cursor:pointer}
+    .tl-form-cancel{padding:8px 14px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);cursor:pointer}
+    .ratchet-editor{padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border);margin-top:8px}
+    .ratchet-title{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+    .ratchet-row{display:flex;align-items:center;gap:8px;font-size:13px}
+    .ratchet-row input{width:90px;padding:6px 9px;border-radius:var(--radius-sm);border:1px solid var(--border);font:inherit;font-size:13px;text-align:right}
+    .ratchet-save{padding:6px 14px;border-radius:var(--radius-sm);background:var(--primary);color:white;border:none;font-size:13px;font-weight:700;cursor:pointer}
   </style>
 </head>
 <body>
@@ -336,14 +373,9 @@
         </section>
 
         <section id="status" class="section view-panel">
-          <div class="section-head"><h2>§0A 持仓状态</h2><span id="positionStamp" class="subtle"></span></div>
+          <div class="section-head"><h2>持仓记录</h2><span id="positionStamp" class="subtle"></span></div>
           <div id="positionTabs" class="tabs"></div>
-          <h3>静态参数</h3><div id="staticGrid" class="metric-grid"></div>
-          <h3>实时行情</h3><div id="quoteGrid" class="metric-grid"></div>
-          <h3>技术指标</h3><div id="techGrid" class="metric-grid"></div>
-          <h3>四线止损</h3><div id="stopCards" class="stop-grid"></div>
-          <div id="finalStop" class="final-banner"></div>
-          <div id="priceViz" class="viz"></div>
+          <div id="statusContent"></div>
         </section>
 
         <section id="market" class="section view-panel">
@@ -447,7 +479,8 @@
     const state = {
       activeId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
       autoTimer:null, matrixTouched:false, planTouched:false,
-      gateOverrides:{ poolWidth:false }
+      gateOverrides:{ poolWidth:false },
+      trades:{}, ratchets:{}, tradeEditId:null, tradeFormOpen:false
     };
     const $ = (id) => document.getElementById(id);
     const ids = () => Object.keys(POSITIONS_CONFIG);
@@ -458,7 +491,51 @@
     function fmtPct(v, d=2) { return Number.isFinite(v) ? (v > 0 ? "+" : "") + v.toFixed(d) + "%" : "—"; }
     function fmtR(v) { return Number.isFinite(v) ? (v > 0 ? "+" : "") + v.toFixed(2) + "R" : "—"; }
     function secKey(row) { return `${row.f13}.${row.f12}`; }
-    function posCfg() { return POSITIONS_CONFIG[state.activeId]; }
+    function posCfg() { return effectiveCfg(state.activeId); }
+    // ── Trade log helpers ──
+    function loadTradeState() {
+      try { const t = localStorage.getItem("trend_trades"); if (t) state.trades = JSON.parse(t); } catch(e) {}
+      try { const r = localStorage.getItem("trend_ratchets"); if (r) state.ratchets = JSON.parse(r); } catch(e) {}
+    }
+    function saveTradeState() {
+      try { localStorage.setItem("trend_trades", JSON.stringify(state.trades)); } catch(e) {}
+      try { localStorage.setItem("trend_ratchets", JSON.stringify(state.ratchets)); } catch(e) {}
+    }
+    function tradesOf(id) { return state.trades[id] || []; }
+    function derivedFromTrades(id) {
+      const ts = tradesOf(id);
+      if (!ts.length) return { avgCost:null, entryATR:null, openedAt:null, netUnits:0, realizedPnl:0 };
+      let buyUnits = 0, buyCost = 0, firstBuyATR = null, firstBuyDate = null;
+      let netUnits = 0, realizedPnl = 0, avgCost = null;
+      const sorted = [...ts].sort((a,b) => a.date < b.date ? -1 : 1);
+      sorted.forEach(t => {
+        const u = Number(t.units) || 0, p = Number(t.price) || 0;
+        if (t.type === "buy") {
+          if (firstBuyATR == null && Number.isFinite(Number(t.entryATR))) firstBuyATR = Number(t.entryATR);
+          if (!firstBuyDate) firstBuyDate = t.date;
+          buyCost += u * p; buyUnits += u; netUnits += u;
+          avgCost = buyUnits > 0 ? buyCost / buyUnits : null;
+        } else {
+          const costBasis = avgCost ?? 0;
+          realizedPnl += u * (p - costBasis);
+          netUnits -= u;
+          buyCost = Math.max(0, netUnits) * (avgCost ?? 0);
+          buyUnits = Math.max(0, netUnits);
+        }
+      });
+      return { avgCost: netUnits > 0 ? avgCost : null, entryATR: firstBuyATR, openedAt: firstBuyDate, netUnits, realizedPnl };
+    }
+    function effectiveCfg(id) {
+      const base = POSITIONS_CONFIG[id];
+      const d = derivedFromTrades(id);
+      const ratchet = state.ratchets[id];
+      return Object.assign({}, base, {
+        cost: d.avgCost ?? base.cost,
+        entryATR: d.entryATR ?? base.entryATR,
+        openedAt: d.openedAt ?? base.openedAt,
+        ratchet: (ratchet != null ? ratchet : base.ratchet),
+      });
+    }
     function marketOf(id=state.activeId) {
       const cfg = POSITIONS_CONFIG[id];
       const base = state.market[id] || {};
@@ -1218,24 +1295,110 @@
       return "deep-green";
     }
     function renderPositionPanel() {
-      const c = posCfg(), m = marketOf(), r = compute(c, m);
+      const id = state.activeId;
+      const c = effectiveCfg(id), m = marketOf(id), r = compute(c, m);
+      const d = derivedFromTrades(id);
       $("positionStamp").textContent = c.signalName ? `信号：${c.signalName}` : "";
-      $("staticGrid").innerHTML = [
-        metric("成本价", fmt(c.cost)), metric("开仓ATR14", fmt(c.entryATR, 4)),
-        metric("R单位", fmt(r.R, 3)), metric("仓位", `${fmt(c.positionPct, 1)}%`)
-      ].join("");
-      $("quoteGrid").innerHTML = [
-        metric("当前价", fmt(m.currentPrice)), metric("涨跌幅", fmtPct(m.changePct), m.changePct >= 0 ? "positive" : "negative"),
-        metric("今日高", fmt(m.high)), metric("今日低", fmt(m.low))
-      ].join("");
-      $("techGrid").innerHTML = [
-        metric("ATR14", fmt(m.currentATR, 4), !Number.isFinite(m.currentATR) ? "yellow" : ""),
-        metric("RSI14", fmt(m.currentRSI, 1)), metric("ADX14", fmt(m.currentADX, 1)),
-        metric("浮盈(R值)", fmtR(r.floatR), floatClass(r.floatR))
-      ].join("");
-      renderStopCards("stopCards", c, m, r, false);
-      $("finalStop").innerHTML = `★ 最终止损 <span class="num">${fmt(r.finalStop)}</span> <span class="subtle">[${r.winner} 胜出]</span>`;
-      $("priceViz").innerHTML = priceSvg(c, m, r);
+
+      // Summary cards
+      const cp = m.currentPrice;
+      const unrealPnl = (Number.isFinite(cp) && Number.isFinite(c.cost) && d.netUnits > 0)
+        ? (cp - c.cost) * d.netUnits * 100 : null; // units in 手(100股)
+      const unrealPct = (Number.isFinite(cp) && Number.isFinite(c.cost) && c.cost > 0)
+        ? (cp / c.cost - 1) * 100 : null;
+      function pnlClass(v) { return !Number.isFinite(v) ? "neutral" : v > 0 ? "positive" : v < 0 ? "negative" : "neutral"; }
+      function fmtMoney(v) { if (!Number.isFinite(v)) return "—"; const abs = Math.abs(v); const s = v < 0 ? "−" : "+"; if (abs >= 10000) return s + (abs/10000).toFixed(2) + "万"; return s + abs.toFixed(0); }
+
+      const sumCards = [
+        { label:"净持仓（手）", val: d.netUnits > 0 ? d.netUnits.toFixed(1) : "空仓", cls:"neutral" },
+        { label:"均成本价", val: Number.isFinite(c.cost) ? fmt(c.cost) : "—", cls:"neutral" },
+        { label:"未实现盈亏", val: Number.isFinite(unrealPct) ? fmtPct(unrealPct) + (Number.isFinite(unrealPnl) ? " / " + fmtMoney(unrealPnl) : "") : "—", cls: pnlClass(unrealPct) },
+        { label:"历史已实现盈亏", val: fmtMoney(d.realizedPnl), cls: pnlClass(d.realizedPnl) },
+      ].map(s => `<div class="pos-sum-card"><div class="pos-sum-label">${s.label}</div><div class="pos-sum-val ${s.cls} num">${s.val}</div></div>`).join("");
+
+      // Trade log
+      const trades = tradesOf(id);
+      const sortedTrades = [...trades].sort((a,b) => b.date < a.date ? -1 : 1);
+      let tradeItems = "";
+      if (!sortedTrades.length) {
+        tradeItems = `<div class="tl-empty">暂无交易记录，点击下方"添加记录"录入买卖明细</div>`;
+      } else {
+        tradeItems = sortedTrades.map(t => {
+          const typeLabel = t.type === "buy" ? "买入" : "卖出";
+          const atrStr = Number.isFinite(Number(t.entryATR)) ? ` · 入场ATR ${Number(t.entryATR).toFixed(4)}` : "";
+          return `<div class="tl-item ${t.type}" data-tid="${t.id}">
+            <div>
+              <div class="tl-row1">
+                <span class="tl-type ${t.type}">${typeLabel}</span>
+                <span class="tl-date">${t.date}</span>
+              </div>
+              <div class="tl-details">${fmt(Number(t.price))} · ${Number(t.units).toFixed(1)} 手${atrStr}</div>
+            </div>
+            <div class="tl-actions">
+              <button class="tl-btn" data-edit="${t.id}">编辑</button>
+              <button class="tl-btn del" data-del="${t.id}">删除</button>
+            </div>
+          </div>`;
+        }).join("");
+      }
+
+      // Trade form (add/edit)
+      const formHtml = state.tradeFormOpen ? renderTradeForm(id) : "";
+
+      // Ratchet editor
+      const ratchetVal = state.ratchets[id] ?? c.ratchet;
+      const ratchetHtml = `<div class="ratchet-editor">
+        <div class="ratchet-title">④ 棘轮线（只升不降）</div>
+        <div class="ratchet-row">
+          <span>当前棘轮线：</span>
+          <input id="ratchetInput" type="number" step="0.001" value="${Number.isFinite(ratchetVal) ? ratchetVal.toFixed(3) : ""}">
+          <button class="ratchet-save" id="ratchetSaveBtn">保存</button>
+          <span class="subtle" style="font-size:12px">（配置默认：${fmt(POSITIONS_CONFIG[id].ratchet)}）</span>
+        </div>
+      </div>`;
+
+      $("statusContent").innerHTML = `
+        <div class="pos-summary">${sumCards}</div>
+        <div class="tl-header">进出记录</div>
+        <div class="tl-list">${tradeItems}</div>
+        ${formHtml}
+        <button class="tl-add-btn" id="addTradeBtn">＋ 添加记录</button>
+        ${ratchetHtml}
+      `;
+
+      // Bind events after render
+      const addBtn = $("addTradeBtn");
+      if (addBtn) addBtn.onclick = () => { state.tradeFormOpen = true; state.tradeEditId = null; renderPositionPanel(); };
+      const rSave = $("ratchetSaveBtn");
+      if (rSave) rSave.onclick = () => {
+        const v = parseFloat($("ratchetInput").value);
+        if (Number.isFinite(v)) { state.ratchets[id] = v; saveTradeState(); renderAll(); }
+      };
+    }
+    function renderTradeForm(id) {
+      const editing = state.tradeEditId;
+      const existing = editing ? (tradesOf(id).find(t => t.id === editing) || {}) : {};
+      const typeVal = existing.type || "buy";
+      const dateVal = existing.date || new Date().toISOString().slice(0,10);
+      const priceVal = existing.price ?? "";
+      const unitsVal = existing.units ?? "";
+      const atrVal = existing.entryATR ?? "";
+      return `<div class="tl-form" id="tradeForm">
+        <strong style="font-size:13px">${editing ? "编辑记录" : "添加记录"}</strong>
+        <div class="tl-form-row">
+          <label>类型<select id="tf-type"><option value="buy" ${typeVal==="buy"?"selected":""}>买入</option><option value="sell" ${typeVal==="sell"?"selected":""}>卖出</option></select></label>
+          <label>日期<input id="tf-date" type="date" value="${dateVal}"></label>
+        </div>
+        <div class="tl-form-row">
+          <label>交易价<input id="tf-price" type="number" step="0.001" value="${priceVal}" placeholder="例：1.188"></label>
+          <label>仓位（手）<input id="tf-units" type="number" step="0.1" value="${unitsVal}" placeholder="例：10"></label>
+        </div>
+        <label style="grid-column:1/-1">入场ATR（买入时填写，卖出可留空）<input id="tf-atr" type="number" step="0.0001" value="${atrVal}" placeholder="例：0.0500"></label>
+        <div class="tl-form-actions">
+          <button class="tl-form-cancel" id="tf-cancel">取消</button>
+          <button class="tl-form-save" id="tf-save">保存</button>
+        </div>
+      </div>`;
     }
     function stopRows(c, m, r) {
       const ladderInactive = !Number.isFinite(r.line2);
@@ -1450,10 +1613,24 @@
           <span class="num">${valStr}${isWinner ? " ★" : ""}</span>
         </div>`;
       }).join("");
+      let priceInfoHtml = "";
+      if (Number.isFinite(m.currentPrice) && Number.isFinite(r.finalStop)) {
+        const distPct = (m.currentPrice - r.finalStop) / m.currentPrice * 100;
+        const above = distPct > 0;
+        const priceColor = above ? "var(--red)" : "var(--green)";
+        const distLabel = above
+          ? `还需下跌 ${distPct.toFixed(1)}%`
+          : `已跌破 ${Math.abs(distPct).toFixed(1)}%，建议清仓`;
+        priceInfoHtml = `<div class="sd-price-info">
+          <span class="sd-price-cur">当前价 ${fmt(m.currentPrice)}</span>
+          <span class="sd-price-dist" style="color:${priceColor}">${distLabel}</span>
+        </div>`;
+      }
       return `<div class="sd-summary">
         <div class="sd-summary-meta">★ 最终止损 · 四线取最大值 ${stamp}</div>
         <div class="sd-summary-winner">${r.winner || "等待数据"} 胜出</div>
         <div class="sd-summary-val">${Number.isFinite(r.finalStop) ? fmt(r.finalStop) : "—"}</div>
+        ${priceInfoHtml}
         <div class="sd-summary-rows">${rows}</div>
       </div>`;
     }
@@ -1628,7 +1805,50 @@
       const tab = e.target.closest("[data-pos]");
       if (tab) {
         state.activeId = tab.dataset.pos; state.matrixTouched = false; state.planTouched = false;
+        state.tradeFormOpen = false; state.tradeEditId = null;
         syncInputsFromMarket(); renderAll();
+      }
+      // Trade log edit
+      const editBtn = e.target.closest("[data-edit]");
+      if (editBtn) {
+        state.tradeEditId = editBtn.dataset.edit;
+        state.tradeFormOpen = true;
+        renderPositionPanel(); return;
+      }
+      // Trade log delete
+      const delBtn = e.target.closest("[data-del]");
+      if (delBtn) {
+        const id = state.activeId;
+        state.trades[id] = (state.trades[id] || []).filter(t => t.id !== delBtn.dataset.del);
+        saveTradeState(); renderAll(); return;
+      }
+      // Trade form save
+      if (e.target.id === "tf-save") {
+        const id = state.activeId;
+        const type = $("tf-type").value;
+        const date = $("tf-date").value;
+        const price = parseFloat($("tf-price").value);
+        const units = parseFloat($("tf-units").value);
+        const entryATR = parseFloat($("tf-atr").value);
+        if (!date || !Number.isFinite(price) || !Number.isFinite(units)) return;
+        const trade = {
+          id: state.tradeEditId || ("t" + Date.now()),
+          type, date, price, units,
+          entryATR: Number.isFinite(entryATR) ? entryATR : null,
+        };
+        if (!state.trades[id]) state.trades[id] = [];
+        if (state.tradeEditId) {
+          state.trades[id] = state.trades[id].map(t => t.id === state.tradeEditId ? trade : t);
+        } else {
+          state.trades[id].push(trade);
+        }
+        state.tradeFormOpen = false; state.tradeEditId = null;
+        saveTradeState(); renderAll(); return;
+      }
+      // Trade form cancel
+      if (e.target.id === "tf-cancel") {
+        state.tradeFormOpen = false; state.tradeEditId = null;
+        renderPositionPanel(); return;
       }
     });
     ["matrixAdx","matrixRsi"].forEach(id => $(id).addEventListener("input", () => { state.matrixTouched = true; renderMatrix(); }));
@@ -1647,6 +1867,7 @@
     $("modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
     function seedState() {
+      loadTradeState();
       ids().forEach(id => {
         const c = POSITIONS_CONFIG[id];
         state.market[id] = { currentPrice:null, currentATR:null, currentRSI:null, currentADX:null, highestClose:c.highestClose };
