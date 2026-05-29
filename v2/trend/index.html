@@ -859,7 +859,7 @@
     function compute(cfg, market) {
       const R = 2 * cfg.entryATR;
       const floatR = Number.isFinite(market.currentPrice) ? (market.currentPrice - cfg.cost) / R : null;
-      const line1 = cfg.initialStop;
+      const line1 = cfg.cost - R;
       let line2 = null;
       if (Number.isFinite(floatR)) {
         if (floatR >= 3.0) line2 = cfg.cost + R * 1.5;
@@ -1702,7 +1702,7 @@
     }
     function sdRMultipleHtml(c, m, r, stamp) {
       const stages = [
-        { label:"初始", threshold:-Infinity, protect:c.initialStop },
+        { label:"初始", threshold:-Infinity, protect:r.line1 },
         { label:"+0.5R", threshold:0.5, protect:c.cost },
         { label:"+1R", threshold:1.0, protect:c.cost + r.R * 0.25 },
         { label:"+2R", threshold:2.0, protect:c.cost + r.R * 0.75 },
