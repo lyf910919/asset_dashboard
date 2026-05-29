@@ -213,7 +213,8 @@
     .ov-change.up{color:var(--red)}.ov-change.down{color:var(--green)}
     .ov-atr{font-size:13px;color:var(--text-muted);align-self:center}
     .ov-block{margin-bottom:18px}
-    .ov-block-title{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px}
+    .ov-block-title{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px;display:flex;align-items:center;gap:6px}
+    .ov-block-stamp{font-size:10px;font-weight:400;color:#94a3b8;letter-spacing:0;text-transform:none;margin-left:auto;white-space:nowrap}
     .ov-indicators{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
     .ov-ind{padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2)}
     .ov-ind-label{font-size:11px;color:var(--text-muted);margin-bottom:4px}
@@ -452,6 +453,7 @@
         volumeAmount: clean(base.volumeAmount), volumeAmountPrev: clean(base.volumeAmountPrev),
         volumeAmountMa20: clean(base.volumeAmountMa20), volumeCoverage: base.volumeCoverage,
         volumeUpdatedAt: base.volumeUpdatedAt, volumeScope: base.volumeScope, volumeIsIndex: !!base.volumeIsIndex,
+        klineUpdatedAt: base.klineUpdatedAt || null,
       };
     }
     function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
@@ -529,10 +531,11 @@
       }).filter(r => [r.open, r.close, r.high, r.low].every(Number.isFinite));
     }
     function toYahooSymbol(secid) {
-      if (secid === "2.931643") return "159781.SZ";
       const [m, code] = secid.split(".");
       if (!code) return null;
-      return `${code}.${m === "0" ? "SZ" : "SS"}`;
+      if (m === "0") return `${code}.SZ`;
+      if (m === "1") return `${code}.SS`;
+      return null; // market=2 (CSI indices) not on Yahoo
     }
     function parseYahooKlines(data) {
       const result = data?.chart?.result?.[0];
@@ -545,12 +548,11 @@
       })).filter(r => [r.open, r.close, r.high, r.low].every(Number.isFinite));
     }
     function toSinaSymbol(secid) {
-      if (secid === "2.931643") return "sz159781";
       const [market, code] = secid.split(".");
       if (!code) return null;
       if (market === "0") return "sz" + code;
       if (market === "1") return "sh" + code;
-      return null;
+      return null; // market=2 (CSI indices) not on Sina
     }
     function fetchSinaKlines(secid) {
       return new Promise((resolve, reject) => {
@@ -568,7 +570,6 @@
             date:row.day, open:+row.open, high:+row.high, low:+row.low,
             close:+row.close, volume:+row.volume || 0
           })).filter(r => [r.open, r.close, r.high, r.low].every(Number.isFinite));
-          parsed.isVolumeProxy = secid === "2.931643";
           parsed.length >= 30 ? resolve(parsed) : reject(new Error("sina empty"));
         };
         script.onerror = () => {
@@ -579,24 +580,25 @@
       });
     }
     async function fetchKlines(secid) {
-      try {
-        return await fetchSinaKlines(secid);
-      } catch (sinaError) {
-      }
+      // Try EastMoney first: it includes today's partial candle (live close) during trading hours
       try {
         const resp = await timeoutFetch(eastmoneyKlineUrl(secid), 8000);
         const data = await resp.json();
         const rows = parseEMKlines(data?.data?.klines || []);
         if (rows.length >= 30) return rows;
         throw new Error("empty eastmoney kline");
-      } catch (e) {
-        const symbol = toYahooSymbol(secid);
-        if (!symbol) throw e;
-        const resp = await timeoutFetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=6mo&interval=1d`, 8000);
-        const rows = parseYahooKlines(await resp.json());
-        if (rows.length >= 30) return rows;
-        throw new Error("empty yahoo kline");
+      } catch (emError) {
       }
+      try {
+        return await fetchSinaKlines(secid);
+      } catch (sinaError) {
+      }
+      const symbol = toYahooSymbol(secid);
+      if (!symbol) throw new Error("no kline source for " + secid);
+      const resp = await timeoutFetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=6mo&interval=1d`, 8000);
+      const rows = parseYahooKlines(await resp.json());
+      if (rows.length >= 30) return rows;
+      throw new Error("empty yahoo kline");
     }
     async function fetchGeneratedIndexVolume(secid) {
       const spec = INDEX_VOLUME_FILES[secid];
@@ -799,6 +801,8 @@
           next.priceChangePct = volumeLatest && volumePrev?.close ? (volumeLatest.close / volumePrev.close - 1) * 100 : null;
           next.volumeScope = volumeRows ? `${cfg.signalName || "信号指数"}（指数成交量）` : "指数量能不可得";
           next.volumeIsIndex = !!volumeRows;
+          // Record when klines were fetched (used for indicator/MA timestamps)
+          next.klineUpdatedAt = new Date().toLocaleTimeString("zh-CN", {hour12:false, hour:"2-digit", minute:"2-digit"});
           if (!volumeRows && cfg.signalSecid) {
             try {
               applyGeneratedIndexVolume(next, cfg, await fetchGeneratedIndexVolume(cfg.signalSecid));
@@ -995,13 +999,18 @@
         <span class="ov-atr">ATR₁₄ ${fmt(m.currentATR,4)}</span>
       </div>`;
 
+      // ---- Timestamps ----
+      const klineStamp = m.klineUpdatedAt ? `<span class="ov-block-stamp">${m.klineUpdatedAt}</span>` : "";
+      const volStampRaw = m.volumeUpdatedAt ? m.volumeUpdatedAt.slice(11,16) : m.klineUpdatedAt || null;
+      const volStamp = volStampRaw ? `<span class="ov-block-stamp">${volStampRaw}</span>` : "";
+
       // ---- Trend indicators block ----
       const rsiPct = Number.isFinite(m.currentRSI) ? Math.min(100,m.currentRSI) : 0;
       const adxPct = Number.isFinite(m.currentADX) ? Math.min(100,m.currentADX*1.5) : 0;
       const rsiColor = !Number.isFinite(m.currentRSI) ? "#94a3b8" : m.currentRSI>70 ? "#dc2626" : m.currentRSI>50 ? "#059669" : "#d97706";
       const adxColor = !Number.isFinite(m.currentADX) ? "#94a3b8" : m.currentADX>=25 ? "#2563eb" : m.currentADX>=20 ? "#d97706" : "#94a3b8";
       const indBlock = `<div class="ov-block">
-        <div class="ov-block-title">趋势指标（信号指数）</div>
+        <div class="ov-block-title">趋势指标（信号指数）${klineStamp}</div>
         <div class="ov-indicators">
           <div class="ov-ind">
             <div class="ov-ind-label">ATR₁₄</div>
@@ -1025,6 +1034,7 @@
       </div></div>`;
 
       // ---- MA alignment block ----
+      const maTitleSuffix = isOpen ? "实时" : "昨收";
       const maInterp = interpretMAAlignment(m.close, m.ma5, m.ma10, m.ma20, m.ma60);
       const maVals = [
         {label:"价格", val:m.close, color:"#1e40af", isPrice:true},
@@ -1050,7 +1060,7 @@
         }).join("");
       } else { maRows = `<div class="subtle">等待均线数据…</div>`; }
       const maBlock = `<div class="ov-block">
-        <div class="ov-block-title">均线排列（信号指数收盘价）</div>
+        <div class="ov-block-title">均线排列（信号指数·${maTitleSuffix}）${klineStamp}</div>
         <div class="ov-ma-ladder">${maRows}</div>
         <div class="ov-interp ${maInterp.cls}" style="margin-top:10px">
           <div class="ov-interp-title">${maInterp.title}</div>
@@ -1091,7 +1101,7 @@
         </div>`;
       }
       const volBlock = `<div class="ov-block">
-        <div class="ov-block-title">量能分析（${m.volumeScope || "信号指数"}）</div>
+        <div class="ov-block-title">量能分析（${m.volumeScope || "信号指数"}）${volStamp}</div>
         ${projNote}
         <div class="ov-vol-rows">${volRows}</div>
         <div class="ov-interp ${volInterp.cls}">
