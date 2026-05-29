@@ -253,6 +253,44 @@
     .ov-signal-tag.warn{background:var(--yellow-bg);border-color:#fcd34d;color:#92400e}
     .ov-signal-tag.fail{background:var(--red-bg);border-color:#fca5a5;color:#991b1b}
     .ov-con-stop{font-size:13px;color:var(--text-secondary);margin-top:6px}
+    /* ── Stop-detail page ── */
+    .sd-summary{margin-bottom:20px;padding:16px;border-radius:var(--radius-sm);background:var(--blue-info-bg);border:2px solid var(--primary)}
+    .sd-summary-meta{font-size:12px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    .sd-summary-stamp{font-size:10px;font-weight:400;color:#64748b;text-transform:none;letter-spacing:0}
+    .sd-summary-winner{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:2px}
+    .sd-summary-val{font-size:38px;font-weight:800;color:var(--primary);margin:2px 0 12px;font-variant-numeric:tabular-nums}
+    .sd-summary-rows{display:grid;gap:5px}
+    .sd-summary-row{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-radius:6px;font-size:13px}
+    .sd-summary-row.winner{background:var(--primary);color:white;font-weight:800}
+    .sd-summary-row.other{background:white;color:var(--text-secondary);border:1px solid var(--border)}
+    .sd-summary-row.inactive{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border);font-style:italic}
+    .sd-block{margin-bottom:18px}
+    .sd-block-title{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px;display:flex;align-items:center;gap:6px}
+    .sd-block-stamp{font-size:10px;font-weight:400;color:#94a3b8;letter-spacing:0;text-transform:none;margin-left:auto;white-space:nowrap}
+    .sd-kv{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+    .sd-row{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border);font-size:13px;gap:8px}
+    .sd-row-label{color:var(--text-muted);flex-shrink:0}
+    .sd-row-val{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+    .sd-row.highlight{background:var(--blue-info-bg);border-color:#93c5fd}
+    .sd-row.stop-line{background:var(--primary);color:white;border-color:var(--primary)}
+    .sd-row.stop-line .sd-row-label,.sd-row.stop-line .sd-row-val{color:white}
+    .sd-ladder{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0 12px}
+    .sd-ladder-step{padding:9px 5px;border-radius:var(--radius-sm);text-align:center;border:1px solid var(--border);background:var(--surface-2)}
+    .sd-ladder-step.done{background:var(--green-bg);border-color:#6ee7b7}
+    .sd-ladder-step.active{background:var(--blue-info-bg);border-color:var(--primary);border-width:2px}
+    .sd-ladder-label{font-size:11px;font-weight:700;color:var(--text-muted)}
+    .sd-ladder-step.done .sd-ladder-label{color:var(--green)}
+    .sd-ladder-step.active .sd-ladder-label{color:var(--primary)}
+    .sd-ladder-protect{font-size:11px;color:var(--text-secondary);margin-top:3px;font-variant-numeric:tabular-nums}
+    .sd-kdecision{display:grid;gap:4px;margin-bottom:10px}
+    .sd-kstep{padding:7px 11px;border-radius:var(--radius-sm);font-size:13px;background:var(--surface-2);border:1px solid var(--border)}
+    .sd-kstep.active{background:var(--blue-info-bg);border-color:#93c5fd;color:var(--primary);font-weight:700}
+    .sd-kstep.adjust{background:var(--yellow-bg);border-color:#fcd34d;color:#92400e;font-weight:700}
+    .sd-calc-box{margin:8px 0;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);font-variant-numeric:tabular-nums;line-height:1.7}
+    .sd-time-tag{display:inline-flex;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid;margin-bottom:8px}
+    .sd-time-tag.ok{background:var(--green-bg);border-color:#6ee7b7;color:#065f46}
+    .sd-time-tag.warn{background:var(--yellow-bg);border-color:#fcd34d;color:#92400e}
+    .sd-asset-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
   </style>
 </head>
 <body>
@@ -260,12 +298,12 @@
     <div class="brand">趋势规则系统</div>
     <div class="nav-links" aria-label="区块导航">
       <button class="nav-tab active" data-view="overview">趋势概览</button>
+      <button class="nav-tab" data-view="stop-detail">止损</button>
       <button class="nav-tab" data-view="status">持仓状态</button>
       <button class="nav-tab" data-view="market">市场状态</button>
       <button class="nav-tab" data-view="entry">入场</button>
       <button class="nav-tab" data-view="position-calc">仓位</button>
       <button class="nav-tab" data-view="pyramid">加仓</button>
-      <button class="nav-tab" data-view="stop-detail">四线止损</button>
       <button class="nav-tab" data-view="exit">出场</button>
       <button class="nav-tab" data-view="risk">风控</button>
     </div>
@@ -357,21 +395,9 @@
     </section>
 
     <section id="stop-detail" class="section view-panel">
-      <div class="section-head"><h2>§4 四线止损详细推导</h2></div>
-      <div class="metric-grid">
-        <label class="field"><span>当前价</span><input id="detailPrice" type="number" step="0.001"></label>
-        <label class="field"><span>持仓最高收盘 HH</span><input id="detailHh" type="number" step="0.001"></label>
-        <label class="field"><span>当前 ATR14</span><input id="detailAtr" type="number" step="0.0001"></label>
-        <label class="field"><span>当前 RSI14</span><input id="detailRsi" type="number" step="0.1"></label>
-        <label class="field"><span>当前 ADX14</span><input id="detailAdx" type="number" step="0.1"></label>
-      </div>
-      <h3 style="margin-top:16px;">Chandelier k 自适应</h3>
-      <div id="kTable" class="matrix-wrap"></div>
-      <div id="kExplain" class="summary"></div>
-      <h3 style="margin-top:16px;">R-Ladder 阶梯图</h3>
-      <div id="ladderViz" class="viz" style="overflow-x:auto;"></div>
-      <div id="detailStopCards"></div>
-      <div id="detailFinal" class="final-banner"></div>
+      <div class="section-head"><h2>止损</h2></div>
+      <div id="sdAssetBar" class="sd-asset-bar"></div>
+      <div id="sdContent"></div>
     </section>
 
     <section id="exit" class="section view-panel">
@@ -454,6 +480,7 @@
         volumeAmountMa20: clean(base.volumeAmountMa20), volumeCoverage: base.volumeCoverage,
         volumeUpdatedAt: base.volumeUpdatedAt, volumeScope: base.volumeScope, volumeIsIndex: !!base.volumeIsIndex,
         klineUpdatedAt: base.klineUpdatedAt || null,
+        min10: clean(base.min10), min20: clean(base.min20),
       };
     }
     function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
@@ -715,9 +742,32 @@
       if (Number.isFinite(rsi) && rsi >= 80) { base = 1.5; reason = "RSI≥80 → 基础1.5"; }
       else if (Number.isFinite(rsi) && rsi >= 70) { base = 2.0; reason = "RSI70~80 → 基础2.0"; }
       else if (Number.isFinite(rsi) && rsi >= 60) { base = 2.5; reason = "RSI60~70 → 基础2.5"; }
-      const adjusted = Number.isFinite(adx) && adx > 50 ? Math.max(1.0, base - 0.3) : base;
-      const adxText = Number.isFinite(adx) && adx > 50 ? "，ADX>50 → -0.3" : "，ADX≤50 → 不调整";
+      const adxAdj = Number.isFinite(adx) && adx > 50;
+      const adjusted = adxAdj ? Math.max(1.0, base - 0.3) : base;
+      const adxText = adxAdj ? "，ADX>50 → -0.3" : "，ADX≤50 → 不调整";
       return { base, k:adjusted, text:reason + adxText };
+    }
+    function kTimeFrom(baseK, holdingDays, floatR) {
+      let k = baseK;
+      const steps = [];
+      const d = holdingDays;
+      const fr = floatR;
+      if (Number.isFinite(d) && d > 30 && Number.isFinite(fr) && fr < 1.0) {
+        k = Math.max(1.0, k - 0.5);
+        steps.push({ label:`持仓${d}日 > 30 且 浮盈${fr>=0?"+":""}${fr?.toFixed(2)}R < +1.0R`, adj:"-0.5", triggered:true });
+      } else if (Number.isFinite(d) && d > 30) {
+        steps.push({ label:`持仓${d}日 > 30 但 浮盈${fr>=0?"+":""}${fr?.toFixed(2)}R ≥ +1.0R`, adj:"不触发", triggered:false });
+      } else {
+        steps.push({ label:Number.isFinite(d) ? `持仓${d}日 ≤ 30` : "开仓日未记录", adj:"不触发", triggered:false });
+      }
+      if (Number.isFinite(d) && d > 60 && Number.isFinite(fr) && fr < 1.5) {
+        k = Math.max(1.0, k - 0.3);
+        steps.push({ label:`持仓${d}日 > 60 且 浮盈 < +1.5R（追加）`, adj:"-0.3", triggered:true });
+      } else if (Number.isFinite(d) && d > 60) {
+        steps.push({ label:`持仓${d}日 > 60 但 浮盈 ≥ +1.5R`, adj:"不触发", triggered:false });
+      }
+      const triggered = steps.some(s => s.triggered);
+      return { k, steps, triggered };
     }
     function compute(cfg, market) {
       const R = 2 * cfg.entryATR;
@@ -733,11 +783,19 @@
       const kInfo = kFrom(market.currentRSI, market.currentADX);
       const line3 = Number.isFinite(market.highestClose) && Number.isFinite(market.currentATR)
         ? market.highestClose - kInfo.k * market.currentATR : null;
+      const holdingDays = cfg.openedAt
+        ? Math.floor((Date.now() - new Date(cfg.openedAt).getTime()) / 86400000)
+        : null;
+      const kTimeInfo = kTimeFrom(kInfo.k, holdingDays, floatR);
+      const line3t = Number.isFinite(market.highestClose) && Number.isFinite(market.currentATR)
+        ? market.highestClose - kTimeInfo.k * market.currentATR : null;
       const line4 = cfg.ratchet;
-      const candidates = {"①初始止损":line1, "②R-Ladder":line2, "③Chandelier":line3, "④棘轮记忆":line4};
+      // Use time-adjusted Chandelier (= line3 when no time factor) as ③ in final stop
+      const candidates = {"①初始止损":line1, "②R-Ladder":line2, "③Chandelier":line3t, "④棘轮记忆":line4};
       const valid = Object.entries(candidates).filter(([, v]) => Number.isFinite(v));
       const best = valid.reduce((a, b) => b[1] > a[1] ? b : a, valid[0] || ["—", null]);
-      return { R, floatR, k:kInfo.k, kInfo, line1, line2, line3, line4, finalStop:best[1], winner:best[0], candidates };
+      return { R, floatR, k:kInfo.k, kInfo, holdingDays, kTimeInfo,
+               line1, line2, line3, line3t, line4, finalStop:best[1], winner:best[0], candidates };
     }
     async function refreshAll() {
       setStatus("loading", "行情 刷新中");
@@ -795,6 +853,11 @@
           next.ma20 = sma(closes, 20); next.ma20Prev = sma(closes.slice(0, -1), 20);
           next.ma60 = sma(closes, 60);
           next.tradeMa20 = sma(tradeCloses, 20);
+          // Turtle exit levels: 10-day and 20-day lowest close of signal index
+          const fin = (v) => Number.isFinite(v);
+          const last10c = closes.slice(-10).filter(fin), last20c = closes.slice(-20).filter(fin);
+          next.min10 = last10c.length ? Math.min(...last10c) : null;
+          next.min20 = last20c.length ? Math.min(...last20c) : null;
           next.volume = volumeLatest?.volume ?? null; next.volumePrev = volumePrev?.volume ?? null;
           next.volumeMa5 = sma(volumeSeries, 5); next.volumeMa10 = sma(volumeSeries, 10);
           next.volumeMa20 = sma(volumeSeries, 20);
@@ -842,15 +905,6 @@
         $("planPrice").value = fmt(m.currentPrice ?? c.cost, 3);
         $("planAtr").value = fmt(m.currentATR ?? c.entryATR, 4);
       }
-      updateDetailInput("detailPrice", m.currentPrice);
-      updateDetailInput("detailHh", m.highestClose);
-      updateDetailInput("detailAtr", m.currentATR);
-      updateDetailInput("detailRsi", m.currentRSI);
-      updateDetailInput("detailAdx", m.currentADX);
-    }
-    function updateDetailInput(id, value) {
-      const el = $(id);
-      if (document.activeElement !== el) el.value = Number.isFinite(value) ? String(+value.toFixed(id === "detailAtr" ? 4 : 3)) : "";
     }
     // ===== 趋势概览 helper functions =====
     function volText(v) {
@@ -1150,6 +1204,7 @@
       $("positionTabs").innerHTML = html;
       $("marketTabs").innerHTML = html;
       $("ovAssetBar").innerHTML = html;
+      $("sdAssetBar").innerHTML = html;
     }
     function metric(label, value, cls="") {
       return `<div class="metric"><label>${label}</label><strong class="num ${cls}">${value}</strong></div>`;
@@ -1367,39 +1422,145 @@
     }
     function renderStopDetail() {
       const c = posCfg(), m = marketOf(), r = compute(c, m);
-      const rows = [
-        ["RSI ≥ 80", "1.5", "1.2", m.currentRSI >= 80],
-        ["RSI 70~80", "2.0", "1.7", m.currentRSI >= 70 && m.currentRSI < 80],
-        ["RSI 60~70", "2.5", "2.2", m.currentRSI >= 60 && m.currentRSI < 70],
-        ["RSI < 60", "3.0", "3.0", !Number.isFinite(m.currentRSI) || m.currentRSI < 60],
-      ].map(x => `<tr class="${x[3] ? "active-k" : ""}"><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td><td>${Number.isFinite(m.currentADX) && m.currentADX > 50 ? x[2] : x[1]}</td><td>${kMeaning(x[0])}</td></tr>`).join("");
-      $("kTable").innerHTML = `<table class="k-table"><tr><th>RSI条件</th><th>基础k</th><th>ADX>50后</th><th>最终k</th><th>含义</th></tr>${rows}</table>`;
-      $("kExplain").textContent = `当前 k = ${fmt(r.k, 1)}（${r.kInfo.text}）`;
-      $("ladderViz").innerHTML = ladderSvg(c, r);
-      renderStopCards("detailStopCards", c, m, r, true);
-      $("detailFinal").innerHTML = `★ 最终止损 <span class="num">${fmt(r.finalStop)}</span><div class="subtle">四线取最大值，${r.winner} 胜出；若高于当前棘轮值，收盘后写回 last_protection_line。</div>`;
+      const stamp = m.klineUpdatedAt ? `<span class="sd-block-stamp">${m.klineUpdatedAt}</span>` : "";
+      $("sdContent").innerHTML =
+        sdSummaryHtml(c, m, r, stamp) +
+        sdRMultipleHtml(c, m, r, stamp) +
+        sdTurtleHtml(c, m, r, stamp) +
+        sdChandelierHtml(c, m, r, stamp) +
+        sdTimeFacHtml(c, m, r, stamp);
     }
-    function kMeaning(cond) {
-      return cond.includes("80") ? "极度超买，大幅收紧" : cond.includes("70") ? "加速段，收紧" : cond.includes("60") ? "正常趋势，标准" : "趋势初期，宽松";
+    function sdRow(label, val, cls="") {
+      return `<div class="sd-row ${cls}"><span class="sd-row-label">${label}</span><span class="sd-row-val num">${val}</span></div>`;
     }
-    function ladderSvg(c, r) {
-      const stages = [
-        {x:20, label:"初始", protect:c.initialStop, threshold:-Infinity},
-        {x:145, label:"+0.5R", protect:c.cost, threshold:.5},
-        {x:270, label:"+1R", protect:c.cost + r.R * .25, threshold:1},
-        {x:395, label:"+2R", protect:c.cost + r.R * .75, threshold:2},
-        {x:520, label:"+3R", protect:c.cost + r.R * 1.5, threshold:3},
-        {x:645, label:"+4R+", protect:null, threshold:4},
+    function sdSummaryHtml(c, m, r, stamp) {
+      const lines = [
+        { no:"①", name:"初始止损", val:r.line1, key:"①初始止损" },
+        { no:"②", name:"R-Ladder", val:r.line2, key:"②R-Ladder", inactive:!Number.isFinite(r.line2) },
+        { no:"③", name:"Chandelier（基础）", val:r.line3 },
+        { no:"③t", name:"Chandelier（时间修正）", val:r.line3t, key:"③Chandelier" },
+        { no:"④", name:"棘轮记忆", val:r.line4, key:"④棘轮记忆" },
       ];
-      const active = Number.isFinite(r.floatR) ? stages.reduce((idx, s, i) => r.floatR >= s.threshold ? i : idx, 0) : 0;
-      const blocks = stages.map((s, i) => {
-        const fill = i < active ? "#d1fae5" : i === active ? "#dbeafe" : "#f8fafc";
-        const stroke = i === active ? "#2563eb" : i < active ? "#059669" : "#cbd5e1";
-        return `<rect x="${s.x}" y="${80 - i * 7}" width="104" height="62" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${i === active ? 2 : 1}"/>
-          <text x="${s.x + 52}" y="${102 - i * 7}" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">${s.label}</text>
-          <text x="${s.x + 52}" y="${124 - i * 7}" text-anchor="middle" font-size="12" fill="#475569">${s.protect == null ? "Chandelier" : fmt(s.protect)}</text>`;
+      const rows = lines.map(l => {
+        const isWinner = l.key === r.winner;
+        const cls = l.inactive ? "inactive" : isWinner ? "winner" : "other";
+        const valStr = l.inactive ? "未触发" : Number.isFinite(l.val) ? fmt(l.val) : "—";
+        return `<div class="sd-summary-row ${cls}">
+          <span>${l.no} ${l.name}</span>
+          <span class="num">${valStr}${isWinner ? " ★" : ""}</span>
+        </div>`;
       }).join("");
-      return `<svg viewBox="0 0 770 160" style="min-width:760px"><rect width="770" height="160" fill="#fff"/>${blocks}<text x="20" y="30" font-size="13" fill="#475569">当前浮盈：${fmtR(r.floatR)}</text></svg>`;
+      return `<div class="sd-summary">
+        <div class="sd-summary-meta">★ 最终止损 · 四线取最大值 ${stamp}</div>
+        <div class="sd-summary-winner">${r.winner || "等待数据"} 胜出</div>
+        <div class="sd-summary-val">${Number.isFinite(r.finalStop) ? fmt(r.finalStop) : "—"}</div>
+        <div class="sd-summary-rows">${rows}</div>
+      </div>`;
+    }
+    function sdRMultipleHtml(c, m, r, stamp) {
+      const stages = [
+        { label:"初始", threshold:-Infinity, protect:c.initialStop },
+        { label:"+0.5R", threshold:0.5, protect:c.cost },
+        { label:"+1R", threshold:1.0, protect:c.cost + r.R * 0.25 },
+        { label:"+2R", threshold:2.0, protect:c.cost + r.R * 0.75 },
+        { label:"+3R", threshold:3.0, protect:c.cost + r.R * 1.5 },
+        { label:"+4R+", threshold:4.0, protect:null },
+      ];
+      const activeIdx = Number.isFinite(r.floatR)
+        ? stages.reduce((idx, s, i) => r.floatR >= s.threshold ? i : idx, 0) : 0;
+      const ladder = stages.map((s, i) => {
+        const cls = i < activeIdx ? "done" : i === activeIdx ? "active" : "";
+        const protStr = s.protect == null ? "Chandelier" : fmt(s.protect);
+        return `<div class="sd-ladder-step ${cls}">
+          <div class="sd-ladder-label">${s.label}</div>
+          <div class="sd-ladder-protect">${protStr}</div>
+        </div>`;
+      }).join("");
+      const activeStage = stages[activeIdx];
+      const stopLine = Number.isFinite(r.line2)
+        ? sdRow("当前档止损线", `${activeStage.label} → ${fmt(r.line2)}`, "stop-line")
+        : sdRow("当前档止损线", `未触发（触发价 ${fmt(c.cost + r.R * 0.5)}）`, "highlight");
+      return `<div class="sd-block">
+        <div class="sd-block-title">R-multiple${stamp}</div>
+        <div class="sd-kv">
+          ${sdRow("R 单位（= 2 × 入场ATR）", `${fmt(r.R, 4)}（ATR ${fmt(c.entryATR, 4)}）`)}
+          ${sdRow("当前浮盈", `${fmtR(r.floatR)}（当前 ${fmt(m.currentPrice)} · 成本 ${fmt(c.cost)}）`, Number.isFinite(r.floatR) && r.floatR > 0 ? "highlight" : "")}
+        </div>
+        <div class="sd-ladder">${ladder}</div>
+        ${stopLine}
+      </div>`;
+    }
+    function sdTurtleHtml(c, m, r, stamp) {
+      const price = m.close ?? m.currentPrice;
+      function turtleRow(label, minVal) {
+        if (!Number.isFinite(minVal)) return sdRow(label, "等待K线数据");
+        const above = Number.isFinite(price) && price > minVal;
+        const icon = above ? "✓ 高于" : "✗ 已跌破";
+        const cls = above ? "highlight" : "stop-line";
+        return sdRow(label, `${fmt(minVal)} · 当前 ${fmt(price)} ${icon}`, cls);
+      }
+      return `<div class="sd-block">
+        <div class="sd-block-title">海龟交易${stamp}</div>
+        <div class="sd-kv">
+          ${sdRow("2N 硬止损（= 初始止损线）", `${fmt(r.line1)}（成本 ${fmt(c.cost)} − R ${fmt(r.R, 4)}）`)}
+        </div>
+        <div class="sd-kv" style="margin-top:8px">
+          ${turtleRow("10日新低出场线（信号指数）", m.min10)}
+          ${turtleRow("20日新低出场线（信号指数）", m.min20)}
+        </div>
+      </div>`;
+    }
+    function sdChandelierHtml(c, m, r, stamp) {
+      const ki = r.kInfo;
+      const rsiCond = [
+        { label:"RSI ≥ 80", k:1.5, active:Number.isFinite(m.currentRSI) && m.currentRSI >= 80 },
+        { label:"RSI 70~80", k:2.0, active:Number.isFinite(m.currentRSI) && m.currentRSI >= 70 && m.currentRSI < 80 },
+        { label:"RSI 60~70", k:2.5, active:Number.isFinite(m.currentRSI) && m.currentRSI >= 60 && m.currentRSI < 70 },
+        { label:"RSI < 60", k:3.0, active:!Number.isFinite(m.currentRSI) || m.currentRSI < 60 },
+      ];
+      const adxAdj = Number.isFinite(m.currentADX) && m.currentADX > 50;
+      const kSteps = rsiCond.map(s =>
+        `<div class="sd-kstep ${s.active ? "active" : ""}">${s.label} → 基础 k = ${s.k}${s.active ? "  ←当前" : ""}</div>`
+      ).join("") +
+      `<div class="sd-kstep ${adxAdj ? "adjust" : ""}">ADX ${fmt(m.currentADX, 1)} ${adxAdj ? "> 50 → −0.3" : "≤ 50 → 不调整"}</div>`;
+      const hh = m.highestClose, atr = m.currentATR, k = r.k;
+      const calcBox = Number.isFinite(hh) && Number.isFinite(atr)
+        ? `HH ${fmt(hh)} − k ${fmt(k,1)} × ATR ${fmt(atr,4)} = ${fmt(hh)} − ${fmt(k * atr, 4)} = ${fmt(r.line3)}`
+        : "等待 HH 和 ATR 数据";
+      return `<div class="sd-block">
+        <div class="sd-block-title">Chandelier 止损${stamp}</div>
+        <div class="sd-kdecision">${kSteps}</div>
+        <div class="sd-calc-box">${calcBox}</div>
+        ${sdRow("Chandelier 止损线", Number.isFinite(r.line3) ? fmt(r.line3) : "—", "stop-line")}
+      </div>`;
+    }
+    function sdTimeFacHtml(c, m, r, stamp) {
+      const { holdingDays, kTimeInfo, line3t, k, line3 } = r;
+      const daysStr = Number.isFinite(holdingDays)
+        ? `${holdingDays} 天（自 ${c.openedAt}）` : "未记录开仓日期";
+      const timeSteps = kTimeInfo.steps.map(s =>
+        `<div class="sd-kstep ${s.triggered ? "adjust" : ""}">${s.label} → ${s.adj}</div>`
+      ).join("");
+      const kSame = Math.abs((kTimeInfo.k - k)) < 0.001;
+      const hh = m.highestClose, atr = m.currentATR;
+      const calcBox = Number.isFinite(hh) && Number.isFinite(atr)
+        ? `HH ${fmt(hh)} − k_t ${fmt(kTimeInfo.k,1)} × ATR ${fmt(atr,4)} = ${fmt(line3t)}`
+          + (kSame ? "（与 Chandelier 相同，无时间调整）" : "")
+        : "等待 HH 和 ATR 数据";
+      const tag = kTimeInfo.triggered
+        ? `<span class="sd-time-tag warn">时间收紧：k ${fmt(k,1)} → ${fmt(kTimeInfo.k,1)}</span>`
+        : `<span class="sd-time-tag ok">无时间调整</span>`;
+      return `<div class="sd-block">
+        <div class="sd-block-title">时间因子${stamp}</div>
+        <div class="sd-kv">
+          ${sdRow("持仓天数", daysStr)}
+          ${sdRow("浮盈", fmtR(r.floatR))}
+        </div>
+        <div class="sd-kdecision" style="margin-top:8px">${timeSteps}</div>
+        ${tag}
+        <div class="sd-calc-box">${calcBox}</div>
+        ${sdRow("时间因子止损线", Number.isFinite(line3t) ? fmt(line3t) : "—", "stop-line")}
+      </div>`;
     }
     function renderExitTree() {
       const r = compute(posCfg(), marketOf());
@@ -1472,15 +1633,7 @@
     });
     ["matrixAdx","matrixRsi"].forEach(id => $(id).addEventListener("input", () => { state.matrixTouched = true; renderMatrix(); }));
     ["planPrice","planAtr","riskBudget"].forEach(id => $(id).addEventListener("input", () => { state.planTouched = true; renderPositionCalc(); renderPyramid(); }));
-    ["detailPrice","detailHh","detailAtr","detailRsi","detailAdx"].forEach(id => $(id).addEventListener("input", () => {
-      const map = { detailPrice:"currentPrice", detailHh:"highestClose", detailAtr:"currentATR", detailRsi:"currentRSI", detailAdx:"currentADX" };
-      state.overrides[state.activeId] ||= {};
-      state.overrides[state.activeId][map[id]] = parseFloat($(id).value);
-      if (id === "detailRsi" || id === "detailAdx") {
-        $("matrixAdx").value = $("detailAdx").value; $("matrixRsi").value = $("detailRsi").value; state.matrixTouched = true;
-      }
-      renderAll();
-    }));
+
     document.addEventListener("input", (e) => {
       if (e.target.id === "gatePool") state.gateOverrides.poolWidth = e.target.checked;
       if (["gateAdx","gateMa","gateClose","gatePool"].includes(e.target.id)) renderGates();
