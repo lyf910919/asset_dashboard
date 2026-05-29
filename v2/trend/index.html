@@ -235,11 +235,12 @@
     .ov-ma-dot{position:absolute;top:0;height:100%;width:8px;border-radius:4px;transform:translateX(-50%)}
     .ov-ma-val{text-align:right;font-variant-numeric:tabular-nums;color:var(--text-secondary)}
     .ov-vol-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-    .ov-vol-row{display:grid;grid-template-columns:76px 1fr 90px;align-items:center;gap:8px}
+    .ov-vol-row{display:grid;grid-template-columns:76px 1fr 80px 42px;align-items:center;gap:8px}
     .ov-vol-label{color:var(--text-muted);font-size:12px}
     .ov-vol-track{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden}
     .ov-vol-bar{height:100%;border-radius:4px}
     .ov-vol-val{text-align:right;font-variant-numeric:tabular-nums;font-size:12px;color:var(--text-secondary)}
+    .ov-vol-ratio{text-align:right;font-variant-numeric:tabular-nums;font-size:12px;font-weight:700}
     .ov-proj-note{font-size:12px;color:var(--text-muted);margin-bottom:8px;padding:8px 10px;background:var(--surface-2);border-radius:var(--radius-sm);border:1px solid var(--border)}
     .ov-conclusion{padding:16px;border-radius:var(--radius-sm);border:2px solid}
     .ov-conclusion.green{background:var(--green-bg);border-color:var(--green)}
@@ -1216,9 +1217,9 @@
       const volEntries = [
         {label: isOpen ? "今日量(实时)" : "今日量", val: m.volume, isToday:true},
         ...(isOpen && Number.isFinite(projVol) ? [{label:"预计全天量", val:projVol, isProj:true}] : []),
-        {label:"5日均量",  val: m.volumeMa5},
-        {label:"10日均量", val: m.volumeMa10},
-        {label:"20日均量", val: m.volumeMa20},
+        {label:"5日均量",  val: m.volumeMa5,  isMa:true},
+        {label:"10日均量", val: m.volumeMa10, isMa:true},
+        {label:"20日均量", val: m.volumeMa20, isMa:true},
       ].filter(x => Number.isFinite(x.val));
       let volRows = "";
       if (volEntries.length >= 2) {
@@ -1227,10 +1228,18 @@
           const barPct = (x.val / maxV * 100).toFixed(1);
           const barColor = x.isToday ? "#2563eb" : x.isProj ? "#7c3aed" : "#94a3b8";
           const valStr = volText(x.val) + (x.isProj ? " (预估)" : "");
+          let ratioHtml = "";
+          if (x.isMa && Number.isFinite(compareVol) && x.val > 0) {
+            const ratio = compareVol / x.val;
+            const ratioStr = ratio.toFixed(2) + "×";
+            const ratioColor = ratio >= 2.0 ? "var(--red)" : ratio >= 1.5 ? "#ea580c"
+              : ratio >= 1.0 ? "var(--text-secondary)" : ratio >= 0.7 ? "var(--yellow)" : "var(--green)";
+            ratioHtml = `<span class="ov-vol-ratio" style="color:${ratioColor}">${ratioStr}</span>`;
+          }
           return `<div class="ov-vol-row">
             <span class="ov-vol-label">${x.label}</span>
             <div class="ov-vol-track"><div class="ov-vol-bar" style="width:${barPct}%;background:${barColor}"></div></div>
-            <span class="ov-vol-val">${valStr}</span>
+            <span class="ov-vol-val">${valStr}</span>${ratioHtml}
           </div>`;
         }).join("");
       } else { volRows = `<div class="subtle">等待量能数据…</div>`; }
