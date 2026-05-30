@@ -14,10 +14,10 @@ import {
   setBundle,
   setConfigValue,
   upsertDailyNav,
-} from "./lib/storage.js?v=20260527-fund-targets-mobile";
-import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260527-fund-targets-mobile";
-import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260527-fund-targets-mobile";
-import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260527-fund-targets-mobile";
+} from "./lib/storage.js?v=20260530-mobile-nav";
+import { fetchDirectFxSnapshot, fetchFundSnapshots } from "./lib/market.js?v=20260530-mobile-nav";
+import { readBackupGist, upsertBackupGist, verifyGistToken } from "./lib/gist.js?v=20260530-mobile-nav";
+import { buildPerformanceScopeCatalog, computePerformanceReport } from "./lib/performance.js?v=20260530-mobile-nav";
 const STORAGE_KEY = "qdii-vault-encrypted-v1";
 const LEGACY_STORAGE_KEY = "qdii-dashboard-config-v1";
 const REMEMBER_PASS_KEY = "qdii-remember-passphrase-v1";

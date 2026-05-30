@@ -215,6 +215,20 @@ async function fetchEstimateJsonp(code) {
 }
 
 async function fetchNavJsonp(code) {
+  try {
+    const payload = await fetchMobileNavJson(code);
+    const item = Array.isArray(payload?.Datas) ? payload.Datas[0] : null;
+    if (item) {
+      return {
+        nav: parseFloatSafe(item.DWJZ),
+        navDate: item.FSRQ || null,
+        navAcc: parseFloatSafe(item.LJJZ),
+        navChangePct: parseFloatSafe(item.JZZZL),
+      };
+    }
+  } catch {
+  }
+
   const payload = await loadJsonp(
     `https://api.fund.eastmoney.com/f10/lsjz?fundCode=${code}&pageIndex=1&pageSize=1&startDate=&endDate=`,
     "callback",
@@ -228,6 +242,25 @@ async function fetchNavJsonp(code) {
     navAcc: parseFloatSafe(item.LJJZ),
     navChangePct: parseFloatSafe(item.JZZZL),
   };
+}
+
+async function fetchMobileNavJson(code) {
+  const params = new URLSearchParams({
+    FCODE: code,
+    pageIndex: "1",
+    pageSize: "1",
+    deviceid: "qdii-dashboard",
+    plat: "Iphone",
+    product: "EFund",
+    version: "6.5.8",
+  });
+  const response = await fetch(`https://fundmobapi.eastmoney.com/FundMNewApi/FundMNHisNetList?${params.toString()}`);
+  if (!response.ok) throw new Error("移动端净值接口异常");
+  const payload = await response.json();
+  if (String(payload?.ErrCode ?? payload?.ErrorCode ?? "") !== "0" || !Array.isArray(payload?.Datas)) {
+    throw new Error(String(payload?.ErrMsg || payload?.ErrorMessage || "移动端净值为空"));
+  }
+  return payload;
 }
 
 async function fetchOverseasFundListJsonp() {
