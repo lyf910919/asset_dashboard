@@ -465,6 +465,16 @@
         ratchet:1.840, highestClose:1.998, openedAt:"2026-05-25", positionPct:0.5,
       }
     };
+    const OVERVIEW_WATCH_CONFIG = {
+      "HSTECH": {
+        name:"恒生科技指数", secid:"124.HSTECH", signalSecid:"124.HSTECH",
+        signalName:"恒生科技指数", observeOnly:true,
+      },
+      "H30533": {
+        name:"中概互联指数", secid:"2.H30533", signalSecid:"2.H30533",
+        signalName:"中国互联网50", observeOnly:true,
+      }
+    };
     const ACCOUNT_CONFIG = { trendAccountPct:3.0, maxLossPct:-10.0 };
     const INDEX_VOLUME_FILES = {
       "2.931643":{
@@ -479,13 +489,16 @@
       },
     };
     const state = {
-      activeId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
+      activeId:"159781", overviewId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
       autoTimer:null, matrixTouched:false, planTouched:false,
       gateOverrides:{ poolWidth:false },
       trades:{}, ratchets:{}, tradeEditId:null, tradeFormOpen:false
     };
     const $ = (id) => document.getElementById(id);
     const ids = () => Object.keys(POSITIONS_CONFIG);
+    const overviewIds = () => [...ids(), ...Object.keys(OVERVIEW_WATCH_CONFIG)];
+    const marketIds = () => [...new Set(overviewIds())];
+    const assetCfg = (id) => POSITIONS_CONFIG[id] || OVERVIEW_WATCH_CONFIG[id];
     const isNum = (v) => Number.isFinite(Number(v));
     const clean = (v) => Number.isFinite(v) ? v : null;
     const nullableNum = (v) => v == null ? null : (Number.isFinite(+v) ? +v : null);
@@ -539,7 +552,7 @@
       });
     }
     function marketOf(id=state.activeId) {
-      const cfg = POSITIONS_CONFIG[id];
+      const cfg = assetCfg(id) || {};
       const base = state.market[id] || {};
       const over = state.overrides[id] || {};
       return {
@@ -633,7 +646,7 @@
     function parseEMKlines(klines) {
       return klines.map((item) => {
         const p = item.split(",");
-        return { date:p[0], open:+p[1], close:+p[2], high:+p[3], low:+p[4], volume:+p[5] };
+        return { date:p[0], open:+p[1], close:+p[2], high:+p[3], low:+p[4], volume:+p[5], amount:+p[6] };
       }).filter(r => [r.open, r.close, r.high, r.low].every(Number.isFinite));
     }
     function toYahooSymbol(secid) {
@@ -887,7 +900,7 @@
     }
     async function refreshAll() {
       setStatus("loading", "行情 刷新中");
-      const secids = [...new Set(ids().flatMap(id => [POSITIONS_CONFIG[id].secid, POSITIONS_CONFIG[id].signalSecid]))];
+      const secids = [...new Set(marketIds().flatMap(id => [assetCfg(id).secid, assetCfg(id).signalSecid]))];
       let quoteRows = {}, quoteOk = false, kOkCount = 0;
       try {
         const data = await fetchQuotes(secids);
@@ -901,8 +914,8 @@
           quoteOk = false;
         }
       }
-      await Promise.all(ids().map(async (id) => {
-        const cfg = POSITIONS_CONFIG[id];
+      await Promise.all(marketIds().map(async (id) => {
+        const cfg = assetCfg(id);
         const current = state.market[id] || {};
         const quote = quoteRows[cfg.secid] || {};
         const signalQuote = quoteRows[cfg.signalSecid] || {};
@@ -913,9 +926,11 @@
         }
         try {
           const tradeRows = await fetchKlines(cfg.secid);
-          const signalRows = cfg.signalSecid ? await fetchKlines(cfg.signalSecid).catch(() => {
-            tradeRows.isVolumeProxy = true; return tradeRows;
-          }) : tradeRows;
+          const signalRows = cfg.signalSecid && cfg.signalSecid !== cfg.secid
+            ? await fetchKlines(cfg.signalSecid).catch(() => {
+              tradeRows.isVolumeProxy = true; return tradeRows;
+            })
+            : tradeRows;
           const adx = calcADX(signalRows);
           const closes = signalRows.map(r => r.close);
           const tradeCloses = tradeRows.map(r => r.close);
@@ -925,6 +940,7 @@
           const prev = tradeRows[tradeRows.length - 2];
           const volumeLatest = volumeRows?.[volumeRows.length - 1];
           const volumePrev = volumeRows?.[volumeRows.length - 2];
+          const amountSeries = volumeRows ? volumeRows.map(r => r.amount).filter(Number.isFinite) : [];
           if (!Number.isFinite(next.currentPrice) && latest) next.currentPrice = latest.close;
           if (!Number.isFinite(next.high) && latest) next.high = latest.high;
           if (!Number.isFinite(next.low) && latest) next.low = latest.low;
@@ -950,6 +966,8 @@
           next.volume = volumeLatest?.volume ?? null; next.volumePrev = volumePrev?.volume ?? null;
           next.volumeMa5 = sma(volumeSeries, 5); next.volumeMa10 = sma(volumeSeries, 10);
           next.volumeMa20 = sma(volumeSeries, 20);
+          next.volumeAmount = volumeLatest?.amount ?? null; next.volumeAmountPrev = volumePrev?.amount ?? null;
+          next.volumeAmountMa20 = sma(amountSeries, 20);
           next.priceChangePct = volumeLatest && volumePrev?.close ? (volumeLatest.close / volumePrev.close - 1) * 100 : null;
           next.volumeScope = volumeRows ? `${cfg.signalName || "信号指数"}（指数成交量）` : "指数量能不可得";
           next.volumeIsIndex = !!volumeRows;
@@ -974,7 +992,7 @@
       }));
       const clock = new Date().toLocaleTimeString("zh-CN", {hour12:false});
       const label = quoteOk ? `行情 ${clock}` : (kOkCount ? `K线 ${clock} · 实时失败` : "行情 获取失败");
-      setStatus(quoteOk && kOkCount === ids().length ? "ok" : quoteOk || kOkCount ? "partial" : "bad", label);
+      setStatus(quoteOk && kOkCount === marketIds().length ? "ok" : quoteOk || kOkCount ? "partial" : "bad", label);
       $("dataMode").textContent = quoteOk ? "实时联动" : (kOkCount ? "K线驱动" : "静态降级");
       syncInputsFromMarket();
       renderAll();
@@ -1108,7 +1126,6 @@
       return {cls:"yellow", title:"温和量能回调", desc:"价格小幅下跌，量能在均线附近，属常规回调，关注支撑位。"};
     }
     function overallConclusion(indInterp, maInterp, volInterp, m, cfg) {
-      const r = compute(cfg, m);
       const scoreMap = {green:2, yellow:1, red:0, neutral:1};
       const score = (scoreMap[indInterp.cls]||1) + (scoreMap[maInterp.cls]||1) + (scoreMap[volInterp.cls]||1);
       let cls, title, advice;
@@ -1122,12 +1139,16 @@
         {label:"均线排列", cls: maInterp.cls === "green" ? "pass" : maInterp.cls === "red" ? "fail" : "warn"},
         {label:"量能", cls: volInterp.cls === "green" ? "pass" : volInterp.cls === "red" ? "fail" : "warn"},
       ];
-      const stopRef = Number.isFinite(r.finalStop) ? `止损参考：${fmt(r.finalStop)}（${r.winner}）` : "";
+      let stopRef = "";
+      if (!cfg.observeOnly) {
+        const r = compute(cfg, m);
+        stopRef = Number.isFinite(r.finalStop) ? `止损参考：${fmt(r.finalStop)}（${r.winner}）` : "";
+      }
       return {cls, title, advice, tags, stopRef};
     }
     function renderOverview() {
-      const id = state.activeId;
-      const cfg = POSITIONS_CONFIG[id];
+      const id = state.overviewId;
+      const cfg = assetCfg(id);
       const m = marketOf(id);
       const projVol = projectVolume(m.volume);
       const elapsed = tradingMinutesElapsed();
@@ -1275,7 +1296,7 @@
       </div>`;
 
       $("ovContent").innerHTML = priceRow + indBlock + indInterpHtml + maBlock + volBlock + conBlock;
-      $("ovStamp").textContent = cfg.signalName ? `信号：${cfg.signalName}` : "";
+      $("ovStamp").textContent = cfg.signalName ? `${cfg.observeOnly ? "观察" : "信号"}：${cfg.signalName}` : "";
     }
     // ===== end 趋势概览 =====
     function renderAll() {
@@ -1285,23 +1306,40 @@
     function renderTabs() {
       const allIds = ids();
       const MAX_TABS = 5;
-      let html;
-      if (allIds.length <= MAX_TABS) {
-        html = allIds.map(id => {
-          const c = POSITIONS_CONFIG[id];
-          return `<button class="tab ${id === state.activeId ? "active" : ""}" data-pos="${id}">${id} ${c.name}</button>`;
-        }).join("");
-      } else {
-        html = `<select class="tab" onchange="state.activeId=this.value;renderAll()">` +
-          allIds.map(id => {
-            const c = POSITIONS_CONFIG[id];
-            return `<option value="${id}" ${id === state.activeId ? "selected" : ""}>${id} ${c.name}</option>`;
+      function tabHtml(items, activeId, dataName) {
+        if (items.length <= MAX_TABS) {
+          return items.map(id => {
+            const c = assetCfg(id);
+            return `<button class="tab ${id === activeId ? "active" : ""}" data-${dataName}="${id}">${id} ${c.name}</button>`;
+          }).join("");
+        }
+        return `<select class="tab" data-${dataName}-select>` +
+          items.map(id => {
+            const c = assetCfg(id);
+            return `<option value="${id}" ${id === activeId ? "selected" : ""}>${id} ${c.name}</option>`;
           }).join("") + `</select>`;
       }
+      const html = tabHtml(allIds, state.activeId, "pos");
       $("positionTabs").innerHTML = html;
       $("marketTabs").innerHTML = html;
-      $("ovAssetBar").innerHTML = html;
       $("sdAssetBar").innerHTML = html;
+      $("ovAssetBar").innerHTML = tabHtml(overviewIds(), state.overviewId, "ov");
+    }
+    function setActivePosition(id) {
+      if (!POSITIONS_CONFIG[id]) return;
+      state.activeId = id; state.matrixTouched = false; state.planTouched = false;
+      state.tradeFormOpen = false; state.tradeEditId = null;
+      syncInputsFromMarket(); renderAll();
+    }
+    function setOverviewAsset(id) {
+      if (!assetCfg(id)) return;
+      state.overviewId = id;
+      if (POSITIONS_CONFIG[id]) {
+        state.activeId = id; state.matrixTouched = false; state.planTouched = false;
+        state.tradeFormOpen = false; state.tradeEditId = null;
+        syncInputsFromMarket();
+      }
+      renderAll();
     }
     function metric(label, value, cls="") {
       return `<div class="metric"><label>${label}</label><strong class="num ${cls}">${value}</strong></div>`;
@@ -1878,11 +1916,9 @@
       const modalBtn = e.target.closest("[data-modal]");
       if (modalBtn) openModal(modalBtn.dataset.modal);
       const tab = e.target.closest("[data-pos]");
-      if (tab) {
-        state.activeId = tab.dataset.pos; state.matrixTouched = false; state.planTouched = false;
-        state.tradeFormOpen = false; state.tradeEditId = null;
-        syncInputsFromMarket(); renderAll();
-      }
+      if (tab) setActivePosition(tab.dataset.pos);
+      const ovTab = e.target.closest("[data-ov]");
+      if (ovTab) setOverviewAsset(ovTab.dataset.ov);
       // Trade log edit
       const editBtn = e.target.closest("[data-edit]");
       if (editBtn) {
@@ -1936,6 +1972,10 @@
       if (e.target.id === "tf-date" || e.target.id === "tf-type") updateTradeFormATR();
       if (["tf-atr","tf-price"].includes(e.target.id)) updateTradeFormPreview();
     });
+    document.addEventListener("change", (e) => {
+      if (e.target.matches("[data-pos-select]")) setActivePosition(e.target.value);
+      if (e.target.matches("[data-ov-select]")) setOverviewAsset(e.target.value);
+    });
     $("refreshBtn").addEventListener("click", refreshAll);
     $("autoRefresh").addEventListener("change", (e) => {
       clearInterval(state.autoTimer);
@@ -1946,8 +1986,8 @@
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
     function seedState() {
       loadTradeState();
-      ids().forEach(id => {
-        const c = POSITIONS_CONFIG[id];
+      marketIds().forEach(id => {
+        const c = assetCfg(id);
         state.market[id] = { currentPrice:null, currentATR:null, currentRSI:null, currentADX:null, highestClose:c.highestClose };
       });
       renderAll(); syncInputsFromMarket(); refreshAll();
