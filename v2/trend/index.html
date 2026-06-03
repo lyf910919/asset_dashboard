@@ -410,8 +410,16 @@
     .pyramid-stage-body{font-size:13px;line-height:1.5;min-width:0}
     .pyramid-stage-cond{font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
     .pyramid-stage-mark{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid}
+    .watch-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .watch-card{padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);display:flex;flex-direction:column;gap:8px}
+    .watch-card-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+    .watch-card-name{font-size:13px;font-weight:700;color:var(--text-primary)}
+    .watch-card-price{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+    .watch-card-tags{display:flex;flex-wrap:wrap;gap:5px}
+    .watch-card-rets{display:flex;gap:12px;font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+    .watch-card-rets strong{font-variant-numeric:tabular-nums}
     @media (min-width:720px){.entry-cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
-    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}.watch-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -421,7 +429,6 @@
       <button class="nav-tab active" data-view="overview">趋势概览</button>
       <button class="nav-tab" data-view="stop-detail">止损</button>
       <button class="nav-tab" data-view="status">持仓状态</button>
-      <button class="nav-tab" data-view="market">市场状态</button>
       <button class="nav-tab" data-view="entry">入场/加仓</button>
       <button class="nav-tab" data-view="position-calc">仓位</button>
       <button class="nav-tab" data-view="exit">出场</button>
@@ -486,6 +493,7 @@
       <div class="entry-block"><div class="entry-block-title">多周期收益率与波动率</div><div id="entryRetRow" class="entry-ret-row"></div></div>
       <div class="entry-block"><div class="entry-block-title">第2层 · 量价质量</div><div id="entryVolRow"></div></div>
       <div class="entry-block"><div class="entry-block-title">第3层 · 横截面相对强度</div><div id="entryCrossSec"></div></div>
+      <div class="entry-block"><div class="entry-block-title">观察标的快照（中概互联 · 恒生科技）</div><div id="entryWatchList"></div></div>
       <div class="entry-block"><div class="entry-block-title">Donchian 实时位置（信号指数）</div><div id="entryDonchian"></div></div>
       <div class="entry-block"><div class="entry-block-title">池宽度（成分股站上 MA20 比例）</div><div id="entryBreadth"></div></div>
       <div class="entry-block"><div class="entry-block-title">闸门清单（明细）</div><div id="entryGateChecklist"></div></div>
@@ -2204,6 +2212,7 @@
       renderEntryRetRow(m, g);
       renderEntryVolRow(m, g);
       renderEntryCrossSection(m, g, cfg);
+      renderEntryWatchList();
       renderEntryDonchianPos(m, g);
       renderEntryBreadth(g);
       renderEntryGateChecklist(g);
@@ -2288,6 +2297,42 @@
         <thead><tr><th>对比</th><th>相对收益</th><th>含义</th></tr></thead>
         <tbody>${rows.map(r => `<tr><td>${r.name}</td><td class="num ${cls(r.v)}">${fxPct(r.v)}</td><td>${r.hint}</td></tr>`).join("")}</tbody>
       </table>${internal}`;
+    }
+    function renderEntryWatchList() {
+      const watchIds = Object.keys(OVERVIEW_WATCH_CONFIG);
+      if (!watchIds.length) { $("entryWatchList").innerHTML = ""; return; }
+      const fxPct = (v) => Number.isFinite(v) ? (v >= 0 ? "+" : "") + v.toFixed(2) + "%" : "—";
+      const colorOf = (v) => Number.isFinite(v) ? (v >= 0 ? "color:var(--red)" : "color:var(--green)") : "color:var(--text-muted)";
+      const cards = watchIds.map(id => {
+        const cfg = OVERVIEW_WATCH_CONFIG[id];
+        const m = marketOf(id);
+        if (!m) return "";
+        const adxL = adxLevel(m.currentADX);
+        const rsiL = rsiLevel(m.currentRSI);
+        const maUp = Number.isFinite(m.ma20) && Number.isFinite(m.ma20Prev) && m.ma20 >= m.ma20Prev;
+        const maAligned = [m.ma10, m.ma20, m.ma60].every(Number.isFinite) && m.close > m.ma10 && m.ma10 > m.ma20 && m.ma20 > m.ma60;
+        const maTag = maAligned ? { t:"多头", cls:"green" } : (maUp ? { t:"偏多", cls:"yellow" } : { t:"偏弱", cls:"red" });
+        const price = Number.isFinite(m.currentPrice) ? m.currentPrice.toFixed(2) : "—";
+        const chg = Number.isFinite(m.changePct) ? ((m.changePct >= 0 ? "+" : "") + m.changePct.toFixed(2) + "%") : "—";
+        const chgColor = Number.isFinite(m.changePct) ? (m.changePct >= 0 ? "var(--red)" : "var(--green)") : "var(--text-muted)";
+        return `<div class="watch-card">
+          <div class="watch-card-head">
+            <span class="watch-card-name">${cfg.name}</span>
+            <span class="watch-card-price">${price} <span style="color:${chgColor};font-size:13px">${chg}</span></span>
+          </div>
+          <div class="watch-card-tags">
+            <span class="lvl-card-tag tag-${adxL.cls}">ADX ${Number.isFinite(m.currentADX) ? m.currentADX.toFixed(1) : "—"} ${adxL.tag}</span>
+            <span class="lvl-card-tag tag-${rsiL.cls}">RSI ${Number.isFinite(m.currentRSI) ? m.currentRSI.toFixed(1) : "—"} ${rsiL.tag}</span>
+            <span class="lvl-card-tag tag-${maTag.cls}">均线${maTag.t}</span>
+          </div>
+          <div class="watch-card-rets">
+            <span>5日 <strong style="${colorOf(m.ret5)}">${fxPct(m.ret5)}</strong></span>
+            <span>20日 <strong style="${colorOf(m.ret20)}">${fxPct(m.ret20)}</strong></span>
+            <span>60日 <strong style="${colorOf(m.ret60)}">${fxPct(m.ret60)}</strong></span>
+          </div>
+        </div>`;
+      }).join("");
+      $("entryWatchList").innerHTML = `<div class="watch-grid">${cards}</div>`;
     }
     function renderEntryDonchianPos(m, g) {
       const sig = m.signalRows;
