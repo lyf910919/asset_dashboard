@@ -330,6 +330,88 @@
     .ratchet-row{display:flex;align-items:center;gap:8px;font-size:13px}
     .ratchet-row input{width:90px;padding:6px 9px;border-radius:var(--radius-sm);border:1px solid var(--border);font:inherit;font-size:13px;text-align:right}
     .ratchet-save{padding:6px 14px;border-radius:var(--radius-sm);background:var(--primary);color:white;border:none;font-size:13px;font-weight:700;cursor:pointer}
+    /* ── §1 入场决策面板 ── */
+    .entry-block{margin-top:18px}
+    .entry-block-title{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px;display:flex;align-items:center;gap:6px}
+    .verdict-banner{padding:16px 18px;border-radius:var(--radius);border:2px solid;margin-bottom:6px}
+    .verdict-banner.forbid{background:var(--red-bg);border-color:var(--red);color:#7f1d1d}
+    .verdict-banner.warn{background:var(--yellow-bg);border-color:var(--yellow);color:#78350f}
+    .verdict-banner.healthy{background:var(--green-bg);border-color:var(--green);color:#065f46}
+    .verdict-banner.bonus{background:var(--blue-info-bg);border-color:var(--primary);color:var(--primary)}
+    .verdict-banner.na{background:var(--surface-2);border-color:var(--border);color:var(--text-secondary)}
+    .verdict-title{font-size:20px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .verdict-icon{font-size:22px}
+    .verdict-desc{font-size:14px;line-height:1.6}
+    .verdict-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .verdict-stat{padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.55);font-size:12px;font-weight:700}
+    .entry-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .lvl-card{padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);display:flex;flex-direction:column;gap:4px}
+    .lvl-card-label{font-size:11px;color:var(--text-muted);font-weight:600;letter-spacing:.04em}
+    .lvl-card-value{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+    .lvl-card-tag{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid;align-self:flex-start}
+    .lvl-card-desc{font-size:12px;color:var(--text-secondary)}
+    .tag-red{background:var(--red-bg);border-color:#fca5a5;color:#7f1d1d}
+    .tag-yellow{background:var(--yellow-bg);border-color:#fcd34d;color:#78350f}
+    .tag-green{background:var(--green-bg);border-color:#6ee7b7;color:#065f46}
+    .tag-blue{background:var(--primary-light);border-color:#bfdbfe;color:var(--primary)}
+    .tag-pink{background:var(--pink-bg);border-color:#f9a8d4;color:var(--pink)}
+    .tag-neutral{background:var(--surface-2);border-color:var(--border);color:var(--text-secondary)}
+    .entry-ret-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+    .ret-cell{padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);text-align:center}
+    .ret-cell-label{font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:4px}
+    .ret-cell-value{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+    .vol-row{padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .vol-state{display:inline-flex;align-items:center;gap:8px;font-weight:700}
+    .vol-state-tag{padding:3px 10px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid}
+    .vol-detail{font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+    .cross-table{width:100%;border-collapse:collapse;font-size:13px}
+    .cross-table th,.cross-table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left}
+    .cross-table th{font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:var(--surface-2)}
+    .cross-table td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+    .cross-pos{color:var(--red)}
+    .cross-neg{color:var(--green)}
+    .donchian-bar{position:relative;padding:14px 14px 30px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm)}
+    .donchian-track{position:relative;height:14px;background:linear-gradient(90deg,#fee2e2 0%,#fef3c7 50%,#d1fae5 100%);border-radius:7px;border:1px solid var(--border)}
+    .donchian-marker{position:absolute;top:-4px;width:4px;height:22px;background:var(--primary);border-radius:2px;transform:translateX(-50%)}
+    .donchian-label{position:absolute;top:-22px;font-size:11px;font-weight:700;color:var(--primary);transform:translateX(-50%);white-space:nowrap}
+    .donchian-axis{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+    .donchian-meta{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px}
+    .donchian-meta strong{font-variant-numeric:tabular-nums}
+    .donchian-row{margin-bottom:14px}
+    .donchian-row:last-child{margin-bottom:0}
+    .breadth-box{padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2)}
+    .breadth-bar{height:14px;background:#e2e8f0;border-radius:7px;overflow:hidden;margin:8px 0}
+    .breadth-fill{height:100%;background:linear-gradient(90deg,var(--green) 0%,var(--green) 100%)}
+    .breadth-info{display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums;flex-wrap:wrap;gap:6px}
+    .gate-checklist{display:grid;gap:6px}
+    .gate-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 11px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);font-size:13px}
+    .gate-item.hit-forbid{border-color:#fca5a5;background:#fef2f2}
+    .gate-item.hit-warn{border-color:#fcd34d;background:#fffbeb}
+    .gate-item.hit-healthy{border-color:#6ee7b7;background:#ecfdf5}
+    .gate-item.hit-bonus{border-color:#93c5fd;background:#eff6ff}
+    .gate-item.dim{opacity:.55}
+    .gate-icon{font-size:16px;font-weight:800;width:22px;text-align:center}
+    .gate-icon.hit{color:var(--red)}
+    .gate-icon.hit-warn{color:var(--yellow)}
+    .gate-icon.hit-good{color:var(--green)}
+    .gate-icon.hit-bonus{color:var(--primary)}
+    .gate-icon.miss{color:var(--text-muted)}
+    .gate-body{display:flex;flex-direction:column;gap:2px;min-width:0}
+    .gate-label{font-weight:700;font-size:13px}
+    .gate-evidence{font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums;line-height:1.5}
+    .gate-status{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;border:1px solid}
+    .gate-cat{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px}
+    .gate-cat-count{padding:1px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-secondary)}
+    .pyramid-stages{display:grid;gap:8px;margin-top:8px}
+    .pyramid-stage{padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+    .pyramid-stage.done{background:var(--green-bg);border-color:#6ee7b7}
+    .pyramid-stage.next{background:var(--blue-info-bg);border-color:var(--primary);border-width:2px}
+    .pyramid-stage-no{font-weight:800;font-size:14px;color:var(--primary);min-width:30px;text-align:center}
+    .pyramid-stage-body{font-size:13px;line-height:1.5;min-width:0}
+    .pyramid-stage-cond{font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+    .pyramid-stage-mark{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid}
+    @media (min-width:720px){.entry-cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
@@ -340,9 +422,8 @@
       <button class="nav-tab" data-view="stop-detail">止损</button>
       <button class="nav-tab" data-view="status">持仓状态</button>
       <button class="nav-tab" data-view="market">市场状态</button>
-      <button class="nav-tab" data-view="entry">入场</button>
+      <button class="nav-tab" data-view="entry">入场/加仓</button>
       <button class="nav-tab" data-view="position-calc">仓位</button>
-      <button class="nav-tab" data-view="pyramid">加仓</button>
       <button class="nav-tab" data-view="exit">出场</button>
       <button class="nav-tab" data-view="risk">风控</button>
     </div>
@@ -398,11 +479,17 @@
         </section>
 
     <section id="entry" class="section view-panel">
-      <div class="section-head"><h2>§1 入场信号与四闸门</h2></div>
-      <div id="donchianViz" class="viz"></div>
-      <div class="subtle" style="margin:8px 0 14px;">突破过去 N 日最高价（不含当日），次日开盘入场。</div>
-      <div id="gates" class="gate-list"></div>
-      <div id="gateSummary" class="summary warn"></div>
+      <div class="section-head"><h2>§1 入场决策面板</h2><span id="entryStamp" class="subtle"></span></div>
+      <div id="entryAssetBar" class="ov-asset-bar"></div>
+      <div id="entryVerdict"></div>
+      <div class="entry-block"><div class="entry-block-title">第1层 · 标的本身趋势状态</div><div id="entryL1Cards" class="entry-cards"></div></div>
+      <div class="entry-block"><div class="entry-block-title">多周期收益率与波动率</div><div id="entryRetRow" class="entry-ret-row"></div></div>
+      <div class="entry-block"><div class="entry-block-title">第2层 · 量价质量</div><div id="entryVolRow"></div></div>
+      <div class="entry-block"><div class="entry-block-title">第3层 · 横截面相对强度</div><div id="entryCrossSec"></div></div>
+      <div class="entry-block"><div class="entry-block-title">Donchian 实时位置（信号指数）</div><div id="entryDonchian"></div></div>
+      <div class="entry-block"><div class="entry-block-title">池宽度（成分股站上 MA20 比例）</div><div id="entryBreadth"></div></div>
+      <div class="entry-block"><div class="entry-block-title">闸门清单（明细）</div><div id="entryGateChecklist"></div></div>
+      <div class="entry-block"><div class="entry-block-title">§3 加仓金字塔（已持仓时适用）<button class="info" data-modal="modal-pyramid">ⓘ</button></div><div id="entryAddBlock"></div></div>
     </section>
 
     <section id="position-calc" class="section view-panel">
@@ -417,14 +504,6 @@
           <div id="positionOutputs" class="output-list"></div>
           <div id="ladderTable" class="matrix-wrap" style="margin-top:10px;"></div>
         </div>
-      </div>
-    </section>
-
-    <section id="pyramid" class="section view-panel">
-      <div class="section-head"><h2>§3 加仓金字塔</h2><button class="info" data-modal="modal-pyramid">ⓘ</button></div>
-      <div id="pyramidViz" class="viz"></div>
-      <div class="summary warn">
-        禁止加仓：高位分歧（日内回撤或上影线 ≥ 1.2%）；RSI ≥ 80；ADX > 50 且 RSI > 75；今日刚开仓。
       </div>
     </section>
 
@@ -492,7 +571,19 @@
       activeId:"159781", overviewId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
       autoTimer:null, matrixTouched:false, planTouched:false,
       gateOverrides:{ poolWidth:false },
-      trades:{}, ratchets:{}, tradeEditId:null, tradeFormOpen:false
+      trades:{}, ratchets:{}, tradeEditId:null, tradeFormOpen:false,
+      benchmarks:{}, breadth:{}
+    };
+    // 横截面对照标的: 沪深300 / 中证红利 / 创业板指
+    const BENCHMARKS = {
+      hs300:    { secid:"1.000300", name:"沪深300" },
+      dividend: { secid:"1.000922", name:"中证红利" },
+      cyb:      { secid:"0.399006", name:"创业板指" },
+    };
+    // 信号指数 → 池宽度成分股清单（json file），构成同一观察池
+    const POOL_CONSTITUENTS = {
+      "2.931643": "data/index_constituents/931643.json",
+      "1.000688": "data/index_constituents/000688.json",
     };
     const $ = (id) => document.getElementById(id);
     const ids = () => Object.keys(POSITIONS_CONFIG);
@@ -573,6 +664,12 @@
         volumeUpdatedAt: base.volumeUpdatedAt, volumeScope: base.volumeScope, volumeIsIndex: !!base.volumeIsIndex,
         klineUpdatedAt: base.klineUpdatedAt || null,
         min10: clean(base.min10), min20: clean(base.min20),
+        ret5: clean(base.ret5), ret20: clean(base.ret20), ret60: clean(base.ret60),
+        atrMa20: clean(base.atrMa20),
+        donchian20: clean(base.donchian20), donchian55: clean(base.donchian55),
+        reboundRatio: clean(base.reboundRatio),
+        intradayHigh: clean(base.intradayHigh), upperShadowPct: clean(base.upperShadowPct),
+        signalRows: base.signalRows || null,
       };
     }
     function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
@@ -781,6 +878,94 @@
       for (let i = n; i < trs.length; i++) atr = (atr * (n - 1) + trs[i]) / n;
       return atr;
     }
+    // n日对数收益率（最后一根 vs n日前）
+    function nDayReturn(rows, n) {
+      if (!rows || rows.length < n + 1) return null;
+      const last = rows[rows.length - 1].close;
+      const past = rows[rows.length - 1 - n].close;
+      if (!Number.isFinite(last) || !Number.isFinite(past) || past <= 0) return null;
+      return (last / past - 1) * 100;
+    }
+    // Donchian 通道高点（不含当日），N 日内最高价（取最高价 high）
+    function donchianHigh(rows, n) {
+      if (!rows || rows.length < n + 1) return null;
+      const slice = rows.slice(-n - 1, -1);
+      const highs = slice.map(r => r.high).filter(Number.isFinite);
+      return highs.length ? Math.max(...highs) : null;
+    }
+    // 相对强弱：A 相对 B 近 n 日的超额收益率
+    function relStrength(rowsA, rowsB, n) {
+      const a = nDayReturn(rowsA, n), b = nDayReturn(rowsB, n);
+      if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+      return a - b;
+    }
+    // 反弹比：今日上涨幅度 / |昨日下跌幅度|（昨日跌时才有意义）
+    function reboundRatio(rows) {
+      if (!rows || rows.length < 3) return null;
+      const today = rows[rows.length - 1], y = rows[rows.length - 2], yy = rows[rows.length - 3];
+      if (!Number.isFinite(today.close) || !Number.isFinite(y.close) || !Number.isFinite(yy.close)) return null;
+      const yChg = (y.close / yy.close - 1) * 100;
+      const tChg = (today.close / y.close - 1) * 100;
+      if (yChg >= 0) return null;
+      return tChg / Math.abs(yChg);
+    }
+    // 带并发限制的 map：避免一次性发出 50+ 请求被限流
+    async function pmap(items, concurrency, worker) {
+      const results = new Array(items.length);
+      let i = 0;
+      const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+        while (i < items.length) {
+          const idx = i++;
+          try { results[idx] = await worker(items[idx], idx); }
+          catch (e) { results[idx] = null; }
+        }
+      });
+      await Promise.all(runners);
+      return results;
+    }
+    // 池宽度：拉取成分股 K 线，统计站上 MA20 比例。结果缓存到 state.breadth[signalSecid]
+    async function refreshBreadth(signalSecid, constituentsUrl) {
+      const cached = state.breadth[signalSecid];
+      const stamp = cached?.stamp || 0;
+      // 同一交易日内已计算过则复用（5分钟内）
+      if (cached && Date.now() - stamp < 5 * 60 * 1000) return cached;
+      let pool = null;
+      try {
+        const resp = await timeoutFetch(constituentsUrl + "?t=" + Date.now(), 6000);
+        if (!resp.ok) throw new Error("constituents http");
+        pool = await resp.json();
+      } catch (e) { return null; }
+      const list = (pool?.constituents || []).map(x => x.secid).filter(Boolean);
+      if (!list.length) return null;
+      let aboveMa20 = 0, aboveMa10 = 0, aboveMa60 = 0, total = 0;
+      const samples = [];
+      await pmap(list, 6, async (secid) => {
+        try {
+          const rows = await fetchKlines(secid);
+          if (!rows || rows.length < 21) return;
+          const closes = rows.map(r => r.close);
+          const last = closes[closes.length - 1];
+          const ma10 = sma(closes, 10), ma20 = sma(closes, 20), ma60 = sma(closes, 60);
+          if (!Number.isFinite(last)) return;
+          total += 1;
+          if (Number.isFinite(ma10) && last > ma10) aboveMa10 += 1;
+          if (Number.isFinite(ma20) && last > ma20) aboveMa20 += 1;
+          if (Number.isFinite(ma60) && last > ma60) aboveMa60 += 1;
+          samples.push({ secid, last, ma20 });
+        } catch (e) {}
+      });
+      const result = {
+        total, expected: list.length,
+        aboveMa10Pct: total ? aboveMa10 / total * 100 : null,
+        aboveMa20Pct: total ? aboveMa20 / total * 100 : null,
+        aboveMa60Pct: total ? aboveMa60 / total * 100 : null,
+        stamp: Date.now(),
+        updatedAt: new Date().toLocaleTimeString("zh-CN", {hour12:false, hour:"2-digit", minute:"2-digit"}),
+        poolName: pool?.indexName || signalSecid,
+      };
+      state.breadth[signalSecid] = result;
+      return result;
+    }
     // ATR14 as of a specific date: slice klines up to that date, then compute
     function calcATRAtDate(rows, targetDate) {
       if (!rows || !targetDate) return null;
@@ -898,6 +1083,342 @@
       return { R, floatR, k:kInfo.k, kInfo, holdingDays, kTimeInfo,
                line1, line2, line3, line3t, line4, finalStop:best[1], winner:best[0], candidates };
     }
+    // ===== 入场闸门合成器 =====
+    // 输入：当前 marketOf 输出 + 基准 K 线 + 池宽度结果。输出：四档裁决 + 命中详情。
+    // 每条规则返回 { key, label, hit:bool, evidence:string, dataOk:bool }
+    function composeGates(m, benchmarks, breadth, cfg) {
+      const out = { forbid:[], warn:[], healthy:[], bonus:[], addPositive:[], addNegative:[] };
+      const fx = (v, d=2) => Number.isFinite(v) ? v.toFixed(d) : "—";
+      const fxPct = (v, d=2) => Number.isFinite(v) ? (v > 0 ? "+" : "") + v.toFixed(d) + "%" : "—";
+
+      // ── 第1层：标的本身多周期趋势状态 ──
+      const adx = m.currentADX, rsi = m.currentRSI;
+      const ma10 = m.ma10, ma20 = m.ma20, ma20Prev = m.ma20Prev, ma60 = m.ma60;
+      const close = m.close;
+      const maAlignBull = [ma10, ma20, ma60].every(Number.isFinite) && close > ma10 && ma10 > ma20 && ma20 > ma60;
+      const ma20Up = Number.isFinite(ma20) && Number.isFinite(ma20Prev) && ma20 >= ma20Prev;
+      const ma20Down = Number.isFinite(ma20) && Number.isFinite(ma20Prev) && ma20 < ma20Prev;
+      const allRetUp = [m.ret5, m.ret20, m.ret60].every(v => Number.isFinite(v) && v > 0);
+
+      // 1. ADX < 20 → 禁止（无趋势）
+      out.forbid.push({
+        key:"adx20", label:"ADX 趋势强度",
+        hit: Number.isFinite(adx) && adx < 20,
+        evidence: Number.isFinite(adx) ? `ADX14=${fx(adx, 1)}（<20 表示无趋势，不应入场）` : "ADX 数据缺失",
+        dataOk: Number.isFinite(adx),
+      });
+      // 2. MA20 下行 → 禁止
+      out.forbid.push({
+        key:"ma20Down", label:"MA20 斜率",
+        hit: ma20Down,
+        evidence: ma20Down ? `MA20 ${fx(ma20)} < 昨 ${fx(ma20Prev)}（下行趋势）`
+                            : (ma20Up ? `MA20 ${fx(ma20)} ≥ 昨 ${fx(ma20Prev)}（上行）` : "MA20 数据缺失"),
+        dataOk: Number.isFinite(ma20) && Number.isFinite(ma20Prev),
+      });
+
+      // 3. ADX > 50 + RSI > 75 → 警示（加速段过热）
+      const overheat = Number.isFinite(adx) && Number.isFinite(rsi) && adx > 50 && rsi > 75;
+      out.warn.push({
+        key:"overheat", label:"过热（ADX>50 且 RSI>75）",
+        hit: overheat,
+        evidence: overheat ? `ADX=${fx(adx, 1)}，RSI=${fx(rsi, 1)}（加速段尾部，停止加仓）`
+                            : `ADX=${fx(adx, 1)}，RSI=${fx(rsi, 1)}（未同时过热）`,
+        dataOk: Number.isFinite(adx) && Number.isFinite(rsi),
+      });
+      // 4. RSI ≥ 80 → 警示（极度超买，参考"禁止加仓"清单）
+      out.warn.push({
+        key:"rsi80", label:"RSI 极度超买",
+        hit: Number.isFinite(rsi) && rsi >= 80,
+        evidence: Number.isFinite(rsi) ? `RSI14=${fx(rsi, 1)}` : "RSI 数据缺失",
+        dataOk: Number.isFinite(rsi),
+      });
+
+      // 5. 量价质量：缩量反弹（今日量 < 0.8×昨日，且昨阴今阳）
+      let volState = "unknown", volRatioMa20 = null, volRatioPrev = null;
+      if (Number.isFinite(m.volume) && Number.isFinite(m.volumeMa20) && m.volumeMa20 > 0) volRatioMa20 = m.volume / m.volumeMa20;
+      if (Number.isFinite(m.volume) && Number.isFinite(m.volumePrev) && m.volumePrev > 0) volRatioPrev = m.volume / m.volumePrev;
+      const isUp = Number.isFinite(m.priceChangePct) && m.priceChangePct >= 0;
+      let volEvidence = "量能数据缺失";
+      let volWeakRebound = false;
+      if (volRatioMa20 != null && volRatioPrev != null && Number.isFinite(m.priceChangePct)) {
+        if (isUp && volRatioMa20 >= 1.2 && volRatioPrev >= 1.0) { volState = "放量上涨"; }
+        else if (!isUp && volRatioMa20 < 1.0 && volRatioPrev < 1.0) { volState = "缩量回调"; }
+        else if (isUp && volRatioPrev < 0.8) { volState = "缩量反弹"; volWeakRebound = true; }
+        else if (!isUp && volRatioMa20 >= 1.2 && volRatioPrev >= 1.0) { volState = "放量下跌"; }
+        else { volState = isUp ? "温和上涨" : "温和回调"; }
+        volEvidence = `${volState}：今/20均=${fx(volRatioMa20, 2)}× · 今/昨=${fx(volRatioPrev, 2)}× · ${fxPct(m.priceChangePct)}`;
+      }
+      out.warn.push({
+        key:"weakRebound", label:"缩量反弹（量价质量恶化）",
+        hit: volWeakRebound,
+        evidence: volEvidence,
+        dataOk: volState !== "unknown",
+      });
+
+      // ── 第3层：横截面强弱（沪深300 / 中证红利 / 创业板指） ──
+      const sigRows = state.market[state.activeId]?.signalRows;
+      const rsHs300_5 = relStrength(sigRows, benchmarks?.hs300?.rows, 5);
+      const rsHs300_20 = relStrength(sigRows, benchmarks?.hs300?.rows, 20);
+      const rsDiv_5 = relStrength(sigRows, benchmarks?.dividend?.rows, 5);
+      const rsCyb_5 = relStrength(sigRows, benchmarks?.cyb?.rows, 5);
+      // 6. 跑输沪深300：5日相对收益 < 0 → 禁止（弱化版：跑输的同时跌破MA20）
+      const losingHs300 = Number.isFinite(rsHs300_5) && rsHs300_5 < 0;
+      out.forbid.push({
+        key:"loseHs300", label:"主线地位（vs 沪深300，5日）",
+        hit: losingHs300 && Number.isFinite(rsHs300_20) && rsHs300_20 < -2,
+        evidence: Number.isFinite(rsHs300_5) ? `近5日相对收益 ${fxPct(rsHs300_5)} · 近20日 ${fxPct(rsHs300_20)}（连续跑输 → 主线丢失）` : "沪深300 K线缺失",
+        dataOk: Number.isFinite(rsHs300_5),
+      });
+      // 7. 跑输红利（风格切换）→ 警示
+      out.warn.push({
+        key:"loseDividend", label:"风格强弱（vs 中证红利，5日）",
+        hit: Number.isFinite(rsDiv_5) && rsDiv_5 < 0,
+        evidence: Number.isFinite(rsDiv_5) ? `近5日相对收益 ${fxPct(rsDiv_5)}（< 0 警惕风格切向防守）` : "中证红利 K线缺失",
+        dataOk: Number.isFinite(rsDiv_5),
+      });
+      // 8. 创业板 vs 科创50 内部分化（绝对差 > 3%）→ 警示
+      const cyb5 = nDayReturn(benchmarks?.cyb?.rows, 5);
+      const sig5 = nDayReturn(sigRows, 5);
+      const internalDiv = (Number.isFinite(cyb5) && Number.isFinite(sig5)) ? Math.abs(cyb5 - sig5) : null;
+      out.warn.push({
+        key:"internalDiv", label:"双创内部分化（创业板 vs 科创）",
+        hit: Number.isFinite(internalDiv) && internalDiv > 3,
+        evidence: Number.isFinite(internalDiv) ? `创业板${fxPct(cyb5)} vs 信号${fxPct(sig5)}，差 ${internalDiv.toFixed(2)}pp` : "数据缺失",
+        dataOk: Number.isFinite(internalDiv),
+      });
+
+      // ── 池宽度（自动） ──
+      const poolPct = breadth?.aboveMa20Pct;
+      const poolEvidence = Number.isFinite(poolPct)
+        ? `${breadth.poolName} ${breadth.total}/${breadth.expected} 只成分股，站上 MA20 比例 ${fx(poolPct, 1)}%`
+        : "池宽度数据加载中";
+
+      // ── 健康项（多个 OK 才能进健康） ──
+      out.healthy.push({
+        key:"hMaBull", label:"均线多头排列（10>20>60）", hit: maAlignBull,
+        evidence: maAlignBull ? `价 ${fx(close)} > MA10 ${fx(ma10)} > MA20 ${fx(ma20)} > MA60 ${fx(ma60)}`
+                              : `当前未形成 10>20>60 多头排列`,
+        dataOk: [ma10, ma20, ma60, close].every(Number.isFinite),
+      });
+      out.healthy.push({
+        key:"hMa20Up", label:"MA20 上行", hit: ma20Up,
+        evidence: ma20Up ? `MA20 ${fx(ma20)} ≥ 昨 ${fx(ma20Prev)}` : `MA20 ${fx(ma20)} < 昨 ${fx(ma20Prev)}`,
+        dataOk: Number.isFinite(ma20) && Number.isFinite(ma20Prev),
+      });
+      out.healthy.push({
+        key:"hRetSync", label:"多周期同向上涨（ret5/20/60>0）", hit: allRetUp,
+        evidence: `ret5 ${fxPct(m.ret5)} · ret20 ${fxPct(m.ret20)} · ret60 ${fxPct(m.ret60)}`,
+        dataOk: [m.ret5, m.ret20, m.ret60].every(Number.isFinite),
+      });
+      out.healthy.push({
+        key:"hVolUp", label:"放量上涨（量价同步）", hit: volState === "放量上涨",
+        evidence: volEvidence, dataOk: volState !== "unknown",
+      });
+      out.healthy.push({
+        key:"hWinHs300", label:"跑赢沪深300（5日）",
+        hit: Number.isFinite(rsHs300_5) && rsHs300_5 > 0,
+        evidence: Number.isFinite(rsHs300_5) ? `5日相对收益 ${fxPct(rsHs300_5)}` : "—",
+        dataOk: Number.isFinite(rsHs300_5),
+      });
+      out.healthy.push({
+        key:"hPool70", label:"池宽度 ≥ 70%（多数成分股站上 MA20）",
+        hit: Number.isFinite(poolPct) && poolPct >= 70,
+        evidence: poolEvidence, dataOk: Number.isFinite(poolPct),
+      });
+
+      // ── 加分项 ──
+      out.bonus.push({
+        key:"bAdxBest", label:"ADX 最佳区间（25-40 + RSI 60-80）",
+        hit: Number.isFinite(adx) && Number.isFinite(rsi) && adx >= 25 && adx < 40 && rsi >= 60 && rsi <= 80,
+        evidence: `ADX=${fx(adx, 1)}，RSI=${fx(rsi, 1)}`,
+        dataOk: Number.isFinite(adx) && Number.isFinite(rsi),
+      });
+      out.bonus.push({
+        key:"bDonchian", label:"突破 D20 前高（信号指数）",
+        hit: Number.isFinite(close) && Number.isFinite(m.donchian20) && close > m.donchian20,
+        evidence: `信号收盘 ${fx(close)} vs D20高 ${fx(m.donchian20)}`,
+        dataOk: Number.isFinite(close) && Number.isFinite(m.donchian20),
+      });
+      out.bonus.push({
+        key:"bDonchian55", label:"突破 D55 前高（中长期信号）",
+        hit: Number.isFinite(close) && Number.isFinite(m.donchian55) && close > m.donchian55,
+        evidence: `信号收盘 ${fx(close)} vs D55高 ${fx(m.donchian55)}`,
+        dataOk: Number.isFinite(close) && Number.isFinite(m.donchian55),
+      });
+      out.bonus.push({
+        key:"bRebound", label:"跌后超额修复（反弹/跌幅 > 1.0）",
+        hit: Number.isFinite(m.reboundRatio) && m.reboundRatio > 1.0,
+        evidence: Number.isFinite(m.reboundRatio) ? `反弹/跌幅比 ${fx(m.reboundRatio, 2)}` : "（昨日未跌或数据不足，不适用）",
+        dataOk: Number.isFinite(m.reboundRatio),
+      });
+      out.bonus.push({
+        key:"bPool80", label:"池宽度 ≥ 80%（趋势扩散充分）",
+        hit: Number.isFinite(poolPct) && poolPct >= 80,
+        evidence: poolEvidence, dataOk: Number.isFinite(poolPct),
+      });
+
+      // ── 加仓专属（含禁止/正向） ──
+      // 已开仓（cfg.openedAt 或 净持仓>0）才适用
+      const d = derivedFromTrades(state.activeId);
+      const hasPosition = (d.netUnits || 0) > 0;
+      // 当日刚开仓
+      const todayStr = new Date().toISOString().slice(0,10);
+      const justOpened = hasPosition && d.openedAt === todayStr;
+      // 当前价是否在最近买入价之上 +0.5N / +1N
+      const trades = tradesOf(state.activeId).filter(t => t.type === "buy").sort((a,b) => a.date < b.date ? -1 : 1);
+      const lastBuy = trades.length ? trades[trades.length - 1] : null;
+      const curATR = m.currentATR;
+      const cur = m.currentPrice;
+      const distFromLastBuyN = (lastBuy && Number.isFinite(cur) && Number.isFinite(curATR) && curATR > 0)
+        ? (cur - lastBuy.price) / curATR : null;
+      // 浮盈 R 估算
+      const cost = derivedFromTrades(state.activeId).avgCost ?? null;
+      const entryATR = derivedFromTrades(state.activeId).entryATR ?? null;
+      const Rval = Number.isFinite(entryATR) ? 2 * entryATR : null;
+      const floatR = (Number.isFinite(cur) && Number.isFinite(cost) && Number.isFinite(Rval) && Rval > 0)
+        ? (cur - cost) / Rval : null;
+      // 上影线 / 日内回撤（高位分歧定义）
+      const intradayDrawdown = (Number.isFinite(m.intradayHigh) && Number.isFinite(cur) && m.intradayHigh > 0)
+        ? (m.intradayHigh - cur) / m.intradayHigh * 100 : null;
+      const highDivergence = (Number.isFinite(intradayDrawdown) && intradayDrawdown >= 1.2)
+        || (Number.isFinite(m.upperShadowPct) && m.upperShadowPct >= 1.2);
+
+      out.addNegative.push({
+        key:"naDivergence", label:"高位分歧（日内回撤≥1.2% 或 上影≥1.2%）",
+        hit: highDivergence,
+        evidence: `日内回撤 ${Number.isFinite(intradayDrawdown) ? intradayDrawdown.toFixed(2)+"%" : "—"} · 上影占比 ${Number.isFinite(m.upperShadowPct) ? m.upperShadowPct.toFixed(2)+"%" : "—"}`,
+        dataOk: Number.isFinite(intradayDrawdown) || Number.isFinite(m.upperShadowPct),
+      });
+      out.addNegative.push({
+        key:"naRsi80", label:"RSI ≥ 80（极度超买，禁加仓）",
+        hit: Number.isFinite(rsi) && rsi >= 80,
+        evidence: Number.isFinite(rsi) ? `RSI=${fx(rsi, 1)}` : "—",
+        dataOk: Number.isFinite(rsi),
+      });
+      out.addNegative.push({
+        key:"naOverheat", label:"ADX>50 且 RSI>75",
+        hit: overheat,
+        evidence: `ADX=${fx(adx, 1)}，RSI=${fx(rsi, 1)}`,
+        dataOk: Number.isFinite(adx) && Number.isFinite(rsi),
+      });
+      out.addNegative.push({
+        key:"naJustOpened", label:"今日刚开仓（当日不追加）",
+        hit: justOpened,
+        evidence: justOpened ? `开仓日 ${d.openedAt} = 今日` : (hasPosition ? `开仓日 ${d.openedAt}` : "未持仓"),
+        dataOk: hasPosition,
+      });
+      out.addNegative.push({
+        key:"naLossPosition", label:"亏损仓位（不给亏单补仓）",
+        hit: hasPosition && Number.isFinite(floatR) && floatR < 0,
+        evidence: Number.isFinite(floatR) ? `当前浮盈 ${fmtR(floatR)}` : "—",
+        dataOk: hasPosition && Number.isFinite(floatR),
+      });
+
+      out.addPositive.push({
+        key:"paR05", label:"浮盈 ≥ +0.5R（具备加2笔条件）",
+        hit: Number.isFinite(floatR) && floatR >= 0.5,
+        evidence: Number.isFinite(floatR) ? `当前浮盈 ${fmtR(floatR)}` : "—",
+        dataOk: Number.isFinite(floatR),
+      });
+      out.addPositive.push({
+        key:"paR1", label:"浮盈 ≥ +1R（具备加3笔条件）",
+        hit: Number.isFinite(floatR) && floatR >= 1.0,
+        evidence: Number.isFinite(floatR) ? `当前浮盈 ${fmtR(floatR)}` : "—",
+        dataOk: Number.isFinite(floatR),
+      });
+      out.addPositive.push({
+        key:"paN05", label:"价格距上次买入 ≥ +0.5N",
+        hit: Number.isFinite(distFromLastBuyN) && distFromLastBuyN >= 0.5,
+        evidence: lastBuy ? `当前 ${fx(cur)} vs 上次买入 ${fx(lastBuy.price)} = ${Number.isFinite(distFromLastBuyN) ? distFromLastBuyN.toFixed(2)+"N" : "—"}` : "无买入记录",
+        dataOk: Number.isFinite(distFromLastBuyN),
+      });
+      out.addPositive.push({
+        key:"paN1", label:"价格距上次买入 ≥ +1N",
+        hit: Number.isFinite(distFromLastBuyN) && distFromLastBuyN >= 1.0,
+        evidence: lastBuy ? `${Number.isFinite(distFromLastBuyN) ? distFromLastBuyN.toFixed(2)+"N" : "—"}` : "无买入记录",
+        dataOk: Number.isFinite(distFromLastBuyN),
+      });
+
+      // ── 裁决合成 ──
+      const forbidHits = out.forbid.filter(x => x.hit);
+      const warnHits = out.warn.filter(x => x.hit);
+      const healthyOK = out.healthy.filter(x => x.hit);
+      const bonusHits = out.bonus.filter(x => x.hit);
+
+      let verdict, verdictTitle, verdictDesc;
+      if (forbidHits.length) {
+        verdict = "forbid"; verdictTitle = "禁止开新仓";
+        verdictDesc = `命中 ${forbidHits.length} 项禁止条件：${forbidHits.map(x => x.label).join("、")}`;
+      } else if (warnHits.length) {
+        verdict = "warn"; verdictTitle = "警示·暂不开新仓";
+        verdictDesc = `命中 ${warnHits.length} 项警示条件：${warnHits.map(x => x.label).join("、")}`;
+      } else if (healthyOK.length >= 4) {
+        if (bonusHits.length >= 3) { verdict = "bonus"; verdictTitle = "加分·趋势充分扩散"; verdictDesc = `健康 ${healthyOK.length}/6，加分 ${bonusHits.length}/${out.bonus.length}，可考虑分笔建仓`; }
+        else { verdict = "healthy"; verdictTitle = "健康·可建第一笔"; verdictDesc = `健康 ${healthyOK.length}/6，加分 ${bonusHits.length}/${out.bonus.length}`; }
+      } else {
+        verdict = "warn"; verdictTitle = "证据不足·暂等待";
+        verdictDesc = `健康项仅 ${healthyOK.length}/6 满足，趋势确认强度不够，等待更多正面证据`;
+      }
+
+      // 加仓裁决：要求当前已持仓 + verdict 不为 forbid + 无 addNegative + 至少满足相应 addPositive
+      let addVerdict, addTitle, addDesc;
+      if (!hasPosition) { addVerdict = "na"; addTitle = "未持仓"; addDesc = "尚无可加仓位"; }
+      else if (forbidHits.length) { addVerdict = "forbid"; addTitle = "禁止加仓"; addDesc = `开新仓裁决：禁止`; }
+      else {
+        const addNegHits = out.addNegative.filter(x => x.hit);
+        if (addNegHits.length) {
+          addVerdict = "forbid"; addTitle = "禁止加仓";
+          addDesc = `命中 ${addNegHits.length} 项加仓禁止条件：${addNegHits.map(x => x.label).join("、")}`;
+        } else {
+          const hasR05 = out.addPositive.find(x => x.key === "paR05" && x.hit);
+          const hasR1 = out.addPositive.find(x => x.key === "paR1" && x.hit);
+          const hasN05 = out.addPositive.find(x => x.key === "paN05" && x.hit);
+          const hasN1 = out.addPositive.find(x => x.key === "paN1" && x.hit);
+          if (hasR1 && hasN1) { addVerdict = "ok3"; addTitle = "可加第3笔（+0.5%）"; addDesc = "浮盈 ≥+1R 且 价格 ≥+1N"; }
+          else if (hasR05 && hasN05) { addVerdict = "ok2"; addTitle = "可加第2笔（+0.5%）"; addDesc = "浮盈 ≥+0.5R 且 价格 ≥+0.5N"; }
+          else { addVerdict = "wait"; addTitle = "等待加仓条件"; addDesc = `浮盈 ${Number.isFinite(floatR) ? fmtR(floatR) : "—"} · 距上次买入 ${Number.isFinite(distFromLastBuyN) ? distFromLastBuyN.toFixed(2)+"N" : "—"}`; }
+        }
+      }
+
+      return {
+        verdict, verdictTitle, verdictDesc,
+        forbid: out.forbid, warn: out.warn, healthy: out.healthy, bonus: out.bonus,
+        forbidHits, warnHits, healthyOK, bonusHits,
+        // 第1层卡片所需的"档位语义"
+        adxLevel: adxLevel(adx), rsiLevel: rsiLevel(rsi),
+        maAlign: { aligned: maAlignBull, ma20Up, close, ma10, ma20, ma60 },
+        // 多周期收益率
+        ret5: m.ret5, ret20: m.ret20, ret60: m.ret60,
+        // 量价
+        volState, volRatioMa20, volRatioPrev, isUp,
+        // 横截面
+        rs: { hs300_5: rsHs300_5, hs300_20: rsHs300_20, dividend_5: rsDiv_5, cyb_5: rsCyb_5, internalDiv },
+        // Donchian
+        donchian: { close, d20: m.donchian20, d55: m.donchian55 },
+        // 池宽度
+        breadth,
+        // 加仓
+        addVerdict, addTitle, addDesc,
+        addNegative: out.addNegative, addPositive: out.addPositive,
+        position: { hasPosition, floatR, distFromLastBuyN, lastBuy, cost, R: Rval },
+      };
+    }
+    function adxLevel(v) {
+      if (!Number.isFinite(v)) return { tag:"—", cls:"neutral", desc:"数据缺失" };
+      if (v < 20) return { tag:"震荡", cls:"red", desc:"无趋势，禁入" };
+      if (v < 25) return { tag:"萌芽", cls:"yellow", desc:"趋势萌芽" };
+      if (v < 40) return { tag:"最佳", cls:"green", desc:"趋势最佳区" };
+      if (v < 55) return { tag:"中后期", cls:"blue", desc:"持有不追" };
+      return { tag:"末段", cls:"pink", desc:"加速段尾部" };
+    }
+    function rsiLevel(v) {
+      if (!Number.isFinite(v)) return { tag:"—", cls:"neutral", desc:"数据缺失" };
+      if (v < 50) return { tag:"<50", cls:"yellow", desc:"空头占优" };
+      if (v < 60) return { tag:"50-60", cls:"yellow", desc:"中性偏弱" };
+      if (v < 70) return { tag:"60-70", cls:"green", desc:"强势区间" };
+      if (v < 80) return { tag:"70-80", cls:"blue", desc:"加速段" };
+      return { tag:"≥80", cls:"pink", desc:"极度超买" };
+    }
     async function refreshAll() {
       setStatus("loading", "行情 刷新中");
       const secids = [...new Set(marketIds().flatMap(id => [assetCfg(id).secid, assetCfg(id).signalSecid]))];
@@ -914,6 +1435,21 @@
           quoteOk = false;
         }
       }
+      // 并行拉取横截面基准 K 线（沪深300 / 中证红利 / 创业板指）
+      await Promise.all(Object.entries(BENCHMARKS).map(async ([key, spec]) => {
+        try {
+          const rows = await fetchKlines(spec.secid);
+          state.benchmarks[key] = { rows, name:spec.name, secid:spec.secid };
+        } catch (e) { state.benchmarks[key] = state.benchmarks[key] || null; }
+      }));
+      // 并行计算各信号指数的成分股池宽度（仅持仓标的）
+      await Promise.all(ids().map(async (id) => {
+        const cfg = POSITIONS_CONFIG[id];
+        const url = POOL_CONSTITUENTS[cfg.signalSecid];
+        if (!url) return;
+        try { await refreshBreadth(cfg.signalSecid, url); }
+        catch (e) { /* 静默：保留缓存 */ }
+      }));
       await Promise.all(marketIds().map(async (id) => {
         const cfg = assetCfg(id);
         const current = state.market[id] || {};
@@ -947,6 +1483,7 @@
           if (!Number.isFinite(next.open) && latest) next.open = latest.open;
           if (!Number.isFinite(next.changePct) && latest && prev?.close) next.changePct = (latest.close / prev.close - 1) * 100;
           next.tradeRows = tradeRows;
+          next.signalRows = signalRows;
           next.currentATR = calcATR(tradeRows);
           next.currentRSI = calcRSI(signalRows);
           next.currentADX = adx?.[0] ?? null;
@@ -963,6 +1500,26 @@
           const last10c = closes.slice(-10).filter(fin), last20c = closes.slice(-20).filter(fin);
           next.min10 = last10c.length ? Math.min(...last10c) : null;
           next.min20 = last20c.length ? Math.min(...last20c) : null;
+          // 多周期收益率（信号指数）
+          next.ret5 = nDayReturn(signalRows, 5);
+          next.ret20 = nDayReturn(signalRows, 20);
+          next.ret60 = nDayReturn(signalRows, 60);
+          // 20日均ATR vs 当前ATR：判定波动率扩张/收缩（用 trade ETF）
+          const atrSeries = [];
+          for (let i = 14; i < tradeRows.length; i++) atrSeries.push(calcATR(tradeRows.slice(0, i + 1)));
+          next.atrMa20 = sma(atrSeries.filter(fin), 20);
+          // Donchian 通道高点（不含当日，用信号指数）
+          next.donchian20 = donchianHigh(signalRows, 20);
+          next.donchian55 = donchianHigh(signalRows, 55);
+          // 反弹/跌幅比（信号指数）
+          next.reboundRatio = reboundRatio(signalRows);
+          // 日内回撤 / 上影线（用 ETF 当日数据）
+          if (latest && Number.isFinite(latest.high) && Number.isFinite(latest.low) && Number.isFinite(latest.open) && Number.isFinite(latest.close)) {
+            next.intradayHigh = latest.high;
+            const range = Math.max(latest.high - latest.low, 1e-9);
+            const upperShadow = latest.high - Math.max(latest.open, latest.close);
+            next.upperShadowPct = (upperShadow / latest.high) * 100;
+          }
           next.volume = volumeLatest?.volume ?? null; next.volumePrev = volumePrev?.volume ?? null;
           next.volumeMa5 = sma(volumeSeries, 5); next.volumeMa10 = sma(volumeSeries, 10);
           next.volumeMa20 = sma(volumeSeries, 20);
@@ -1300,8 +1857,8 @@
     }
     // ===== end 趋势概览 =====
     function renderAll() {
-      renderTabs(); renderOverview(); renderPositionPanel(); renderMatrix(); renderDonchian(); renderGates();
-      renderVolumeState(); renderPositionCalc(); renderPyramid(); renderStopDetail(); renderExitTree(); renderRisk();
+      renderTabs(); renderOverview(); renderPositionPanel(); renderMatrix(); renderEntry();
+      renderVolumeState(); renderPositionCalc(); renderStopDetail(); renderExitTree(); renderRisk();
     }
     function renderTabs() {
       const allIds = ids();
@@ -1324,6 +1881,7 @@
       $("marketTabs").innerHTML = html;
       $("sdAssetBar").innerHTML = html;
       $("ovAssetBar").innerHTML = tabHtml(overviewIds(), state.overviewId, "ov");
+      const eb = $("entryAssetBar"); if (eb) eb.innerHTML = html;
     }
     function setActivePosition(id) {
       if (!POSITIONS_CONFIG[id]) return;
@@ -1635,33 +2193,202 @@
       if (v >= 1e4) return (v / 1e4).toFixed(2) + "万";
       return v.toFixed(0);
     }
-    function renderDonchian() {
-      $("donchianViz").innerHTML = `<svg viewBox="0 0 720 160" aria-label="Donchian突破示意">
-        <rect width="720" height="160" fill="#fff"/>
-        <polyline points="30,122 96,116 160,104 226,110 290,86 354,78 420,70 486,58 552,48 620,28 680,22" fill="none" stroke="#2563eb" stroke-width="4"/>
-        <line x1="40" x2="680" y1="74" y2="74" stroke="#d97706" stroke-width="2" stroke-dasharray="7 6"/>
-        <line x1="40" x2="680" y1="48" y2="48" stroke="#7c3aed" stroke-width="2" stroke-dasharray="7 6"/>
-        <text x="48" y="68" font-size="13" fill="#d97706">D20 前高</text><text x="48" y="42" font-size="13" fill="#7c3aed">D55 前高</text>
-        <path d="M526 74 L552 52 L578 74" fill="none" stroke="#059669" stroke-width="3"/>
-        <text x="545" y="96" font-size="14" fill="#059669" font-weight="700">突破 → 信号触发</text>
-      </svg>`;
+    function renderEntry() {
+      const m = marketOf(), cfg = posCfg();
+      const breadth = state.breadth?.[cfg.signalSecid] || null;
+      const g = composeGates(m, state.benchmarks, breadth, cfg);
+      const stamp = m.klineUpdatedAt ? `K线 ${m.klineUpdatedAt} · 信号 ${cfg.signalName || ""}` : (cfg.signalName || "");
+      setText("entryStamp", stamp);
+      renderEntryVerdict(g);
+      renderEntryL1Cards(m, g);
+      renderEntryRetRow(m, g);
+      renderEntryVolRow(m, g);
+      renderEntryCrossSection(m, g, cfg);
+      renderEntryDonchianPos(m, g);
+      renderEntryBreadth(g);
+      renderEntryGateChecklist(g);
+      renderEntryAddBlock(g);
     }
-    function renderGates() {
-      const m = marketOf();
-      const adxValue = parseFloat($("gateAdx")?.value || m.currentADX || "");
-      const maUpAuto = Number.isFinite(m.ma20) && Number.isFinite(m.ma20Prev) ? m.ma20 >= m.ma20Prev : false;
-      const closeAboveAuto = Number.isFinite(m.close) && Number.isFinite(m.ma20) ? m.close > m.ma20 : false;
-      const defs = [
-        {id:"gateAdx", no:"①", name:"ADX > 25", desc:"趋势强度闸门", pass:Number.isFinite(adxValue) && adxValue > 25, control:`<input id="gateAdx" type="number" step="0.1" value="${Number.isFinite(adxValue) ? adxValue.toFixed(1) : ""}">`},
-        {id:"gateMa", no:"②", name:"MA20 上行", desc:`今日MA20 ${fmt(m.ma20)} / 昨日 ${fmt(m.ma20Prev)}`, pass:$("gateMa")?.checked ?? maUpAuto, control:`<input id="gateMa" type="checkbox" ${($("gateMa")?.checked ?? maUpAuto) ? "checked" : ""}>`},
-        {id:"gateClose", no:"③", name:"收盘价 > MA20", desc:`收盘 ${fmt(m.close)} / MA20 ${fmt(m.ma20)}`, pass:$("gateClose")?.checked ?? closeAboveAuto, control:`<input id="gateClose" type="checkbox" ${($("gateClose")?.checked ?? closeAboveAuto) ? "checked" : ""}>`},
-        {id:"gatePool", no:"④", name:"池内宽度 ≥ 50%", desc:"需人工确认标的池强度", pass:state.gateOverrides.poolWidth, control:`<input id="gatePool" type="checkbox" ${state.gateOverrides.poolWidth ? "checked" : ""}>`},
+    function renderEntryVerdict(g) {
+      const icon = { forbid:"⛔", warn:"⚠", healthy:"✓", bonus:"★", na:"·" }[g.verdict] || "·";
+      const banner = `<div class="verdict-banner ${g.verdict}">
+        <div class="verdict-title"><span class="verdict-icon">${icon}</span><span>${g.verdictTitle}</span></div>
+        <div class="verdict-desc">${g.verdictDesc}</div>
+        <div class="verdict-stats">
+          <span class="verdict-stat">禁止 ${g.forbidHits.length}/${g.forbid.length}</span>
+          <span class="verdict-stat">警示 ${g.warnHits.length}/${g.warn.length}</span>
+          <span class="verdict-stat">健康 ${g.healthyOK.length}/${g.healthy.length}</span>
+          <span class="verdict-stat">加分 ${g.bonusHits.length}/${g.bonus.length}</span>
+        </div>
+      </div>`;
+      $("entryVerdict").innerHTML = banner;
+    }
+    function renderEntryL1Cards(m, g) {
+      const adxL = g.adxLevel, rsiL = g.rsiLevel;
+      const ma = g.maAlign;
+      const maAlignTag = ma.aligned ? { tag:"多头", cls:"green" } : (Number.isFinite(ma.ma20) && Number.isFinite(ma.close) && ma.close > ma.ma20 ? { tag:"偏多", cls:"yellow" } : { tag:"未排列", cls:"red" });
+      const ma20Tag = ma.ma20Up ? { tag:"上行", cls:"green" } : { tag:"下行", cls:"red" };
+      const cards = [
+        {label:"ADX14（趋势强度）", value:Number.isFinite(m.currentADX) ? m.currentADX.toFixed(1) : "—", tag:adxL.tag, cls:adxL.cls, desc:adxL.desc},
+        {label:"RSI14（动量）", value:Number.isFinite(m.currentRSI) ? m.currentRSI.toFixed(1) : "—", tag:rsiL.tag, cls:rsiL.cls, desc:rsiL.desc},
+        {label:"均线排列（10/20/60）", value:ma.aligned ? "10>20>60" : (Number.isFinite(ma.ma20) ? `MA20 ${fmt(ma.ma20)}` : "—"), tag:maAlignTag.tag, cls:maAlignTag.cls, desc:`收 ${fmt(ma.close)} · MA10 ${fmt(ma.ma10)} · MA60 ${fmt(ma.ma60)}`},
+        {label:"MA20 斜率", value:Number.isFinite(ma.ma20) ? fmt(ma.ma20) : "—", tag:ma20Tag.tag, cls:ma20Tag.cls, desc:`昨日 MA20 ${fmt(m.ma20Prev)}`},
       ];
-      $("gates").innerHTML = defs.map(g => `<div class="gate"><span class="badge">${g.no}</span><div><strong>${g.name}</strong><div class="subtle">${g.desc}</div></div><div>${g.control}<div class="signal ${g.pass ? "ok-text" : "no-text"}">${g.pass ? "✓" : "✗"}</div></div></div>`).join("");
-      const bad = defs.filter(g => !g.pass).map(g => g.name);
-      const sum = $("gateSummary");
-      sum.className = "summary " + (bad.length ? "warn" : "ok");
-      sum.textContent = bad.length ? `⚠ 闸门未通过：${bad.join("、")}` : "✓ 四闸门全部通过，可开仓";
+      $("entryL1Cards").innerHTML = cards.map(c => `<div class="lvl-card">
+        <div class="lvl-card-label">${c.label}</div>
+        <div class="lvl-card-value">${c.value}</div>
+        <span class="lvl-card-tag tag-${c.cls}">${c.tag}</span>
+        <div class="lvl-card-desc">${c.desc}</div>
+      </div>`).join("");
+    }
+    function renderEntryRetRow(m, g) {
+      const fxPct = (v) => Number.isFinite(v) ? (v >= 0 ? "+" : "") + v.toFixed(2) + "%" : "—";
+      const colorOf = (v) => Number.isFinite(v) ? (v >= 0 ? "color:var(--red)" : "color:var(--green)") : "color:var(--text-muted)";
+      const atrRatio = (Number.isFinite(m.currentATR) && Number.isFinite(m.atrMa20) && m.atrMa20 > 0) ? m.currentATR / m.atrMa20 : null;
+      const atrText = Number.isFinite(atrRatio) ? `${atrRatio.toFixed(2)}×` : "—";
+      const atrColor = Number.isFinite(atrRatio) ? (atrRatio >= 1.2 ? "color:var(--red)" : atrRatio <= 0.8 ? "color:var(--green)" : "color:var(--text-primary)") : "color:var(--text-muted)";
+      const atrDesc = Number.isFinite(atrRatio) ? (atrRatio >= 1.2 ? "波动扩张" : atrRatio <= 0.8 ? "波动收缩" : "波动正常") : "—";
+      const cells = [
+        {label:"近5日（信号）", value:fxPct(g.ret5), color:colorOf(g.ret5), desc:""},
+        {label:"近20日（信号）", value:fxPct(g.ret20), color:colorOf(g.ret20), desc:""},
+        {label:"近60日（信号）", value:fxPct(g.ret60), color:colorOf(g.ret60), desc:""},
+        {label:"ATR / 20日均", value:atrText, color:atrColor, desc:atrDesc},
+      ];
+      $("entryRetRow").innerHTML = cells.map(c => `<div class="ret-cell">
+        <div class="ret-cell-label">${c.label}</div>
+        <div class="ret-cell-value" style="${c.color}">${c.value}</div>
+        ${c.desc ? `<div class="lvl-card-desc">${c.desc}</div>` : ""}
+      </div>`).join("");
+    }
+    function renderEntryVolRow(m, g) {
+      const tagMap = { "放量上涨":{cls:"green",icon:"▲"}, "缩量回调":{cls:"green",icon:"▽"}, "缩量反弹":{cls:"red",icon:"⚠"}, "放量下跌":{cls:"red",icon:"▼"}, "温和上涨":{cls:"yellow",icon:"△"}, "温和回调":{cls:"yellow",icon:"▽"}, "unknown":{cls:"neutral",icon:"·"} };
+      const t = tagMap[g.volState] || tagMap.unknown;
+      const r1 = Number.isFinite(g.volRatioMa20) ? g.volRatioMa20.toFixed(2) + "×" : "—";
+      const r2 = Number.isFinite(g.volRatioPrev) ? g.volRatioPrev.toFixed(2) + "×" : "—";
+      const pct = Number.isFinite(m.priceChangePct) ? (m.priceChangePct >= 0 ? "+" : "") + m.priceChangePct.toFixed(2) + "%" : "—";
+      const note = g.volState === "缩量反弹" ? `<div class="lvl-card-desc" style="margin-top:6px;color:var(--red)">⚠ 量价质量恶化：弱反弹，多关注次日量能</div>` : "";
+      $("entryVolRow").innerHTML = `<div class="vol-row">
+        <div class="vol-state"><span class="vol-state-tag tag-${t.cls}">${t.icon} ${g.volState}</span></div>
+        <div class="vol-detail">今/20均 ${r1} · 今/昨 ${r2} · 涨跌 ${pct}</div>
+      </div>${note}`;
+    }
+    function renderEntryCrossSection(m, g, cfg) {
+      const fxPct = (v) => Number.isFinite(v) ? (v >= 0 ? "+" : "") + v.toFixed(2) + "%" : "—";
+      const cls = (v) => Number.isFinite(v) ? (v >= 0 ? "cross-pos" : "cross-neg") : "";
+      const rs = g.rs;
+      const sigName = cfg.signalName || "信号指数";
+      const rows = [
+        {name:"vs 沪深300（5日相对）", v:rs.hs300_5, hint:"主线地位"},
+        {name:"vs 沪深300（20日相对）", v:rs.hs300_20, hint:"中期主线"},
+        {name:"vs 中证红利（5日相对）", v:rs.dividend_5, hint:"风格强弱（< 0 警惕风格切防守）"},
+        {name:"vs 创业板指（5日相对）", v:rs.cyb_5, hint:"双创对比"},
+      ];
+      const internal = Number.isFinite(rs.internalDiv) ? `<div class="lvl-card-desc" style="margin-top:8px">双创内部分化：创业板 vs ${sigName} 5日差 ${rs.internalDiv.toFixed(2)}pp ${rs.internalDiv > 3 ? "（>3pp，警示）" : "（正常）"}</div>` : "";
+      $("entryCrossSec").innerHTML = `<table class="cross-table">
+        <thead><tr><th>对比</th><th>相对收益</th><th>含义</th></tr></thead>
+        <tbody>${rows.map(r => `<tr><td>${r.name}</td><td class="num ${cls(r.v)}">${fxPct(r.v)}</td><td>${r.hint}</td></tr>`).join("")}</tbody>
+      </table>${internal}`;
+    }
+    function renderEntryDonchianPos(m, g) {
+      const sig = m.signalRows;
+      const close = g.donchian.close, d20 = g.donchian.d20, d55 = g.donchian.d55;
+      function buildBar(label, channelHigh, lookback) {
+        if (!Array.isArray(sig) || sig.length < lookback || !Number.isFinite(channelHigh) || !Number.isFinite(close)) {
+          return `<div class="donchian-row"><div class="donchian-meta"><strong>${label}</strong><span class="muted">数据不足</span></div></div>`;
+        }
+        const lows = sig.slice(-lookback - 1, -1).map(r => r.low ?? r.close).filter(Number.isFinite);
+        const lo = lows.length ? Math.min(...lows) : close;
+        const hi = channelHigh;
+        const range = hi - lo;
+        const pct = range > 0 ? Math.max(0, Math.min(100, (close - lo) / range * 100)) : 50;
+        const breakthrough = close > hi;
+        const status = breakthrough ? `<span class="lvl-card-tag tag-blue">突破</span>` : (pct >= 80 ? `<span class="lvl-card-tag tag-yellow">逼近</span>` : `<span class="lvl-card-tag tag-neutral">区间内</span>`);
+        return `<div class="donchian-row">
+          <div class="donchian-meta"><strong>${label}</strong>${status}<span>位置 ${pct.toFixed(0)}%</span></div>
+          <div class="donchian-bar">
+            <div class="donchian-track">
+              <div class="donchian-marker" style="left:${pct}%"></div>
+              <div class="donchian-label" style="left:${pct}%">收 ${fmt(close)}</div>
+            </div>
+            <div class="donchian-axis"><span>低 ${fmt(lo)}</span><span>高 ${fmt(hi)}</span></div>
+          </div>
+        </div>`;
+      }
+      $("entryDonchian").innerHTML = buildBar("D20 通道", d20, 20) + buildBar("D55 通道", d55, 55);
+    }
+    function renderEntryBreadth(g) {
+      const b = g.breadth;
+      if (!b || !Number.isFinite(b.aboveMa20Pct)) {
+        $("entryBreadth").innerHTML = `<div class="breadth-box"><div class="muted" style="font-size:13px">池宽度数据加载中…首次刷新需 10–20 秒</div></div>`;
+        return;
+      }
+      const pct = b.aboveMa20Pct;
+      const cls = pct >= 80 ? "green" : pct >= 70 ? "blue" : pct >= 50 ? "yellow" : "red";
+      const txt = pct >= 80 ? "充分扩散，趋势纵深好" : pct >= 70 ? "多数齐涨，健康" : pct >= 50 ? "一半以上站上 MA20，中性偏强" : "弱：少数股领涨，警惕分化";
+      const stamp = b.updatedAt ? `更新 ${b.updatedAt}` : "";
+      $("entryBreadth").innerHTML = `<div class="breadth-box">
+        <div class="breadth-info"><span><strong>${b.poolName}</strong> · ${b.total}/${b.expected} 只成分股</span><span>${stamp}</span></div>
+        <div class="breadth-bar"><div class="breadth-fill" style="width:${pct.toFixed(1)}%;background:${cls === "red" ? "var(--red)" : cls === "yellow" ? "var(--yellow)" : cls === "green" ? "var(--green)" : "var(--primary)"}"></div></div>
+        <div class="breadth-info"><span class="lvl-card-tag tag-${cls}">${pct.toFixed(1)}% 站上 MA20</span><span class="muted">${txt}</span></div>
+      </div>`;
+    }
+    function renderEntryGateChecklist(g) {
+      const groups = [
+        {key:"forbid", title:"禁止条件", items:g.forbid, hitCls:"hit-forbid", hitIcon:"⛔", hitIconCls:"hit"},
+        {key:"warn", title:"警示条件", items:g.warn, hitCls:"hit-warn", hitIcon:"⚠", hitIconCls:"hit-warn"},
+        {key:"healthy", title:"健康项", items:g.healthy, hitCls:"hit-healthy", hitIcon:"✓", hitIconCls:"hit-good"},
+        {key:"bonus", title:"加分项", items:g.bonus, hitCls:"hit-bonus", hitIcon:"★", hitIconCls:"hit-bonus"},
+      ];
+      const html = groups.map(grp => {
+        const hits = grp.items.filter(x => x.hit).length;
+        const rows = grp.items.map(it => {
+          const isPositive = grp.key === "healthy" || grp.key === "bonus";
+          const hit = it.hit;
+          const dimCls = !hit && !isPositive ? "" : (!hit && isPositive ? "dim" : "");
+          const lineCls = hit ? grp.hitCls : dimCls;
+          const iconChar = hit ? grp.hitIcon : (isPositive ? "·" : "·");
+          const iconCls = hit ? grp.hitIconCls : "miss";
+          const status = hit ? (isPositive ? `<span class="gate-status tag-${grp.key === "bonus" ? "blue" : "green"}">命中</span>` : `<span class="gate-status tag-${grp.key === "forbid" ? "red" : "yellow"}">触发</span>`) : (it.dataOk === false ? `<span class="gate-status tag-neutral">数据缺失</span>` : `<span class="gate-status tag-neutral">未触发</span>`);
+          return `<div class="gate-item ${lineCls}">
+            <div class="gate-icon ${iconCls}">${iconChar}</div>
+            <div class="gate-body"><div class="gate-label">${it.label}</div><div class="gate-evidence">${it.evidence}</div></div>
+            ${status}
+          </div>`;
+        }).join("");
+        return `<div class="gate-cat">${grp.title}<span class="gate-cat-count">${hits}/${grp.items.length}</span></div>${rows}`;
+      }).join("");
+      $("entryGateChecklist").innerHTML = `<div class="gate-checklist">${html}</div>`;
+    }
+    function renderEntryAddBlock(g) {
+      const a = g.addVerdict;
+      const banner = `<div class="verdict-banner ${a === "ok2" || a === "ok3" ? "healthy" : a === "forbid" ? "forbid" : a === "wait" ? "warn" : "na"}">
+        <div class="verdict-title">${a === "ok2" || a === "ok3" ? "✓" : a === "forbid" ? "⛔" : a === "wait" ? "⏸" : "·"} ${g.addTitle}</div>
+        <div class="verdict-desc">${g.addDesc}</div>
+      </div>`;
+      const p = g.position;
+      const stages = [
+        {no:"第1笔", desc:"1.0% 仓位 · D20/D55 突破入场", cond:"开仓条件 见上方主裁决", done:p.hasPosition, next:!p.hasPosition && (g.verdict === "healthy" || g.verdict === "bonus")},
+        {no:"第2笔", desc:"+0.5% 仓位 · 浮盈 ≥ +0.5R 且 距上次买入 ≥ +0.5N", cond:`浮盈 ${Number.isFinite(p.floatR) ? fmtR(p.floatR) : "—"} · 距上次 ${Number.isFinite(p.distFromLastBuyN) ? p.distFromLastBuyN.toFixed(2)+"N" : "—"}`, done:a === "ok3", next:a === "ok2"},
+        {no:"第3笔", desc:"+0.5% 仓位 · 浮盈 ≥ +1R 且 距上次买入 ≥ +1N", cond:`浮盈 ${Number.isFinite(p.floatR) ? fmtR(p.floatR) : "—"} · 距上次 ${Number.isFinite(p.distFromLastBuyN) ? p.distFromLastBuyN.toFixed(2)+"N" : "—"}`, done:false, next:a === "ok3"},
+      ];
+      const stageHtml = `<div class="pyramid-stages">${stages.map(s => `<div class="pyramid-stage ${s.done ? "done" : ""} ${s.next ? "next" : ""}">
+        <div class="pyramid-stage-no">${s.no}</div>
+        <div class="pyramid-stage-body">${s.desc}<div class="pyramid-stage-cond">${s.cond}</div></div>
+        <span class="pyramid-stage-mark ${s.done ? "tag-green" : s.next ? "tag-blue" : "tag-neutral"}">${s.done ? "已完成" : s.next ? "下一步" : "等待"}</span>
+      </div>`).join("")}</div>`;
+      const negList = g.addNegative.map(it => `<div class="gate-item ${it.hit ? "hit-forbid" : "dim"}">
+        <div class="gate-icon ${it.hit ? "hit" : "miss"}">${it.hit ? "⛔" : "·"}</div>
+        <div class="gate-body"><div class="gate-label">${it.label}</div><div class="gate-evidence">${it.evidence}</div></div>
+        <span class="gate-status ${it.hit ? "tag-red" : "tag-neutral"}">${it.hit ? "触发" : "未触发"}</span>
+      </div>`).join("");
+      const posList = g.addPositive.map(it => `<div class="gate-item ${it.hit ? "hit-healthy" : "dim"}">
+        <div class="gate-icon ${it.hit ? "hit-good" : "miss"}">${it.hit ? "✓" : "·"}</div>
+        <div class="gate-body"><div class="gate-label">${it.label}</div><div class="gate-evidence">${it.evidence}</div></div>
+        <span class="gate-status ${it.hit ? "tag-green" : "tag-neutral"}">${it.hit ? "已满足" : "未满足"}</span>
+      </div>`).join("");
+      const detail = `<div class="gate-cat">禁止加仓清单<span class="gate-cat-count">${g.addNegative.filter(x => x.hit).length}/${g.addNegative.length}</span></div>${negList}
+        <div class="gate-cat">加仓正向条件<span class="gate-cat-count">${g.addPositive.filter(x => x.hit).length}/${g.addPositive.length}</span></div>${posList}`;
+      $("entryAddBlock").innerHTML = banner + stageHtml + `<div class="gate-checklist" style="margin-top:14px">${detail}</div>`;
     }
     function renderPositionCalc() {
       const price = parseFloat($("planPrice").value), atr = parseFloat($("planAtr").value);
@@ -1682,19 +2409,6 @@
         return `<tr><td>${label}</td><td class="num">${fmt(triggerPrice)}</td><td class="num">${protect == null ? "交给 Chandelier" : fmt(protectPrice)}</td></tr>`;
       }).join("");
       $("ladderTable").innerHTML = `<table><tr><th>里程碑</th><th>触发价</th><th>保护线上移至</th></tr>${rows}</table>`;
-    }
-    function renderPyramid() {
-      const m = marketOf(), base = m.currentPrice ?? posCfg().cost, atr = m.currentATR ?? posCfg().entryATR;
-      $("pyramidViz").innerHTML = `<svg viewBox="0 0 760 230" aria-label="加仓金字塔">
-        <rect width="760" height="230" fill="#fff"/>
-        <polygon points="130,160 550,160 610,205 70,205" fill="#dbeafe" stroke="#1e40af"/><text x="340" y="188" text-anchor="middle" font-size="16" font-weight="700" fill="#1e40af">第1笔 1% | Donchian D20/D55 突破</text>
-        <polygon points="185,105 495,105 550,150 130,150" fill="#d1fae5" stroke="#059669"/><text x="340" y="133" text-anchor="middle" font-size="15" font-weight="700" fill="#059669">第2笔 +0.5% | +0.5N 且浮盈≥+0.5R</text>
-        <polygon points="245,50 435,50 490,95 190,95" fill="#fef3c7" stroke="#d97706"/><text x="340" y="78" text-anchor="middle" font-size="15" font-weight="700" fill="#d97706">第3笔 +0.5% | +1.0N 且浮盈≥+1R</text>
-        <line x1="628" x2="690" y1="182" y2="182" stroke="#64748b" marker-end="url(#arr)"/><text x="698" y="187" font-size="13" fill="#475569">${fmt(base)}</text>
-        <line x1="558" x2="690" y1="126" y2="126" stroke="#64748b" marker-end="url(#arr)"/><text x="698" y="131" font-size="13" fill="#475569">${fmt(base + .5 * atr)}</text>
-        <line x1="500" x2="690" y1="72" y2="72" stroke="#64748b" marker-end="url(#arr)"/><text x="698" y="77" font-size="13" fill="#475569">${fmt(base + atr)}</text>
-        <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/></marker></defs>
-      </svg>`;
     }
     function renderStopDetail() {
       const c = posCfg(), m = marketOf(), r = compute(c, m);
@@ -1963,11 +2677,9 @@
       }
     });
     ["matrixAdx","matrixRsi"].forEach(id => $(id).addEventListener("input", () => { state.matrixTouched = true; renderMatrix(); }));
-    ["planPrice","planAtr","riskBudget"].forEach(id => $(id).addEventListener("input", () => { state.planTouched = true; renderPositionCalc(); renderPyramid(); }));
+    ["planPrice","planAtr","riskBudget"].forEach(id => $(id).addEventListener("input", () => { state.planTouched = true; renderPositionCalc(); }));
 
     document.addEventListener("input", (e) => {
-      if (e.target.id === "gatePool") state.gateOverrides.poolWidth = e.target.checked;
-      if (["gateAdx","gateMa","gateClose","gatePool"].includes(e.target.id)) renderGates();
       // Trade form: re-calc ATR when date or type changes; update preview on any trade field change
       if (e.target.id === "tf-date" || e.target.id === "tf-type") updateTradeFormATR();
       if (["tf-atr","tf-price"].includes(e.target.id)) updateTradeFormPreview();
