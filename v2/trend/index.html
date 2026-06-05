@@ -291,6 +291,14 @@
     .sd-kstep.active{background:var(--blue-info-bg);border-color:#93c5fd;color:var(--primary);font-weight:700}
     .sd-kstep.adjust{background:var(--yellow-bg);border-color:#fcd34d;color:#92400e;font-weight:700}
     .sd-calc-box{margin:8px 0;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);font-variant-numeric:tabular-nums;line-height:1.7}
+    .ratchet-history{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);overflow:hidden}
+    .ratchet-history summary{padding:10px 12px;font-size:13px;font-weight:800;color:var(--primary);cursor:pointer;background:var(--blue-info-bg)}
+    .ratchet-table-wrap{overflow-x:auto}
+    .ratchet-table{width:100%;min-width:760px;border-collapse:collapse;font-size:12px}
+    .ratchet-table th,.ratchet-table td{padding:7px 9px;border-top:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .ratchet-table th:first-child,.ratchet-table td:first-child{text-align:left}
+    .ratchet-table th{background:var(--surface-2);color:var(--text-muted);font-weight:800}
+    .ratchet-table td:last-child{font-weight:800;color:var(--primary)}
     .sd-time-tag{display:inline-flex;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid;margin-bottom:8px}
     .sd-time-tag.ok{background:var(--green-bg);border-color:#6ee7b7;color:#065f46}
     .sd-time-tag.warn{background:var(--yellow-bg);border-color:#fcd34d;color:#92400e}
@@ -575,12 +583,13 @@
         global:"__INDEX_VOLUME_000688__",
       },
     };
+    const POSITIONS_STATE_URL = "data/positions-state.md";
     const state = {
       activeId:"159781", overviewId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
       autoTimer:null, matrixTouched:false, planTouched:false,
       gateOverrides:{ poolWidth:false },
-      trades:{}, ratchets:{}, tradeEditId:null, tradeFormOpen:false,
-      benchmarks:{}, breadth:{}
+      trades:{}, tradeEditId:null, tradeFormOpen:false,
+      benchmarks:{}, breadth:{}, positionsState:{ byId:{}, loaded:false, updatedAt:null }
     };
     // 横截面对照标的: 沪深300 / 中证红利 / 创业板指
     const BENCHMARKS = {
@@ -609,11 +618,81 @@
     // ── Trade log helpers ──
     function loadTradeState() {
       try { const t = localStorage.getItem("trend_trades"); if (t) state.trades = JSON.parse(t); } catch(e) {}
-      try { const r = localStorage.getItem("trend_ratchets"); if (r) state.ratchets = JSON.parse(r); } catch(e) {}
     }
     function saveTradeState() {
       try { localStorage.setItem("trend_trades", JSON.stringify(state.trades)); } catch(e) {}
-      try { localStorage.setItem("trend_ratchets", JSON.stringify(state.ratchets)); } catch(e) {}
+    }
+    function parseStateNumber(value) {
+      if (value == null || value === "") return null;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+    function firstDate(values) {
+      const dates = values.filter(Boolean).sort();
+      return dates[0] || null;
+    }
+    function parsePositionsState(text) {
+      const byId = {};
+      const cleanValue = (value) => value.replace(/\s+#.*$/, "").trim();
+      text.split(/\r?\n/).forEach(line => {
+        const raw = line.trim();
+        if (!raw || raw.startsWith("#")) return;
+        const sep = raw.indexOf(":");
+        if (sep < 0) return;
+        const key = raw.slice(0, sep).trim();
+        const value = cleanValue(raw.slice(sep + 1));
+        if (!key.startsWith("position.")) return;
+        const parts = key.split(".");
+        const id = parts[1];
+        const field = parts.slice(2).join(".");
+        if (!id || !field) return;
+        const p = byId[id] || (byId[id] = { addons:[] });
+        const setNum = (name) => { const n = parseStateNumber(value); if (n != null) p[name] = n; };
+        if (field === "name") p.name = value;
+        else if (field === "secid") p.secid = value;
+        else if (field === "signal_name") p.signalName = value;
+        else if (field === "signal_secid") p.signalSecid = value;
+        else if (field === "position_pct") setNum("positionPct");
+        else if (field === "cost_price") setNum("cost");
+        else if (field === "initial_stop_price") setNum("initialStop");
+        else if (field === "initial_atr14") setNum("entryATR");
+        else if (field === "last_protection_line") setNum("lastProtectionLine");
+        else if (field === "structure_line") setNum("structureLine");
+        else if (field === "highest_close") setNum("highestClose");
+        else if (field === "opened_at") p.openedAt = value || null;
+        else if (field.startsWith("addon.")) {
+          const [, addonId, addonField] = field.split(".");
+          const addon = p.addons.find(x => x.id === addonId) || { id:addonId };
+          if (!p.addons.includes(addon)) p.addons.push(addon);
+          const n = parseStateNumber(value);
+          if (addonField === "opened_at") addon.openedAt = value || null;
+          else if (addonField === "cost_price" && n != null) addon.cost = n;
+          else if (addonField === "initial_stop_price" && n != null) addon.initialStop = n;
+          else if (addonField === "position_pct" && n != null) addon.positionPct = n;
+          else if (addonField === "signal") addon.signal = value;
+        }
+      });
+      return byId;
+    }
+    async function loadPositionsState() {
+      try {
+        const resp = await timeoutFetch(`${POSITIONS_STATE_URL}?t=${Date.now()}`, 5000);
+        if (!resp.ok) throw new Error("positions state http");
+        state.positionsState = {
+          byId:parsePositionsState(await resp.text()),
+          loaded:true,
+          updatedAt:new Date().toLocaleTimeString("zh-CN", {hour12:false, hour:"2-digit", minute:"2-digit"})
+        };
+      } catch (e) {
+        state.positionsState.loaded = false;
+      }
+    }
+    function positionStateOf(id) { return state.positionsState.byId[id] || {}; }
+    function openedAtInfoFromPositionState(p) {
+      if (p.openedAt) return { date:p.openedAt, source:"持仓状态.md opened_at" };
+      const addonDate = firstDate((p.addons || []).map(a => a.openedAt));
+      if (addonDate) return { date:addonDate, source:"持仓状态.md 加仓日期" };
+      return { date:null, source:null };
     }
     function tradesOf(id) { return state.trades[id] || []; }
     function derivedFromTrades(id) {
@@ -642,16 +721,25 @@
     function effectiveCfg(id) {
       const base = POSITIONS_CONFIG[id];
       const d = derivedFromTrades(id);
-      const ratchet = state.ratchets[id];
-      return Object.assign({}, base, {
-        cost: d.avgCost ?? base.cost,
-        entryATR: d.entryATR ?? base.entryATR,
-        openedAt: d.openedAt ?? base.openedAt,
-        ratchet: (ratchet != null ? ratchet : base.ratchet),
+      const ps = positionStateOf(id);
+      const openedInfo = openedAtInfoFromPositionState(ps);
+      return Object.assign({ id }, base, {
+        name: ps.name || base.name,
+        secid: ps.secid || base.secid,
+        signalName: ps.signalName || base.signalName,
+        signalSecid: ps.signalSecid || base.signalSecid,
+        positionPct: ps.positionPct ?? base.positionPct,
+        cost: ps.cost ?? d.avgCost ?? base.cost,
+        entryATR: ps.entryATR ?? d.entryATR ?? base.entryATR,
+        initialStop: ps.initialStop ?? base.initialStop,
+        openedAt: openedInfo.date ?? d.openedAt ?? base.openedAt,
+        openedAtSource: openedInfo.source || (d.openedAt ? "本地交易记录" : base.openedAt ? "默认配置" : null),
+        ratchet: ps.lastProtectionLine ?? ps.structureLine ?? base.ratchet,
+        highestClose: ps.highestClose ?? base.highestClose,
       });
     }
     function marketOf(id=state.activeId) {
-      const cfg = assetCfg(id) || {};
+      const cfg = POSITIONS_CONFIG[id] ? effectiveCfg(id) : assetCfg(id) || {};
       const base = state.market[id] || {};
       const over = state.overrides[id] || {};
       return {
@@ -677,7 +765,7 @@
         donchian20: clean(base.donchian20), donchian55: clean(base.donchian55),
         reboundRatio: clean(base.reboundRatio),
         intradayHigh: clean(base.intradayHigh), upperShadowPct: clean(base.upperShadowPct),
-        signalRows: base.signalRows || null,
+        signalRows: base.signalRows || null, tradeRows: base.tradeRows || null,
       };
     }
     function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
@@ -1031,15 +1119,77 @@
       const maxClose = Math.max(...usable.map(r => r.close).filter(Number.isFinite));
       return Number.isFinite(maxClose) ? Math.max(maxClose, fallback || 0) : fallback || null;
     }
-    function kFrom(rsi, adx) {
-      let base = 3.0, reason = "RSI<60 → 基础3.0";
-      if (Number.isFinite(rsi) && rsi >= 80) { base = 1.5; reason = "RSI≥80 → 基础1.5"; }
-      else if (Number.isFinite(rsi) && rsi >= 70) { base = 2.0; reason = "RSI70~80 → 基础2.0"; }
-      else if (Number.isFinite(rsi) && rsi >= 60) { base = 2.5; reason = "RSI60~70 → 基础2.5"; }
-      const adxAdj = Number.isFinite(adx) && adx > 50;
-      const adjusted = adxAdj ? Math.max(1.0, base - 0.3) : base;
-      const adxText = adxAdj ? "，ADX>50 → -0.3" : "，ADX≤50 → 不调整";
-      return { base, k:adjusted, text:reason + adxText };
+    function kAdx(adx) {
+      if (Number.isFinite(adx) && adx > 40) return { k:3.5, text:"ADX>40 → 强趋势放宽到 k=3.5" };
+      if (Number.isFinite(adx) && adx > 20) return { k:3.0, text:"ADX20~40 → 标准 k=3.0" };
+      return { k:2.5, text:Number.isFinite(adx) ? "ADX≤20 → 弱趋势参考 k=2.5" : "ADX缺失 → 参考 k=2.5" };
+    }
+    function ladderForPrice(cost, R, price) {
+      const floatR = Number.isFinite(price) && Number.isFinite(R) && R > 0 ? (price - cost) / R : null;
+      let line2 = null;
+      if (Number.isFinite(floatR)) {
+        if (floatR >= 3.0) line2 = cost + R * 1.5;
+        else if (floatR >= 2.0) line2 = cost + R * 0.75;
+        else if (floatR >= 1.0) line2 = cost + R * 0.25;
+        else if (floatR >= 0.5) line2 = cost;
+      }
+      return { floatR, line2 };
+    }
+    function maxFinite(values) {
+      const valid = values.filter(Number.isFinite);
+      return valid.length ? Math.max(...valid) : null;
+    }
+    function daysBetween(start, end) {
+      if (!start || !end) return null;
+      const s = new Date(`${start}T00:00:00+08:00`).getTime();
+      const e = new Date(`${end}T00:00:00+08:00`).getTime();
+      return Number.isFinite(s) && Number.isFinite(e) ? Math.max(0, Math.floor((e - s) / 86400000)) : null;
+    }
+    function resolveRatchetStartDate(cfg, rows) {
+      if (cfg.openedAt) return { date:cfg.openedAt, source:cfg.openedAtSource || "持仓状态.md opened_at" };
+      const tradeDate = firstDate(tradesOf(cfg.id).filter(t => t.type === "buy").map(t => t.date));
+      if (tradeDate) return { date:tradeDate, source:"本地交易记录" };
+      if (!rows?.length || !Number.isFinite(cfg.cost)) return { date:null, source:"未记录" };
+      let best = null;
+      rows.forEach(row => {
+        if (!Number.isFinite(row.close)) return;
+        const dist = Math.abs(row.close - cfg.cost);
+        if (!best || dist < best.dist) best = { date:row.date, dist };
+      });
+      return { date:best?.date || null, source:"收盘价最接近成本" };
+    }
+    function computeRatchetFromHistory(cfg, rows) {
+      if (!rows?.length) return { ratchet:cfg.ratchet, detail:[], startDate:cfg.openedAt || null, source:"等待K线" };
+      const R = 2 * cfg.entryATR;
+      const line1 = Number.isFinite(cfg.cost) && Number.isFinite(R) ? cfg.cost - R : cfg.initialStop;
+      const start = resolveRatchetStartDate(cfg, rows);
+      const startIdx = start.date ? rows.findIndex(r => r.date >= start.date) : -1;
+      if (startIdx < 0 || !Number.isFinite(line1)) {
+        return { ratchet:cfg.ratchet, detail:[], startDate:start.date, source:start.source };
+      }
+      let runningMax = maxFinite([line1, cfg.ratchet]) ?? line1;
+      let runningHigh = Number.isFinite(cfg.highestClose) ? cfg.highestClose : -Infinity;
+      const detail = [];
+      for (let i = startIdx; i < rows.length; i++) {
+        const row = rows[i];
+        if (Number.isFinite(row.close)) runningHigh = Math.max(runningHigh, row.close);
+        const slice = rows.slice(0, i + 1);
+        const atr = calcATR(slice);
+        const adx = calcADX(slice)?.[0] ?? null;
+        const ladder = ladderForPrice(cfg.cost, R, row.close);
+        const line3Fixed = Number.isFinite(runningHigh) && Number.isFinite(atr)
+          ? runningHigh - 3.0 * atr : null;
+        const adxInfo = kAdx(adx);
+        const line3Adx = Number.isFinite(runningHigh) && Number.isFinite(atr)
+          ? runningHigh - adxInfo.k * atr : null;
+        const dayMax = maxFinite([line1, ladder.line2, line3Fixed]);
+        if (Number.isFinite(dayMax)) runningMax = Math.max(runningMax, dayMax);
+        detail.push({
+          date:row.date, close:row.close, atr, adx, line1, line2:ladder.line2,
+          line3Fixed, line3Adx, dayMax, ratchet:runningMax,
+        });
+      }
+      return { ratchet:runningMax, detail, startDate:start.date, source:start.source };
     }
     function kTimeFrom(baseK, holdingDays, floatR) {
       let k = baseK;
@@ -1065,31 +1215,31 @@
     }
     function compute(cfg, market) {
       const R = 2 * cfg.entryATR;
-      const floatR = Number.isFinite(market.currentPrice) ? (market.currentPrice - cfg.cost) / R : null;
-      const line1 = cfg.cost - R;
-      let line2 = null;
-      if (Number.isFinite(floatR)) {
-        if (floatR >= 3.0) line2 = cfg.cost + R * 1.5;
-        else if (floatR >= 2.0) line2 = cfg.cost + R * 0.75;
-        else if (floatR >= 1.0) line2 = cfg.cost + R * 0.25;
-        else if (floatR >= 0.5) line2 = cfg.cost;
-      }
-      const kInfo = kFrom(market.currentRSI, market.currentADX);
-      const line3 = Number.isFinite(market.highestClose) && Number.isFinite(market.currentATR)
-        ? market.highestClose - kInfo.k * market.currentATR : null;
-      const holdingDays = cfg.openedAt
-        ? Math.floor((Date.now() - new Date(cfg.openedAt).getTime()) / 86400000)
-        : null;
-      const kTimeInfo = kTimeFrom(kInfo.k, holdingDays, floatR);
+      const ladder = ladderForPrice(cfg.cost, R, market.currentPrice);
+      const floatR = ladder.floatR;
+      const line1 = Number.isFinite(R) ? cfg.cost - R : cfg.initialStop;
+      const line2 = ladder.line2;
+      const line3Fixed = Number.isFinite(market.highestClose) && Number.isFinite(market.currentATR)
+        ? market.highestClose - 3.0 * market.currentATR : null;
+      const adxKInfo = kAdx(market.currentADX);
+      const line3Adx = Number.isFinite(market.highestClose) && Number.isFinite(market.currentATR)
+        ? market.highestClose - adxKInfo.k * market.currentATR : null;
+      const ratchetInfo = computeRatchetFromHistory(cfg, market.tradeRows);
+      const holdingStart = cfg.openedAt || ratchetInfo.startDate;
+      const today = new Date().toISOString().slice(0, 10);
+      const holdingDays = holdingStart ? daysBetween(holdingStart, today) : null;
+      const kTimeInfo = kTimeFrom(3.0, holdingDays, floatR);
       const line3t = Number.isFinite(market.highestClose) && Number.isFinite(market.currentATR)
         ? market.highestClose - kTimeInfo.k * market.currentATR : null;
-      const line4 = cfg.ratchet;
-      // Use time-adjusted Chandelier (= line3 when no time factor) as ③ in final stop
+      const line4 = ratchetInfo.ratchet;
       const candidates = {"①初始止损":line1, "②R-Ladder":line2, "③Chandelier":line3t, "④棘轮记忆":line4};
       const valid = Object.entries(candidates).filter(([, v]) => Number.isFinite(v));
       const best = valid.reduce((a, b) => b[1] > a[1] ? b : a, valid[0] || ["—", null]);
-      return { R, floatR, k:kInfo.k, kInfo, holdingDays, kTimeInfo,
-               line1, line2, line3, line3t, line4, finalStop:best[1], winner:best[0], candidates };
+      return {
+        R, floatR, k:3.0, kInfo:{ k:3.0, text:"固定 k=3.0" }, adxKInfo, holdingDays, holdingStart,
+        kTimeInfo, ratchetInfo, line1, line2, line3:line3Fixed, line3Fixed, line3Adx, line3t,
+        line4, finalStop:best[1], winner:best[0], candidates
+      };
     }
     // ===== 入场闸门合成器 =====
     // 输入：当前 marketOf 输出 + 基准 K 线 + 池宽度结果。输出：四档裁决 + 命中详情。
@@ -1459,7 +1609,7 @@
         catch (e) { /* 静默：保留缓存 */ }
       }));
       await Promise.all(marketIds().map(async (id) => {
-        const cfg = assetCfg(id);
+        const cfg = POSITIONS_CONFIG[id] ? effectiveCfg(id) : assetCfg(id);
         const current = state.market[id] || {};
         const quote = quoteRows[cfg.secid] || {};
         const signalQuote = quoteRows[cfg.signalSecid] || {};
@@ -1635,13 +1785,13 @@
         return {cls:"yellow", title:"趋势萌芽·方向待定", desc:"ADX 20-25 有趋势苗头，RSI中性，等待 ADX 突破25确认方向。"};
       }
       if (adx < 40) {
-        if (rsi > 80) return {cls:"yellow", title:"强势趋势·超买警戒", desc:"ADX 25-40 趋势明确，但RSI>80 短期超买，注意回调风险，收紧保护线。"};
+        if (rsi > 80) return {cls:"yellow", title:"强势趋势·超买警戒", desc:"ADX 25-40 趋势明确，但RSI>80 短期超买，减少追涨，按既有保护线管理。"};
         if (rsi >= 60) return {cls:"green", title:"趋势确立·多头动能充足", desc:"ADX 25-40 趋势明确，RSI 60-80 处于强势区间。可持有仓位，观察加仓机会。"};
         if (rsi >= 45) return {cls:"green", title:"趋势确立·动能中性", desc:"ADX 25-40 趋势确认，RSI中性偏高，价格大概率维持趋势方向，持有为主。"};
         return {cls:"red", title:"趋势向下·空头确认", desc:"ADX 25-40 趋势明确，RSI<45 空头占优，优先检查止损线是否触发。"};
       }
       // adx >= 40
-      if (rsi > 75) return {cls:"yellow", title:"强趋势末段·过热", desc:"ADX≥40 强势趋势，RSI高位，可能进入趋势末段，收紧 Chandelier 保护线，准备减仓。"};
+      if (rsi > 75) return {cls:"yellow", title:"强趋势末段·过热", desc:"ADX≥40 强势趋势，RSI高位，可能进入趋势末段，避免追涨，按 fixed Chandelier 与棘轮线管理。"};
       if (rsi >= 50) return {cls:"green", title:"强趋势·中后期持有", desc:"ADX≥40 趋势强劲，RSI中高位，趋势仍在延续，持有并跟踪四线止损。"};
       return {cls:"red", title:"强势下跌·空头主导", desc:"ADX≥40 下跌趋势强劲，RSI低位，止损优先，禁止抄底。"};
     }
@@ -1936,8 +2086,9 @@
       const totalPnl = Number.isFinite(unrealPnl) && Number.isFinite(d.realizedPnl) ? d.realizedPnl + unrealPnl
         : Number.isFinite(d.realizedPnl) ? d.realizedPnl
         : Number.isFinite(unrealPnl) ? unrealPnl : null;
+      const positionVal = d.netUnits > 0 ? d.netUnits.toFixed(1) + " 手" : `${fmt(c.positionPct, 1)}%`;
       const sumCards = [
-        { label:"净持仓（手）", val: d.netUnits > 0 ? d.netUnits.toFixed(1) : "空仓", cls:"neutral", wide:false },
+        { label:d.netUnits > 0 ? "净持仓" : "趋势仓位", val: positionVal, cls:"neutral", wide:false },
         { label:"均成本价", val: Number.isFinite(c.cost) ? fmt(c.cost) : "—", cls:"neutral", wide:false },
         { label:"未实现盈亏", val: Number.isFinite(unrealPct) ? fmtPct(unrealPct) + (Number.isFinite(unrealPnl) ? " / " + fmtMoney(unrealPnl) : "") : "—", cls: pnlClass(unrealPct), wide:false },
         { label:"历史已实现盈亏", val: fmtMoney(d.realizedPnl), cls: pnlClass(d.realizedPnl), wide:false },
@@ -1973,15 +2124,13 @@
       // Trade form (add/edit)
       const formHtml = state.tradeFormOpen ? renderTradeForm(id) : "";
 
-      // Ratchet editor
-      const ratchetVal = state.ratchets[id] ?? c.ratchet;
+      // Ratchet replay
       const ratchetHtml = `<div class="ratchet-editor">
-        <div class="ratchet-title">④ 棘轮线（只升不降）</div>
+        <div class="ratchet-title">④ 棘轮线（历史回放）</div>
         <div class="ratchet-row">
-          <span>当前棘轮线：</span>
-          <input id="ratchetInput" type="number" step="0.001" value="${Number.isFinite(ratchetVal) ? ratchetVal.toFixed(3) : ""}">
-          <button class="ratchet-save" id="ratchetSaveBtn">保存</button>
-          <span class="subtle" style="font-size:12px">（配置默认：${fmt(POSITIONS_CONFIG[id].ratchet)}）</span>
+          <span>自动棘轮：</span>
+          <strong class="num">${fmt(r.line4)}</strong>
+          <span class="subtle" style="font-size:12px">起算 ${r.ratchetInfo.startDate || "—"} · ${r.ratchetInfo.source}</span>
         </div>
       </div>`;
 
@@ -1997,11 +2146,6 @@
       // Bind events after render
       const addBtn = $("addTradeBtn");
       if (addBtn) addBtn.onclick = () => { state.tradeFormOpen = true; state.tradeEditId = null; renderPositionPanel(); };
-      const rSave = $("ratchetSaveBtn");
-      if (rSave) rSave.onclick = () => {
-        const v = parseFloat($("ratchetInput").value);
-        if (Number.isFinite(v)) { state.ratchets[id] = v; saveTradeState(); renderAll(); }
-      };
     }
     function renderTradeForm(id) {
       const m = marketOf(id);
@@ -2087,8 +2231,8 @@
       return [
         {key:"①初始止损", no:"①", name:"初始止损", value:r.line1, note:`成本 ${fmt(c.cost)} - R ${fmt(r.R)}`, modal:"modal-initial-stop"},
         {key:"②R-Ladder", no:"②", name:"R-Ladder", value:r.line2, display:ladderInactive ? "未触发" : null, note:ladderNote, modal:"modal-r-ladder"},
-        {key:"③Chandelier", no:"③", name:"Chandelier", value:r.line3, note:`k=${fmt(r.k, 1)}，HH=${fmt(m.highestClose)}`, modal:"modal-chandelier"},
-        {key:"④棘轮记忆", no:"④", name:"棘轮记忆", value:r.line4, note:`上一保护线 ${fmt(c.ratchet)}`, modal:"modal-ratchet"},
+        {key:"③Chandelier", no:"③", name:"Chandelier", value:r.line3t, note:`fixed k=${fmt(r.k, 1)}，HH=${fmt(m.highestClose)}`, modal:"modal-chandelier"},
+        {key:"④棘轮记忆", no:"④", name:"棘轮记忆", value:r.line4, note:`历史回放 · 起算 ${r.ratchetInfo.startDate || "—"}`, modal:"modal-ratchet"},
       ];
     }
     function renderStopCards(target, c, m, r, detail) {
@@ -2102,13 +2246,13 @@
         </div>`).join("");
     }
     function formulaText(key) {
-      return {"①初始止损":"成本 - R", "②R-Ladder":"按浮盈R倍数上移保护线", "③Chandelier":"HH - k × ATR14", "④棘轮记忆":"上一保护线，只升不降"}[key];
+      return {"①初始止损":"成本 - R", "②R-Ladder":"按浮盈R倍数上移保护线", "③Chandelier":"HH - 3.0 × ATR14（再做时间修正）", "④棘轮记忆":"从开仓日起逐日回放，只升不降"}[key];
     }
     function priceSvg(c, m, r) {
       const lines = [
         {name:"①初始止损", value:r.line1, color:"var(--red)"},
         {name:"②R-Ladder", value:r.line2, color:"var(--yellow)"},
-        {name:"③Chandelier", value:r.line3, color:"var(--primary)"},
+        {name:"③Chandelier", value:r.line3t, color:"var(--primary)"},
         {name:"④棘轮记忆", value:r.line4, color:"var(--secondary)"},
         {name:"成本线", value:c.cost, color:"var(--text-muted)", dash:"5 4"},
       ].filter(x => Number.isFinite(x.value));
@@ -2463,7 +2607,8 @@
         sdRMultipleHtml(c, m, r, stamp) +
         sdTurtleHtml(c, m, r, stamp) +
         sdChandelierHtml(c, m, r, stamp) +
-        sdTimeFacHtml(c, m, r, stamp);
+        sdTimeFacHtml(c, m, r, stamp) +
+        sdRatchetHistoryHtml(r);
     }
     function sdRow(label, val, cls="") {
       return `<div class="sd-row ${cls}"><span class="sd-row-label">${label}</span><span class="sd-row-val num">${val}</span></div>`;
@@ -2472,7 +2617,7 @@
       const lines = [
         { no:"①", name:"初始止损", val:r.line1, key:"①初始止损" },
         { no:"②", name:"R-Ladder", val:r.line2, key:"②R-Ladder", inactive:!Number.isFinite(r.line2) },
-        { no:"③", name:"Chandelier（基础）", val:r.line3 },
+        { no:"③", name:"Chandelier（fixed）", val:r.line3 },
         { no:"③t", name:"Chandelier（时间修正）", val:r.line3t, key:"③Chandelier" },
         { no:"④", name:"棘轮记忆", val:r.line4, key:"④棘轮记忆" },
       ];
@@ -2560,33 +2705,28 @@
       </div>`;
     }
     function sdChandelierHtml(c, m, r, stamp) {
-      const ki = r.kInfo;
-      const rsiCond = [
-        { label:"RSI ≥ 80", k:1.5, active:Number.isFinite(m.currentRSI) && m.currentRSI >= 80 },
-        { label:"RSI 70~80", k:2.0, active:Number.isFinite(m.currentRSI) && m.currentRSI >= 70 && m.currentRSI < 80 },
-        { label:"RSI 60~70", k:2.5, active:Number.isFinite(m.currentRSI) && m.currentRSI >= 60 && m.currentRSI < 70 },
-        { label:"RSI < 60", k:3.0, active:!Number.isFinite(m.currentRSI) || m.currentRSI < 60 },
-      ];
-      const adxAdj = Number.isFinite(m.currentADX) && m.currentADX > 50;
-      const kSteps = rsiCond.map(s =>
-        `<div class="sd-kstep ${s.active ? "active" : ""}">${s.label} → 基础 k = ${s.k}${s.active ? "  ←当前" : ""}</div>`
-      ).join("") +
-      `<div class="sd-kstep ${adxAdj ? "adjust" : ""}">ADX ${fmt(m.currentADX, 1)} ${adxAdj ? "> 50 → −0.3" : "≤ 50 → 不调整"}</div>`;
-      const hh = m.highestClose, atr = m.currentATR, k = r.k;
-      const calcBox = Number.isFinite(hh) && Number.isFinite(atr)
-        ? `HH ${fmt(hh)} − k ${fmt(k,1)} × ATR ${fmt(atr,4)} = ${fmt(hh)} − ${fmt(k * atr, 4)} = ${fmt(r.line3)}`
+      const hh = m.highestClose, atr = m.currentATR;
+      const fixedCalc = Number.isFinite(hh) && Number.isFinite(atr)
+        ? `HH ${fmt(hh)} − 3.0 × ATR ${fmt(atr,4)} = ${fmt(r.line3Fixed)}`
+        : "等待 HH 和 ATR 数据";
+      const adxCalc = Number.isFinite(hh) && Number.isFinite(atr)
+        ? `HH ${fmt(hh)} − ${fmt(r.adxKInfo.k,1)} × ATR ${fmt(atr,4)} = ${fmt(r.line3Adx)}`
         : "等待 HH 和 ATR 数据";
       return `<div class="sd-block">
         <div class="sd-block-title">Chandelier 止损${stamp}</div>
-        <div class="sd-kdecision">${kSteps}</div>
-        <div class="sd-calc-box">${calcBox}</div>
-        ${sdRow("Chandelier 止损线", Number.isFinite(r.line3) ? fmt(r.line3) : "—", "stop-line")}
+        <div class="sd-kdecision">
+          <div class="sd-kstep active">固定 k=3.0 → 推荐采用</div>
+          <div class="sd-kstep">ADX 参考：${fmt(m.currentADX, 1)} · ${r.adxKInfo.text}</div>
+        </div>
+        <div class="sd-calc-box">${fixedCalc}<br>ADX 参考：${adxCalc}</div>
+        ${sdRow("固定 k=3.0", Number.isFinite(r.line3Fixed) ? fmt(r.line3Fixed) : "—", "stop-line")}
+        ${sdRow("ADX 驱动参考", Number.isFinite(r.line3Adx) ? fmt(r.line3Adx) : "—")}
       </div>`;
     }
     function sdTimeFacHtml(c, m, r, stamp) {
       const { holdingDays, kTimeInfo, line3t, k, line3 } = r;
       const daysStr = Number.isFinite(holdingDays)
-        ? `${holdingDays} 天（自 ${c.openedAt}）` : "未记录开仓日期";
+        ? `${holdingDays} 天（自 ${r.holdingStart}）` : "未记录开仓日期";
       const timeSteps = kTimeInfo.steps.map(s =>
         `<div class="sd-kstep ${s.triggered ? "adjust" : ""}">${s.label} → ${s.adj}</div>`
       ).join("");
@@ -2611,6 +2751,37 @@
         ${sdRow("时间因子止损线", Number.isFinite(line3t) ? fmt(line3t) : "—", "stop-line")}
       </div>`;
     }
+    function sdRatchetHistoryHtml(r) {
+      const detail = r.ratchetInfo.detail || [];
+      if (!detail.length) {
+        return `<div class="sd-block">
+          <div class="sd-block-title">棘轮演化历史</div>
+          <div class="sd-calc-box">等待K线或开仓日期数据。</div>
+        </div>`;
+      }
+      const rows = detail.slice(-12).map(d => `<tr>
+        <td>${d.date}</td>
+        <td>${fmt(d.close)}</td>
+        <td>${fmt(d.line1)}</td>
+        <td>${Number.isFinite(d.line2) ? fmt(d.line2) : "未触发"}</td>
+        <td>${fmt(d.line3Fixed)}</td>
+        <td>${fmt(d.line3Adx)}</td>
+        <td>${fmt(d.dayMax)}</td>
+        <td>${fmt(d.ratchet)}</td>
+      </tr>`).join("");
+      return `<div class="sd-block">
+        <div class="sd-block-title">棘轮演化历史</div>
+        <details class="ratchet-history" open>
+          <summary>起算 ${r.ratchetInfo.startDate || "—"} · ${r.ratchetInfo.source} · 最近 ${Math.min(detail.length, 12)} / ${detail.length} 日</summary>
+          <div class="ratchet-table-wrap">
+            <table class="ratchet-table">
+              <tr><th>日期</th><th>收盘</th><th>①初始</th><th>②R-Ladder</th><th>③k=3固定</th><th>③ADX参考</th><th>当日最大</th><th>棘轮锁进</th></tr>
+              ${rows}
+            </table>
+          </div>
+        </details>
+      </div>`;
+    }
     function renderExitTree() {
       const r = compute(posCfg(), marketOf());
       $("exitTree").innerHTML = `<svg viewBox="0 0 900 500" aria-label="出场决策树">
@@ -2633,7 +2804,7 @@
       return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#94a3b8" stroke-width="1.5"/><text x="${mx}" y="${my-6}" font-size="12" fill="#475569">${label}</text>`;
     }
     function renderRisk() {
-      const used = ids().reduce((sum, id) => sum + POSITIONS_CONFIG[id].positionPct, 0);
+      const used = ids().reduce((sum, id) => sum + (effectiveCfg(id).positionPct || 0), 0);
       $("riskCards").innerHTML = [
         `<div class="risk-card"><div>趋势账户上限</div><strong class="num">${fmt(ACCOUNT_CONFIG.trendAccountPct, 1)}%</strong><div class="subtle">占总资产<br>当前已用：${fmt(used, 1)}%</div></div>`,
         `<div class="risk-card"><div>单仓初始风险</div><strong class="num">1%</strong><div class="subtle">占趋势账户<br>单笔最大亏损</div></div>`,
@@ -2644,8 +2815,8 @@
       "modal-r-unit":["R 单位是什么？","<p>R = 2 × ATR14，且使用开仓日锁定的 ATR。它把不同价格、不同波动率的标的统一到同一把尺子上。</p><p>示例：开仓 ATR14=0.050，则 R=0.100；价格从1.188涨到1.288，就是 +1R。</p>"],
       "modal-initial-stop":["① 初始止损线","<p>公式：成本 - R。开仓日固定，之后不下移。</p><p>它负责过滤正常波动之外的失败入场，避免刚入场就被小噪音扫出。</p>"],
       "modal-r-ladder":["② R-Ladder 阶梯保护","<table><tr><th>浮盈</th><th>保护线</th></tr><tr><td>+0.5R</td><td>成本</td></tr><tr><td>+1R</td><td>成本+0.25R</td></tr><tr><td>+2R</td><td>成本+0.75R</td></tr><tr><td>+3R</td><td>成本+1.5R</td></tr><tr><td>+4R+</td><td>交给 Chandelier</td></tr></table><p>核心是让赢单尽量不变成亏单。</p>"],
-      "modal-chandelier":["③ Chandelier 吊灯止损","<p>公式：HH - k × ATR14。HH 是持仓以来最高收盘价，使用收盘价而不是最高价，能减少盘中尖峰带来的保护线误抬升。</p><p>k 会随 RSI 和 ADX 自适应：越过热、趋势越强，保护线越收紧。</p>"],
-      "modal-ratchet":["④ 棘轮记忆","<p>棘轮线是上一轮收盘后写回的保护线，只升不降。</p><p>如果今天计算出的最终止损高于当前棘轮值，收盘确认后应同步更新持仓状态。</p>"],
+      "modal-chandelier":["③ Chandelier 吊灯止损","<p>主规则：HH - 3.0 × ATR14。HH 是持仓以来最高收盘价，使用收盘价而不是最高价，能减少盘中尖峰带来的保护线误抬升。</p><p>ADX 驱动版本只作为参考：强趋势给更大波动空间，不再用 RSI 高位来收紧止损。</p>"],
+      "modal-ratchet":["④ 棘轮记忆","<p>棘轮线从开仓日 K 线逐日回放得到，只升不降。</p><p>每日把①初始止损、②R-Ladder、③固定 k 吊灯取最大值并锁进历史最高保护线，避免保护线因波动率变化回落。</p>"],
       "modal-final-stop":["最终止损 = max(①②③④)","<p>四条线分别代表固定风险、盈利保护、趋势追踪和历史记忆。取最大值，是为了永远采用最能保护本金与利润的那条线。</p><p>决策以收盘价为准，不用盘中刺穿立即触发。</p>"],
       "modal-atr":["ATR14 是什么？","<p>ATR 衡量真实波动范围，会纳入跳空影响。TR=max(高-低, |高-昨收|, |低-昨收|)，再做 Wilder 平滑。</p>"],
       "modal-rsi":["RSI14 是什么？","<p>RSI 衡量最近上涨力量和下跌力量的相对强弱。60以上通常说明多方占优，70以上进入加速，80以上容易过热。</p>"],
@@ -2741,10 +2912,11 @@
     $("modalClose").addEventListener("click", closeModal);
     $("modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
-    function seedState() {
+    async function seedState() {
       loadTradeState();
+      await loadPositionsState();
       marketIds().forEach(id => {
-        const c = assetCfg(id);
+        const c = POSITIONS_CONFIG[id] ? effectiveCfg(id) : assetCfg(id);
         state.market[id] = { currentPrice:null, currentATR:null, currentRSI:null, currentADX:null, highestClose:c.highestClose };
       });
       renderAll(); syncInputsFromMarket(); refreshAll();
