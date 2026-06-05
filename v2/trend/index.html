@@ -551,8 +551,8 @@
     const POSITIONS_CONFIG = {
       "159781": {
         name:"科创创业ETF易方达", secid:"0.159781", signalSecid:"2.931643",
-        signalName:"科创创业50", cost:1.188, entryATR:0.050, initialStop:1.101,
-        ratchet:1.222, highestClose:1.300, openedAt:null, positionPct:1.5,
+        signalName:"科创创业50", cost:1.188, entryATR:0.0437, initialStop:1.101,
+        ratchet:null, highestClose:null, openedAt:"2026-05-08", positionPct:1.5,
       },
       "588000": {
         name:"科创50ETF", secid:"1.588000", signalSecid:"1.000688",
@@ -583,13 +583,12 @@
         global:"__INDEX_VOLUME_000688__",
       },
     };
-    const POSITIONS_STATE_URL = "data/positions-state.md";
     const state = {
       activeId:"159781", overviewId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
       autoTimer:null, matrixTouched:false, planTouched:false,
       gateOverrides:{ poolWidth:false },
       trades:{}, tradeEditId:null, tradeFormOpen:false,
-      benchmarks:{}, breadth:{}, positionsState:{ byId:{}, loaded:false, updatedAt:null }
+      benchmarks:{}, breadth:{}
     };
     // 横截面对照标的: 沪深300 / 中证红利 / 创业板指
     const BENCHMARKS = {
@@ -622,77 +621,9 @@
     function saveTradeState() {
       try { localStorage.setItem("trend_trades", JSON.stringify(state.trades)); } catch(e) {}
     }
-    function parseStateNumber(value) {
-      if (value == null || value === "") return null;
-      const n = Number(value);
-      return Number.isFinite(n) ? n : null;
-    }
     function firstDate(values) {
       const dates = values.filter(Boolean).sort();
       return dates[0] || null;
-    }
-    function parsePositionsState(text) {
-      const byId = {};
-      const cleanValue = (value) => value.replace(/\s+#.*$/, "").trim();
-      text.split(/\r?\n/).forEach(line => {
-        const raw = line.trim();
-        if (!raw || raw.startsWith("#")) return;
-        const sep = raw.indexOf(":");
-        if (sep < 0) return;
-        const key = raw.slice(0, sep).trim();
-        const value = cleanValue(raw.slice(sep + 1));
-        if (!key.startsWith("position.")) return;
-        const parts = key.split(".");
-        const id = parts[1];
-        const field = parts.slice(2).join(".");
-        if (!id || !field) return;
-        const p = byId[id] || (byId[id] = { addons:[] });
-        const setNum = (name) => { const n = parseStateNumber(value); if (n != null) p[name] = n; };
-        if (field === "name") p.name = value;
-        else if (field === "secid") p.secid = value;
-        else if (field === "signal_name") p.signalName = value;
-        else if (field === "signal_secid") p.signalSecid = value;
-        else if (field === "position_pct") setNum("positionPct");
-        else if (field === "cost_price") setNum("cost");
-        else if (field === "initial_stop_price") setNum("initialStop");
-        else if (field === "initial_atr14") setNum("entryATR");
-        else if (field === "last_protection_line") setNum("lastProtectionLine");
-        else if (field === "structure_line") setNum("structureLine");
-        else if (field === "highest_close") setNum("highestClose");
-        else if (field === "opened_at") p.openedAt = value || null;
-        else if (field.startsWith("addon.")) {
-          const [, addonId, addonField] = field.split(".");
-          const addon = p.addons.find(x => x.id === addonId) || { id:addonId };
-          if (!p.addons.includes(addon)) p.addons.push(addon);
-          const n = parseStateNumber(value);
-          if (addonField === "opened_at") addon.openedAt = value || null;
-          else if (addonField === "cost_price" && n != null) addon.cost = n;
-          else if (addonField === "initial_stop_price" && n != null) addon.initialStop = n;
-          else if (addonField === "position_pct" && n != null) addon.positionPct = n;
-          else if (addonField === "signal") addon.signal = value;
-        }
-      });
-      return byId;
-    }
-    async function loadPositionsState() {
-      try {
-        const resp = await timeoutFetch(`${POSITIONS_STATE_URL}?t=${Date.now()}`, 5000);
-        if (!resp.ok) throw new Error("positions state http");
-        state.positionsState = {
-          byId:parsePositionsState(await resp.text()),
-          loaded:true,
-          updatedAt:new Date().toLocaleTimeString("zh-CN", {hour12:false, hour:"2-digit", minute:"2-digit"})
-        };
-      } catch (e) {
-        state.positionsState.loaded = false;
-      }
-    }
-    function positionStateOf(id) { return state.positionsState.byId[id] || {}; }
-    function openedAtInfoFromPositionState(p) {
-      if (p.openedAt) return { date:p.openedAt, source:"持仓状态.md opened_at" };
-      const addonDate = firstDate((p.addons || []).map(a => a.openedAt));
-      if (addonDate) return { date:addonDate, source:"持仓状态.md 加仓日期" };
-      return { date:null, source:null };
     }
     function tradesOf(id) { return state.trades[id] || []; }
     function derivedFromTrades(id) {
@@ -721,21 +652,14 @@
     function effectiveCfg(id) {
       const base = POSITIONS_CONFIG[id];
       const d = derivedFromTrades(id);
-      const ps = positionStateOf(id);
-      const openedInfo = openedAtInfoFromPositionState(ps);
       return Object.assign({ id }, base, {
-        name: ps.name || base.name,
-        secid: ps.secid || base.secid,
-        signalName: ps.signalName || base.signalName,
-        signalSecid: ps.signalSecid || base.signalSecid,
-        positionPct: ps.positionPct ?? base.positionPct,
-        cost: ps.cost ?? d.avgCost ?? base.cost,
-        entryATR: ps.entryATR ?? d.entryATR ?? base.entryATR,
-        initialStop: ps.initialStop ?? base.initialStop,
-        openedAt: openedInfo.date ?? d.openedAt ?? base.openedAt,
-        openedAtSource: openedInfo.source || (d.openedAt ? "本地交易记录" : base.openedAt ? "默认配置" : null),
-        ratchet: ps.lastProtectionLine ?? ps.structureLine ?? base.ratchet,
-        highestClose: ps.highestClose ?? base.highestClose,
+        cost: d.avgCost ?? base.cost,
+        entryATR: d.entryATR ?? base.entryATR,
+        initialStop: base.initialStop,
+        openedAt: d.openedAt ?? base.openedAt,
+        openedAtSource: d.openedAt ? "逐笔交易记录" : base.openedAt ? "默认测试配置" : null,
+        ratchet: null,
+        highestClose: null,
       });
     }
     function marketOf(id=state.activeId) {
@@ -1159,16 +1083,16 @@
       return { date:best?.date || null, source:"收盘价最接近成本" };
     }
     function computeRatchetFromHistory(cfg, rows) {
-      if (!rows?.length) return { ratchet:cfg.ratchet, detail:[], startDate:cfg.openedAt || null, source:"等待K线" };
+      if (!rows?.length) return { ratchet:null, detail:[], startDate:cfg.openedAt || null, source:"等待K线" };
       const R = 2 * cfg.entryATR;
       const line1 = Number.isFinite(cfg.cost) && Number.isFinite(R) ? cfg.cost - R : cfg.initialStop;
       const start = resolveRatchetStartDate(cfg, rows);
       const startIdx = start.date ? rows.findIndex(r => r.date >= start.date) : -1;
       if (startIdx < 0 || !Number.isFinite(line1)) {
-        return { ratchet:cfg.ratchet, detail:[], startDate:start.date, source:start.source };
+        return { ratchet:null, detail:[], startDate:start.date, source:start.source };
       }
-      let runningMax = maxFinite([line1, cfg.ratchet]) ?? line1;
-      let runningHigh = Number.isFinite(cfg.highestClose) ? cfg.highestClose : -Infinity;
+      let runningMax = null;
+      let runningHigh = -Infinity;
       const detail = [];
       for (let i = startIdx; i < rows.length; i++) {
         const row = rows[i];
@@ -1183,7 +1107,7 @@
         const line3Adx = Number.isFinite(runningHigh) && Number.isFinite(atr)
           ? runningHigh - adxInfo.k * atr : null;
         const dayMax = maxFinite([line1, ladder.line2, line3Fixed]);
-        if (Number.isFinite(dayMax)) runningMax = Math.max(runningMax, dayMax);
+        if (Number.isFinite(dayMax)) runningMax = Number.isFinite(runningMax) ? Math.max(runningMax, dayMax) : dayMax;
         detail.push({
           date:row.date, close:row.close, atr, adx, line1, line2:ladder.line2,
           line3Fixed, line3Adx, dayMax, ratchet:runningMax,
@@ -1646,7 +1570,7 @@
           next.currentRSI = calcRSI(signalRows);
           next.currentADX = adx?.[0] ?? null;
           next.diPlus = adx?.[1] ?? null; next.diMinus = adx?.[2] ?? null;
-          next.highestClose = highestCloseSinceEntry(tradeRows, cfg.openedAt, cfg.highestClose);
+          next.highestClose = highestCloseSinceEntry(tradeRows, cfg.openedAt, null);
           next.close = tradeRows[tradeRows.length - 1]?.close ?? null;
           next.signalClose = signalRows[signalRows.length - 1]?.close ?? null;
           next.ma5 = sma(closes, 5); next.ma10 = sma(closes, 10);
@@ -2912,9 +2836,8 @@
     $("modalClose").addEventListener("click", closeModal);
     $("modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
-    async function seedState() {
+    function seedState() {
       loadTradeState();
-      await loadPositionsState();
       marketIds().forEach(id => {
         const c = POSITIONS_CONFIG[id] ? effectiveCfg(id) : assetCfg(id);
         state.market[id] = { currentPrice:null, currentATR:null, currentRSI:null, currentADX:null, highestClose:c.highestClose };
