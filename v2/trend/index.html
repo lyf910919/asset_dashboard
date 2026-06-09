@@ -879,7 +879,7 @@
       next.volumeAmountPrev = nullableNum(latest.previousAmountYuan);
       next.volumeAmountMa20 = nullableNum(latest.amountMa20Yuan);
       const aggregateChange = nullableNum(latest.priceChangePct);
-      if (Number.isFinite(aggregateChange)) next.priceChangePct = aggregateChange;
+      if (Number.isFinite(aggregateChange) && !Number.isFinite(next.priceChangePct)) next.priceChangePct = aggregateChange;
       const ok = data.success?.ok;
       const coverage = `${data.success?.count ?? latest.constituentCount}/${data.success?.total ?? 50}`;
       next.volumeScope = `${cfg.signalName || "信号指数"}（成分股聚合${ok ? "" : "，部分缺失"}）`;
@@ -1625,7 +1625,9 @@
         if (Number.isFinite(+signalQuote.f2)) next.signalPrice = +signalQuote.f2;
         if (Number.isFinite(+signalQuote.f3)) {
           next.signalChangePct = +signalQuote.f3;
-          if (!Number.isFinite(next.priceChangePct)) next.priceChangePct = +signalQuote.f3;
+          next.priceChangePct = +signalQuote.f3;
+        } else if (Number.isFinite(next.changePct)) {
+          next.priceChangePct = next.changePct;
         }
         state.market[id] = next;
       }));
@@ -1804,7 +1806,9 @@
 
       // ---- Timestamps ----
       const klineStamp = m.klineUpdatedAt ? `<span class="ov-block-stamp">${m.klineUpdatedAt}</span>` : "";
-      const volStampRaw = m.volumeUpdatedAt ? m.volumeUpdatedAt.slice(11,16) : m.klineUpdatedAt || null;
+      const volStampRaw = m.klineUpdatedAt || (m.quoteTime
+        ? new Date(m.quoteTime * 1000).toLocaleTimeString("zh-CN", {hour12:false, hour:"2-digit", minute:"2-digit"})
+        : null);
       const volStamp = volStampRaw ? `<span class="ov-block-stamp">${volStampRaw}</span>` : "";
 
       // ---- Trend indicators block ----
