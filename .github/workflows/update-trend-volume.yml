@@ -3,7 +3,12 @@ name: Update trend volume data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/15 1-7 * * 1-5"
+    # GitHub cron uses UTC. These map to China trading hours while avoiding
+    # common :00/:15/:30/:45 schedule congestion.
+    - cron: "38,53 1 * * 1-5"       # 09:38 / 09:53 CST
+    - cron: "8,23,38,53 2-6 * * 1-5" # 10:08-14:53 CST
+    - cron: "8,23,38,53 7 * * 1-5"   # 15:08-15:53 CST
+    - cron: "10 8 * * 1-5"           # 16:10 CST final snapshot
 
 permissions:
   contents: write
