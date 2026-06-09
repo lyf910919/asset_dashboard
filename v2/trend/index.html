@@ -675,7 +675,11 @@
         highestClose: clean(over.highestClose ?? base.highestClose ?? cfg.highestClose),
         ma5: clean(base.ma5), ma10: clean(base.ma10),
         ma20: clean(base.ma20), ma20Prev: clean(base.ma20Prev), ma60: clean(base.ma60),
-        close: clean(base.signalClose ?? base.close),
+        signalPrice: clean(base.signalPrice), signalChangePct: clean(base.signalChangePct),
+        signalUsesTradeRows: !!base.signalUsesTradeRows,
+        close: clean(base.signalUsesTradeRows
+          ? (base.currentPrice ?? base.close)
+          : (base.signalPrice ?? base.signalClose ?? base.close)),
         tradeClose: clean(base.close), tradeMa20: clean(base.tradeMa20), priceChangePct: clean(base.priceChangePct),
         volume: clean(base.volume), volumePrev: clean(base.volumePrev),
         volumeMa5: clean(base.volumeMa5), volumeMa10: clean(base.volumeMa10), volumeMa20: clean(base.volumeMa20),
@@ -1568,6 +1572,7 @@
           if (!Number.isFinite(next.changePct) && latest && prev?.close) next.changePct = (latest.close / prev.close - 1) * 100;
           next.tradeRows = tradeRows;
           next.signalRows = signalRows;
+          next.signalUsesTradeRows = !!signalRows.isVolumeProxy;
           next.currentATR = calcATR(tradeRows);
           next.currentRSI = calcRSI(signalRows);
           next.currentADX = adx?.[0] ?? null;
@@ -1698,10 +1703,13 @@
       if (cumPct <= 0) return null;
       return currentVol / cumPct;
     }
-    function interpretTrendIndicators(adx, rsi) {
+    function interpretTrendIndicators(adx, rsi, diPlus, diMinus, changePct) {
       if (!Number.isFinite(adx) || !Number.isFinite(rsi)) {
         return {cls:"neutral", title:"等待数据", desc:"指标数据加载中，请稍候刷新。"};
       }
+      const upToday = Number.isFinite(changePct) && changePct >= 0;
+      const diBull = Number.isFinite(diPlus) && Number.isFinite(diMinus) && diPlus >= diMinus;
+      const diBear = Number.isFinite(diPlus) && Number.isFinite(diMinus) && diMinus > diPlus;
       if (adx < 20) {
         if (rsi < 40) return {cls:"yellow", title:"震荡偏弱", desc:"ADX<20 无明显趋势，RSI偏低，价格可能继续寻底，暂勿追多。"};
         if (rsi > 60) return {cls:"yellow", title:"震荡偏强", desc:"ADX<20 无明显趋势，RSI偏高，上方阻力较大，等待方向选择。"};
@@ -1716,12 +1724,16 @@
         if (rsi > 80) return {cls:"yellow", title:"强势趋势·超买警戒", desc:"ADX 25-40 趋势明确，但RSI>80 短期超买，减少追涨，按既有保护线管理。"};
         if (rsi >= 60) return {cls:"green", title:"趋势确立·多头动能充足", desc:"ADX 25-40 趋势明确，RSI 60-80 处于强势区间。可持有仓位，观察加仓机会。"};
         if (rsi >= 45) return {cls:"green", title:"趋势确立·动能中性", desc:"ADX 25-40 趋势确认，RSI中性偏高，价格大概率维持趋势方向，持有为主。"};
+        if (upToday || diBull) return {cls:"yellow", title:"趋势偏弱·今日修复", desc:"ADX 25-40 说明趋势仍有强度，但今日上涨或 +DI 未弱于 -DI，不能判定为当日下跌趋势；先按止损线和量能确认。"};
         return {cls:"red", title:"趋势向下·空头确认", desc:"ADX 25-40 趋势明确，RSI<45 空头占优，优先检查止损线是否触发。"};
       }
       // adx >= 40
       if (rsi > 75) return {cls:"yellow", title:"强趋势末段·过热", desc:"ADX≥40 强势趋势，RSI高位，可能进入趋势末段，避免追涨，按 fixed Chandelier 与棘轮线管理。"};
       if (rsi >= 50) return {cls:"green", title:"强趋势·中后期持有", desc:"ADX≥40 趋势强劲，RSI中高位，趋势仍在延续，持有并跟踪四线止损。"};
-      return {cls:"red", title:"强势下跌·空头主导", desc:"ADX≥40 下跌趋势强劲，RSI低位，止损优先，禁止抄底。"};
+      if (upToday && diBull) return {cls:"green", title:"强趋势修复·多头占优", desc:"ADX≥40 表示趋势强度高；今日上涨且 +DI≥-DI，说明方向偏多，只是 RSI 仍低于中轴，继续跟踪四线止损。"};
+      if (upToday) return {cls:"yellow", title:"强趋势反弹·等待确认", desc:"ADX≥40 说明趋势强度高，但 ADX 不代表方向；今日上涨，不能写成强势下跌。RSI<50 表示中期动能仍需修复。"};
+      if (diBull) return {cls:"yellow", title:"强趋势分歧·方向待确认", desc:"ADX≥40 但 +DI 未弱于 -DI，方向未确认转空；优先看收盘价、均线与止损线。"};
+      return {cls:"red", title:"强势下行·空头主导", desc:`ADX≥40 且 RSI<50${diBear ? "，-DI>+DI" : ""}，下行压力占优，止损优先，禁止抄底。`};
     }
     function interpretMAAlignment(price, ma5, ma10, ma20, ma60) {
       if (![price,ma5,ma10,ma20].every(Number.isFinite)) {
@@ -1859,7 +1871,7 @@
             <div class="ov-bar-wrap"><div class="ov-bar-fill" style="width:${adxPct}%;background:${adxColor}"></div></div>
           </div>
         </div>`;
-      const indInterp = interpretTrendIndicators(m.currentADX, m.currentRSI);
+      const indInterp = interpretTrendIndicators(m.currentADX, m.currentRSI, m.diPlus, m.diMinus, m.signalChangePct ?? m.priceChangePct);
       const indInterpHtml = `<div class="ov-interp ${indInterp.cls}">
         <div class="ov-interp-title">${indInterp.title}</div>
         <div class="ov-interp-desc">${indInterp.desc}</div>
