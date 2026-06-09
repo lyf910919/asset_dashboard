@@ -681,6 +681,7 @@
         volumeMa5: clean(base.volumeMa5), volumeMa10: clean(base.volumeMa10), volumeMa20: clean(base.volumeMa20),
         volumeAmount: clean(base.volumeAmount), volumeAmountPrev: clean(base.volumeAmountPrev),
         volumeAmountMa20: clean(base.volumeAmountMa20), volumeCoverage: base.volumeCoverage,
+        volumeDate: base.volumeDate || null,
         volumeUpdatedAt: base.volumeUpdatedAt, volumeScope: base.volumeScope, volumeIsIndex: !!base.volumeIsIndex,
         klineUpdatedAt: base.klineUpdatedAt || null,
         min10: clean(base.min10), min20: clean(base.min20),
@@ -878,6 +879,7 @@
       next.volumeAmount = nullableNum(latest.amountYuan);
       next.volumeAmountPrev = nullableNum(latest.previousAmountYuan);
       next.volumeAmountMa20 = nullableNum(latest.amountMa20Yuan);
+      next.volumeDate = latest.date || null;
       const aggregateChange = nullableNum(latest.priceChangePct);
       if (Number.isFinite(aggregateChange) && !Number.isFinite(next.priceChangePct)) next.priceChangePct = aggregateChange;
       const ok = data.success?.ok;
@@ -1746,7 +1748,29 @@
       if (aboveCount >= total - 1) return {cls:"yellow", title:"均线多头为主·局部破位", desc:`${total-aboveCount}条均线尚未突破，整体偏多但需观察企稳。`, aboves};
       return {cls:"yellow", title:"均线多空混杂", desc:`价格站上 ${aboveCount}/${total} 条均线，趋势方向不明朗，等待均线理顺。`, aboves};
     }
-    function interpretVolume(vol, projVol, vma5, vma10, vma20, priceChangePct) {
+    function cstDateString(date=new Date()) {
+      const parts = new Intl.DateTimeFormat("zh-CN", {
+        timeZone:"Asia/Shanghai", year:"numeric", month:"2-digit", day:"2-digit"
+      }).formatToParts(date).reduce((acc, part) => { acc[part.type] = part.value; return acc; }, {});
+      return `${parts.year}-${parts.month}-${parts.day}`;
+    }
+    function formatGeneratedStamp(value) {
+      if (!value) return null;
+      const d = new Date(value);
+      if (!Number.isFinite(d.getTime())) return String(value).slice(0, 16).replace("T", " ");
+      const parts = new Intl.DateTimeFormat("zh-CN", {
+        timeZone:"Asia/Shanghai", month:"2-digit", day:"2-digit",
+        hour:"2-digit", minute:"2-digit", hour12:false
+      }).formatToParts(d).reduce((acc, part) => { acc[part.type] = part.value; return acc; }, {});
+      return `${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
+    }
+    function hasTodayVolume(m) {
+      return !m.volumeDate || m.volumeDate === cstDateString();
+    }
+    function interpretVolume(vol, projVol, vma5, vma10, vma20, priceChangePct, fresh=true) {
+      if (!fresh) {
+        return {cls:"neutral", title:"等待今日量能", desc:"成分股聚合量尚未更新到今日，暂不做量价方向判断，也不参与综合趋势评分。"};
+      }
       const isOpen = tradingMinutesElapsed() > 0 && tradingMinutesElapsed() < 240;
       const compareVol = (isOpen && Number.isFinite(projVol)) ? projVol : vol;
       if (!Number.isFinite(compareVol) || !Number.isFinite(priceChangePct)) {
@@ -1791,7 +1815,8 @@
       const id = state.overviewId;
       const cfg = assetCfg(id);
       const m = marketOf(id);
-      const projVol = projectVolume(m.volume);
+      const volumeFresh = hasTodayVolume(m);
+      const projVol = volumeFresh ? projectVolume(m.volume) : null;
       const elapsed = tradingMinutesElapsed();
       const isOpen = elapsed > 0 && elapsed < 240;
 
@@ -1806,7 +1831,7 @@
 
       // ---- Timestamps ----
       const klineStamp = m.klineUpdatedAt ? `<span class="ov-block-stamp">${m.klineUpdatedAt}</span>` : "";
-      const volStampRaw = m.klineUpdatedAt || (m.quoteTime
+      const volStampRaw = formatGeneratedStamp(m.volumeUpdatedAt) || m.klineUpdatedAt || (m.quoteTime
         ? new Date(m.quoteTime * 1000).toLocaleTimeString("zh-CN", {hour12:false, hour:"2-digit", minute:"2-digit"})
         : null);
       const volStamp = volStampRaw ? `<span class="ov-block-stamp">${volStampRaw}</span>` : "";
@@ -1876,11 +1901,11 @@
       </div>`;
 
       // ---- Volume block ----
-      const compareVol = (isOpen && Number.isFinite(projVol)) ? projVol : m.volume;
-      const volInterp = interpretVolume(m.volume, projVol, m.volumeMa5, m.volumeMa10, m.volumeMa20, m.priceChangePct);
+      const compareVol = (volumeFresh && isOpen && Number.isFinite(projVol)) ? projVol : m.volume;
+      const volInterp = interpretVolume(m.volume, projVol, m.volumeMa5, m.volumeMa10, m.volumeMa20, m.priceChangePct, volumeFresh);
       const volEntries = [
-        {label: isOpen ? "今日量(实时)" : "今日量", val: m.volume, isToday:true},
-        ...(isOpen && Number.isFinite(projVol) ? [{label:"预计全天量", val:projVol, isProj:true}] : []),
+        {label: volumeFresh ? (isOpen ? "今日量(实时)" : "今日量") : `最近量(${m.volumeDate || "—"})`, val: m.volume, isToday:true},
+        ...(volumeFresh && isOpen && Number.isFinite(projVol) ? [{label:"预计全天量", val:projVol, isProj:true}] : []),
         {label:"5日均量",  val: m.volumeMa5,  isMa:true},
         {label:"10日均量", val: m.volumeMa10, isMa:true},
         {label:"20日均量", val: m.volumeMa20, isMa:true},
