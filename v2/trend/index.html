@@ -418,16 +418,12 @@
     .pyramid-stage-body{font-size:13px;line-height:1.5;min-width:0}
     .pyramid-stage-cond{font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
     .pyramid-stage-mark{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid}
-    .watch-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .watch-card{padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);display:flex;flex-direction:column;gap:8px}
-    .watch-card-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
-    .watch-card-name{font-size:13px;font-weight:700;color:var(--text-primary)}
-    .watch-card-price{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
-    .watch-card-tags{display:flex;flex-wrap:wrap;gap:5px}
-    .watch-card-rets{display:flex;gap:12px;font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
-    .watch-card-rets strong{font-variant-numeric:tabular-nums}
+    .entry-asset-selector{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;font-size:13px;color:var(--text-secondary)}
+    .entry-asset-selector label{font-weight:600;color:var(--text-primary)}
+    .entry-asset-selector select{border:1px solid var(--border);border-radius:8px;padding:7px 12px;background:var(--surface-2);color:var(--text-primary);cursor:pointer;font:inherit;font-size:13px;font-weight:600;min-width:200px}
+    .entry-asset-selector .entry-asset-tag{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--surface-3,#f1f5f9);color:var(--text-secondary)}
     @media (min-width:720px){.entry-cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
-    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}.watch-grid{grid-template-columns:1fr}}
+    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
@@ -495,17 +491,16 @@
 
     <section id="entry" class="section view-panel">
       <div class="section-head"><h2>§1 入场决策面板</h2><span id="entryStamp" class="subtle"></span></div>
-      <div id="entryAssetBar" class="ov-asset-bar"></div>
+      <div id="entryAssetBar" class="entry-asset-selector"></div>
       <div id="entryVerdict"></div>
       <div class="entry-block"><div class="entry-block-title">第1层 · 标的本身趋势状态</div><div id="entryL1Cards" class="entry-cards"></div></div>
       <div class="entry-block"><div class="entry-block-title">多周期收益率与波动率</div><div id="entryRetRow" class="entry-ret-row"></div></div>
       <div class="entry-block"><div class="entry-block-title">第2层 · 量价质量</div><div id="entryVolRow"></div></div>
       <div class="entry-block"><div class="entry-block-title">第3层 · 横截面相对强度</div><div id="entryCrossSec"></div></div>
-      <div class="entry-block"><div class="entry-block-title">观察标的快照（中概互联 · 恒生科技）</div><div id="entryWatchList"></div></div>
       <div class="entry-block"><div class="entry-block-title">Donchian 实时位置（信号指数）</div><div id="entryDonchian"></div></div>
-      <div class="entry-block"><div class="entry-block-title">池宽度（成分股站上 MA20 比例）</div><div id="entryBreadth"></div></div>
+      <div class="entry-block" id="entryBreadthBlock"><div class="entry-block-title">池宽度（成分股站上 MA20 比例）</div><div id="entryBreadth"></div></div>
       <div class="entry-block"><div class="entry-block-title">闸门清单（明细）</div><div id="entryGateChecklist"></div></div>
-      <div class="entry-block"><div class="entry-block-title">§3 加仓金字塔（已持仓时适用）<button class="info" data-modal="modal-pyramid">ⓘ</button></div><div id="entryAddBlock"></div></div>
+      <div class="entry-block" id="entryAddBlockWrap"><div class="entry-block-title">§3 加仓金字塔（已持仓时适用）<button class="info" data-modal="modal-pyramid">ⓘ</button></div><div id="entryAddBlock"></div></div>
     </section>
 
     <section id="position-calc" class="section view-panel">
@@ -553,21 +548,39 @@
         name:"科创创业ETF易方达", secid:"0.159781", signalSecid:"2.931643",
         signalName:"科创创业50", cost:1.188, entryATR:0.0437, initialStop:1.101,
         ratchet:null, highestClose:null, openedAt:"2026-05-08", positionPct:1.5,
+        group:"持仓",
       },
       "588000": {
         name:"科创50ETF", secid:"1.588000", signalSecid:"1.000688",
         signalName:"科创50", cost:1.998, entryATR:0.0927, initialStop:1.813,
         ratchet:1.840, highestClose:1.998, openedAt:"2026-05-25", positionPct:0.5,
+        group:"持仓",
       }
     };
     const OVERVIEW_WATCH_CONFIG = {
+      "HS300": {
+        name:"沪深300", secid:"1.000300", signalSecid:"1.000300",
+        signalName:"沪深300", observeOnly:true, group:"基准",
+      },
+      "DIVIDEND": {
+        name:"中证红利", secid:"1.000922", signalSecid:"1.000922",
+        signalName:"中证红利", observeOnly:true, group:"基准",
+      },
+      "CYB": {
+        name:"创业板指", secid:"0.399006", signalSecid:"0.399006",
+        signalName:"创业板指", observeOnly:true, group:"基准",
+      },
+      "COAL": {
+        name:"中证煤炭", secid:"1.000820", signalSecid:"1.000820",
+        signalName:"中证煤炭", observeOnly:true, group:"基准",
+      },
       "HSTECH": {
         name:"恒生科技指数", secid:"124.HSTECH", signalSecid:"124.HSTECH",
-        signalName:"恒生科技指数", observeOnly:true,
+        signalName:"恒生科技指数", observeOnly:true, group:"观察",
       },
       "H30533": {
         name:"中概互联指数", secid:"2.H30533", signalSecid:"2.H30533",
-        signalName:"中国互联网50", observeOnly:true,
+        signalName:"中国互联网50", observeOnly:true, group:"观察",
       }
     };
     const ACCOUNT_CONFIG = { trendAccountPct:3.0, maxLossPct:-10.0 };
@@ -584,7 +597,7 @@
       },
     };
     const state = {
-      activeId:"159781", overviewId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
+      activeId:"159781", overviewId:"159781", entryId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
       autoTimer:null, matrixTouched:false, planTouched:false,
       gateOverrides:{ poolWidth:false },
       trades:{}, tradeEditId:null, tradeFormOpen:false,
@@ -1174,7 +1187,7 @@
     // ===== 入场闸门合成器 =====
     // 输入：当前 marketOf 输出 + 基准 K 线 + 池宽度结果。输出：四档裁决 + 命中详情。
     // 每条规则返回 { key, label, hit:bool, evidence:string, dataOk:bool }
-    function composeGates(m, benchmarks, breadth, cfg) {
+    function composeGates(m, benchmarks, breadth, cfg, id=state.activeId) {
       const out = { forbid:[], warn:[], healthy:[], bonus:[], addPositive:[], addNegative:[] };
       const fx = (v, d=2) => Number.isFinite(v) ? v.toFixed(d) : "—";
       const fxPct = (v, d=2) => Number.isFinite(v) ? (v > 0 ? "+" : "") + v.toFixed(d) + "%" : "—";
@@ -1244,7 +1257,7 @@
       });
 
       // ── 第3层：横截面强弱（沪深300 / 中证红利 / 创业板指） ──
-      const sigRows = state.market[state.activeId]?.signalRows;
+      const sigRows = state.market[id]?.signalRows;
       const rsHs300_5 = relStrength(sigRows, benchmarks?.hs300?.rows, 5);
       const rsHs300_20 = relStrength(sigRows, benchmarks?.hs300?.rows, 20);
       const rsDiv_5 = relStrength(sigRows, benchmarks?.dividend?.rows, 5);
@@ -1347,21 +1360,22 @@
 
       // ── 加仓专属（含禁止/正向） ──
       // 已开仓（cfg.openedAt 或 净持仓>0）才适用
-      const d = derivedFromTrades(state.activeId);
-      const hasPosition = (d.netUnits || 0) > 0;
+      const isHolding = !!POSITIONS_CONFIG[id];
+      const d = isHolding ? derivedFromTrades(id) : { netUnits:0, openedAt:null, avgCost:null, entryATR:null };
+      const hasPosition = isHolding && (d.netUnits || 0) > 0;
       // 当日刚开仓
       const todayStr = new Date().toISOString().slice(0,10);
       const justOpened = hasPosition && d.openedAt === todayStr;
       // 当前价是否在最近买入价之上 +0.5N / +1N
-      const trades = tradesOf(state.activeId).filter(t => t.type === "buy").sort((a,b) => a.date < b.date ? -1 : 1);
+      const trades = isHolding ? tradesOf(id).filter(t => t.type === "buy").sort((a,b) => a.date < b.date ? -1 : 1) : [];
       const lastBuy = trades.length ? trades[trades.length - 1] : null;
       const curATR = m.currentATR;
       const cur = m.currentPrice;
       const distFromLastBuyN = (lastBuy && Number.isFinite(cur) && Number.isFinite(curATR) && curATR > 0)
         ? (cur - lastBuy.price) / curATR : null;
       // 浮盈 R 估算
-      const cost = derivedFromTrades(state.activeId).avgCost ?? null;
-      const entryATR = derivedFromTrades(state.activeId).entryATR ?? null;
+      const cost = d.avgCost ?? null;
+      const entryATR = d.entryATR ?? null;
       const Rval = Number.isFinite(entryATR) ? 2 * entryATR : null;
       const floatR = (Number.isFinite(cur) && Number.isFinite(cost) && Number.isFinite(Rval) && Rval > 0)
         ? (cur - cost) / Rval : null;
@@ -1489,6 +1503,7 @@
         addVerdict, addTitle, addDesc,
         addNegative: out.addNegative, addPositive: out.addPositive,
         position: { hasPosition, floatR, distFromLastBuyN, lastBuy, cost, R: Rval },
+        isHolding,
       };
     }
     function adxLevel(v) {
@@ -2004,12 +2019,33 @@
       $("marketTabs").innerHTML = html;
       $("sdAssetBar").innerHTML = html;
       $("ovAssetBar").innerHTML = tabHtml(overviewIds(), state.overviewId, "ov");
-      const eb = $("entryAssetBar"); if (eb) eb.innerHTML = html;
+      renderEntryAssetSelector();
+    }
+    function renderEntryAssetSelector() {
+      const eb = $("entryAssetBar");
+      if (!eb) return;
+      const groupOrder = ["持仓", "基准", "观察"];
+      const groups = {};
+      marketIds().forEach(id => {
+        const c = assetCfg(id);
+        const g = c.group || (POSITIONS_CONFIG[id] ? "持仓" : "其他");
+        (groups[g] ||= []).push({ id, name:c.name });
+      });
+      const optHtml = groupOrder.filter(g => groups[g]?.length).map(g =>
+        `<optgroup label="${g}">${groups[g].map(o => `<option value="${o.id}" ${o.id === state.entryId ? "selected" : ""}>${o.id} ${o.name}</option>`).join("")}</optgroup>`
+      ).join("");
+      const cur = assetCfg(state.entryId) || {};
+      const tag = POSITIONS_CONFIG[state.entryId] ? "持仓中" : (cur.group === "基准" ? "横截面基准" : "观察标的");
+      eb.innerHTML = `<label for="entryAssetSelect">入场评估对象</label>
+        <select id="entryAssetSelect" data-entry-select>${optHtml}</select>
+        <span class="entry-asset-tag">${tag}</span>`;
     }
     function setActivePosition(id) {
       if (!POSITIONS_CONFIG[id]) return;
       state.activeId = id; state.matrixTouched = false; state.planTouched = false;
       state.tradeFormOpen = false; state.tradeEditId = null;
+      // 持仓 tab 切换时，若入场板块当前看的是另一个持仓标的，则同步过去；用户主动选基准/观察则保持
+      if (POSITIONS_CONFIG[state.entryId]) state.entryId = id;
       syncInputsFromMarket(); renderAll();
     }
     function setOverviewAsset(id) {
@@ -2311,9 +2347,12 @@
       return v.toFixed(0);
     }
     function renderEntry() {
-      const m = marketOf(), cfg = posCfg();
+      renderEntryAssetSelector();
+      const id = state.entryId || state.activeId;
+      const cfg = POSITIONS_CONFIG[id] ? effectiveCfg(id) : (assetCfg(id) || {});
+      const m = marketOf(id);
       const breadth = state.breadth?.[cfg.signalSecid] || null;
-      const g = composeGates(m, state.benchmarks, breadth, cfg);
+      const g = composeGates(m, state.benchmarks, breadth, cfg, id);
       const stamp = m.klineUpdatedAt ? `K线 ${m.klineUpdatedAt} · 信号 ${cfg.signalName || ""}` : (cfg.signalName || "");
       setText("entryStamp", stamp);
       renderEntryVerdict(g);
@@ -2321,11 +2360,13 @@
       renderEntryRetRow(m, g);
       renderEntryVolRow(m, g);
       renderEntryCrossSection(m, g, cfg);
-      renderEntryWatchList();
       renderEntryDonchianPos(m, g);
-      renderEntryBreadth(g);
+      renderEntryBreadth(g, cfg);
       renderEntryGateChecklist(g);
       renderEntryAddBlock(g);
+      // 非持仓标的：隐藏加仓金字塔区块（无意义）
+      const addWrap = $("entryAddBlockWrap");
+      if (addWrap) addWrap.style.display = g.isHolding ? "" : "none";
     }
     function renderEntryVerdict(g) {
       const icon = { forbid:"⛔", warn:"⚠", healthy:"✓", bonus:"★", na:"·" }[g.verdict] || "·";
@@ -2407,42 +2448,6 @@
         <tbody>${rows.map(r => `<tr><td>${r.name}</td><td class="num ${cls(r.v)}">${fxPct(r.v)}</td><td>${r.hint}</td></tr>`).join("")}</tbody>
       </table>${internal}`;
     }
-    function renderEntryWatchList() {
-      const watchIds = Object.keys(OVERVIEW_WATCH_CONFIG);
-      if (!watchIds.length) { $("entryWatchList").innerHTML = ""; return; }
-      const fxPct = (v) => Number.isFinite(v) ? (v >= 0 ? "+" : "") + v.toFixed(2) + "%" : "—";
-      const colorOf = (v) => Number.isFinite(v) ? (v >= 0 ? "color:var(--red)" : "color:var(--green)") : "color:var(--text-muted)";
-      const cards = watchIds.map(id => {
-        const cfg = OVERVIEW_WATCH_CONFIG[id];
-        const m = marketOf(id);
-        if (!m) return "";
-        const adxL = adxLevel(m.currentADX);
-        const rsiL = rsiLevel(m.currentRSI);
-        const maUp = Number.isFinite(m.ma20) && Number.isFinite(m.ma20Prev) && m.ma20 >= m.ma20Prev;
-        const maAligned = [m.ma10, m.ma20, m.ma60].every(Number.isFinite) && m.close > m.ma10 && m.ma10 > m.ma20 && m.ma20 > m.ma60;
-        const maTag = maAligned ? { t:"多头", cls:"green" } : (maUp ? { t:"偏多", cls:"yellow" } : { t:"偏弱", cls:"red" });
-        const price = Number.isFinite(m.currentPrice) ? m.currentPrice.toFixed(2) : "—";
-        const chg = Number.isFinite(m.changePct) ? ((m.changePct >= 0 ? "+" : "") + m.changePct.toFixed(2) + "%") : "—";
-        const chgColor = Number.isFinite(m.changePct) ? (m.changePct >= 0 ? "var(--red)" : "var(--green)") : "var(--text-muted)";
-        return `<div class="watch-card">
-          <div class="watch-card-head">
-            <span class="watch-card-name">${cfg.name}</span>
-            <span class="watch-card-price">${price} <span style="color:${chgColor};font-size:13px">${chg}</span></span>
-          </div>
-          <div class="watch-card-tags">
-            <span class="lvl-card-tag tag-${adxL.cls}">ADX ${Number.isFinite(m.currentADX) ? m.currentADX.toFixed(1) : "—"} ${adxL.tag}</span>
-            <span class="lvl-card-tag tag-${rsiL.cls}">RSI ${Number.isFinite(m.currentRSI) ? m.currentRSI.toFixed(1) : "—"} ${rsiL.tag}</span>
-            <span class="lvl-card-tag tag-${maTag.cls}">均线${maTag.t}</span>
-          </div>
-          <div class="watch-card-rets">
-            <span>5日 <strong style="${colorOf(m.ret5)}">${fxPct(m.ret5)}</strong></span>
-            <span>20日 <strong style="${colorOf(m.ret20)}">${fxPct(m.ret20)}</strong></span>
-            <span>60日 <strong style="${colorOf(m.ret60)}">${fxPct(m.ret60)}</strong></span>
-          </div>
-        </div>`;
-      }).join("");
-      $("entryWatchList").innerHTML = `<div class="watch-grid">${cards}</div>`;
-    }
     function renderEntryDonchianPos(m, g) {
       const sig = m.signalRows;
       const close = g.donchian.close, d20 = g.donchian.d20, d55 = g.donchian.d55;
@@ -2470,8 +2475,16 @@
       }
       $("entryDonchian").innerHTML = buildBar("D20 通道", d20, 20) + buildBar("D55 通道", d55, 55);
     }
-    function renderEntryBreadth(g) {
+    function renderEntryBreadth(g, cfg) {
       const b = g.breadth;
+      const wrap = $("entryBreadthBlock");
+      const hasPool = cfg && cfg.signalSecid && POOL_CONSTITUENTS[cfg.signalSecid];
+      if (!hasPool) {
+        if (wrap) wrap.style.display = "none";
+        $("entryBreadth").innerHTML = "";
+        return;
+      }
+      if (wrap) wrap.style.display = "";
       if (!b || !Number.isFinite(b.aboveMa20Pct)) {
         $("entryBreadth").innerHTML = `<div class="breadth-box"><div class="muted" style="font-size:13px">池宽度数据加载中…首次刷新需 10–20 秒</div></div>`;
         return;
@@ -2868,7 +2881,13 @@
     document.addEventListener("change", (e) => {
       if (e.target.matches("[data-pos-select]")) setActivePosition(e.target.value);
       if (e.target.matches("[data-ov-select]")) setOverviewAsset(e.target.value);
+      if (e.target.matches("[data-entry-select]")) setEntryAsset(e.target.value);
     });
+    function setEntryAsset(id) {
+      if (!assetCfg(id)) return;
+      state.entryId = id;
+      renderEntry();
+    }
     $("refreshBtn").addEventListener("click", refreshAll);
     $("autoRefresh").addEventListener("change", (e) => {
       clearInterval(state.autoTimer);
