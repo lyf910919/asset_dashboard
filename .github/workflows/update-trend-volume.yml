@@ -37,7 +37,7 @@ jobs:
 
       - name: Build 931643 constituent aggregate volume
         working-directory: v2/trend
-        run: python scripts/build_index_volume.py
+        run: python scripts/build_index_volume.py --allow-stale-on-failure
 
       - name: Build 000688 constituent aggregate volume
         working-directory: v2/trend
@@ -45,7 +45,8 @@ jobs:
           python scripts/build_index_volume.py \
             --constituents data/index_constituents/000688.json \
             --output data/generated/index-volume-000688.json \
-            --js-output data/generated/index-volume-000688.js
+            --js-output data/generated/index-volume-000688.js \
+            --allow-stale-on-failure
 
       - name: Commit generated trend data
         run: |

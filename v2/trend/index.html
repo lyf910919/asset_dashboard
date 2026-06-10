@@ -303,6 +303,10 @@
     .sd-time-tag.ok{background:var(--green-bg);border-color:#6ee7b7;color:#065f46}
     .sd-time-tag.warn{background:var(--yellow-bg);border-color:#fcd34d;color:#92400e}
     .sd-asset-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+    .sd-observe-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 18px}
+    .sd-rule-steps{display:grid;gap:8px}
+    .sd-rule-step{padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);font-size:13px;line-height:1.6}
+    .sd-rule-step strong{display:block;color:var(--text-primary);margin-bottom:2px}
     /* ── Position status / trade log ── */
     .pos-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
     .pos-sum-card{padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border)}
@@ -422,7 +426,7 @@
     .entry-asset-selector label{font-weight:600;color:var(--text-primary)}
     .entry-asset-selector select{border:1px solid var(--border);border-radius:8px;padding:7px 12px;background:var(--surface-2);color:var(--text-primary);cursor:pointer;font:inherit;font-size:13px;font-weight:600;min-width:200px}
     .entry-asset-selector .entry-asset-tag{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--surface-3,#f1f5f9);color:var(--text-secondary)}
-    @media (min-width:720px){.entry-cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    @media (min-width:720px){.entry-cards{grid-template-columns:repeat(4,minmax(0,1fr))}.sd-observe-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
     @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
@@ -702,6 +706,10 @@
         volumeUpdatedAt: base.volumeUpdatedAt, volumeScope: base.volumeScope, volumeIsIndex: !!base.volumeIsIndex,
         klineUpdatedAt: base.klineUpdatedAt || null,
         min10: clean(base.min10), min20: clean(base.min20),
+        prevMin10: clean(base.prevMin10), prevMin20: clean(base.prevMin20),
+        ma20DownDays: clean(base.ma20DownDays), belowMa20Days: clean(base.belowMa20Days),
+        adxPeak: clean(base.adxPeak), adxPeakDate: base.adxPeakDate || null,
+        adxDrawdown: clean(base.adxDrawdown),
         ret5: clean(base.ret5), ret20: clean(base.ret20), ret60: clean(base.ret60),
         atrMa20: clean(base.atrMa20),
         donchian20: clean(base.donchian20), donchian55: clean(base.donchian55),
@@ -1026,8 +1034,8 @@
       const rs = (gains / n) / (losses / n);
       return 100 - 100 / (1 + rs);
     }
-    function calcADX(rows, n=14) {
-      if (!rows || rows.length < n * 2 + 1) return null;
+    function calcADXSeries(rows, n=14) {
+      if (!rows || rows.length < n * 2 + 1) return [];
       const plusDM = [], minusDM = [], tr = [];
       for (let i = 1; i < rows.length; i++) {
         const up = rows[i].high - rows[i - 1].high;
@@ -1048,14 +1056,54 @@
         const m = v ? 100 * minusS[i] / v : 0;
         return { dx:p + m ? 100 * Math.abs(p - m) / (p + m) : 0, p, m };
       });
-      if (dx.length < n) return null;
+      if (dx.length < n) return [];
       let adx = dx.slice(0, n).reduce((a, b) => a + b.dx, 0) / n;
-      for (let i = n; i < dx.length; i++) adx = (adx * (n - 1) + dx[i].dx) / n;
-      const last = dx[dx.length - 1];
-      return [adx, last.p, last.m];
+      const out = [{ date:rows[n * 2 - 1]?.date || null, adx, p:dx[n - 1].p, m:dx[n - 1].m }];
+      for (let i = n; i < dx.length; i++) {
+        adx = (adx * (n - 1) + dx[i].dx) / n;
+        out.push({ date:rows[n + i]?.date || null, adx, p:dx[i].p, m:dx[i].m });
+      }
+      return out;
+    }
+    function calcADX(rows, n=14) {
+      const series = calcADXSeries(rows, n);
+      const last = series[series.length - 1];
+      return last ? [last.adx, last.p, last.m] : null;
     }
     function sma(values, n) {
       return values.length >= n ? values.slice(-n).reduce((a, b) => a + b, 0) / n : null;
+    }
+    function dateKey(date) { return String(date || "").slice(0, 10).replace(/-/g, ""); }
+    function countMa20DownDays(closes) {
+      let count = 0;
+      for (let end = closes.length; end >= 21; end--) {
+        const cur = sma(closes.slice(0, end), 20);
+        const prev = sma(closes.slice(0, end - 1), 20);
+        if (Number.isFinite(cur) && Number.isFinite(prev) && cur < prev) count++;
+        else break;
+      }
+      return count;
+    }
+    function countBelowMa20Days(closes) {
+      let count = 0;
+      for (let end = closes.length; end >= 20; end--) {
+        const ma20 = sma(closes.slice(0, end), 20);
+        const close = closes[end - 1];
+        if (Number.isFinite(close) && Number.isFinite(ma20) && close < ma20) count++;
+        else break;
+      }
+      return count;
+    }
+    function adxPeakStats(series, openedAt) {
+      const startKey = dateKey(openedAt);
+      const usable = startKey ? series.filter(x => dateKey(x.date) >= startKey) : series;
+      const current = usable[usable.length - 1];
+      const peak = usable.reduce((best, x) => !best || x.adx > best.adx ? x : best, null);
+      return {
+        peak:Number.isFinite(peak?.adx) ? peak.adx : null,
+        peakDate:peak?.date || null,
+        drawdown:Number.isFinite(peak?.adx) && Number.isFinite(current?.adx) ? peak.adx - current.adx : null,
+      };
     }
     function highestCloseSinceEntry(rows, openedAt, fallback) {
       const usable = openedAt ? rows.filter(r => r.date >= openedAt) : rows;
@@ -1182,6 +1230,52 @@
         R, floatR, k:3.0, kInfo:{ k:3.0, text:"固定 k=3.0" }, adxKInfo, holdingDays, holdingStart,
         kTimeInfo, ratchetInfo, line1, line2, line3:line3Fixed, line3Fixed, line3Adx, line3t,
         line4, finalStop:best[1], winner:best[0], candidates
+      };
+    }
+    function computeExitDecision(cfg, m, r) {
+      const stopPrice = m.currentPrice ?? m.tradeClose;
+      const signalClose = m.close;
+      const hardStop = Number.isFinite(stopPrice) && Number.isFinite(r.finalStop) && stopPrice <= r.finalStop;
+      const ma20Down = Number.isFinite(m.ma20DownDays) && m.ma20DownDays > 0;
+      const belowMa20 = Number.isFinite(signalClose) && Number.isFinite(m.ma20) && signalClose < m.ma20;
+      const maBreak = ma20Down && Number.isFinite(m.belowMa20Days) && m.belowMa20Days >= 2;
+      const break10 = Number.isFinite(signalClose) && Number.isFinite(m.prevMin10) && signalClose <= m.prevMin10;
+      const break20 = Number.isFinite(signalClose) && Number.isFinite(m.prevMin20) && signalClose <= m.prevMin20;
+      const structureBreak = maBreak || break10 || break20;
+      const adxConfirm = Number.isFinite(m.adxPeak) && Number.isFinite(m.adxDrawdown)
+        && m.adxPeak > 50 && m.adxDrawdown >= 12;
+      const timeStop = Number.isFinite(r.holdingDays) && r.holdingDays > 30
+        && Number.isFinite(r.floatR) && r.floatR < 0.5;
+      const structureHits = [
+        maBreak ? `MA20下行且连续${m.belowMa20Days}日低于MA20` : null,
+        break10 ? "跌破前10日新低" : null,
+        break20 ? "跌破前20日新低" : null,
+      ].filter(Boolean);
+      if (hardStop) return {
+        cls:"forbid", action:"clear", title:"硬止损：次日开盘清仓",
+        desc:`止损口径价 ${fmt(stopPrice)} ≤ finalStop ${fmt(r.finalStop)}，优先执行硬止损。`,
+        hardStop, ma20Down, belowMa20, maBreak, break10, break20, structureBreak, adxConfirm, timeStop, structureHits,
+      };
+      if (structureBreak) {
+        return {
+          cls:adxConfirm ? "forbid" : "warn",
+          action:adxConfirm ? "clear" : "half",
+          title:adxConfirm ? "趋势破坏：清仓" : "结构破坏：减半",
+          desc:adxConfirm
+            ? `${structureHits.join("；")}；ADX 高点 ${fmt(m.adxPeak,1)} 回落 ${fmt(m.adxDrawdown,1)} 点，达到趋势破坏确认。`
+            : `${structureHits.join("；")}；ADX 高点/回落未满足 50/12 确认，先减半而非清仓。`,
+          hardStop, ma20Down, belowMa20, maBreak, break10, break20, structureBreak, adxConfirm, timeStop, structureHits,
+        };
+      }
+      if (timeStop) return {
+        cls:"warn", action:"half", title:"时间止损：减半",
+        desc:`持仓 ${r.holdingDays} 日 > 30 日，浮盈 ${fmtR(r.floatR)} < +0.5R，趋势效率不足。`,
+        hardStop, ma20Down, belowMa20, maBreak, break10, break20, structureBreak, adxConfirm, timeStop, structureHits,
+      };
+      return {
+        cls:"healthy", action:"hold", title:"持有：维持止损线",
+        desc:`未触发硬止损、结构破坏或时间止损；继续按 finalStop ${fmt(r.finalStop)} 管理。`,
+        hardStop, ma20Down, belowMa20, maBreak, break10, break20, structureBreak, adxConfirm, timeStop, structureHits,
       };
     }
     // ===== 入场闸门合成器 =====
@@ -1570,7 +1664,9 @@
               tradeRows.isVolumeProxy = true; return tradeRows;
             })
             : tradeRows;
-          const adx = calcADX(signalRows);
+          const adxSeries = calcADXSeries(signalRows);
+          const adx = adxSeries[adxSeries.length - 1];
+          const adxPeak = adxPeakStats(adxSeries, cfg.openedAt);
           const closes = signalRows.map(r => r.close);
           const tradeCloses = tradeRows.map(r => r.close);
           const volumeRows = cfg.signalSecid && !signalRows.isVolumeProxy ? signalRows : null;
@@ -1590,20 +1686,27 @@
           next.signalUsesTradeRows = !!signalRows.isVolumeProxy;
           next.currentATR = calcATR(tradeRows);
           next.currentRSI = calcRSI(signalRows);
-          next.currentADX = adx?.[0] ?? null;
-          next.diPlus = adx?.[1] ?? null; next.diMinus = adx?.[2] ?? null;
+          next.currentADX = adx?.adx ?? null;
+          next.diPlus = adx?.p ?? null; next.diMinus = adx?.m ?? null;
+          next.adxPeak = adxPeak.peak; next.adxPeakDate = adxPeak.peakDate;
+          next.adxDrawdown = adxPeak.drawdown;
           next.highestClose = highestCloseSinceEntry(tradeRows, cfg.openedAt, null);
           next.close = tradeRows[tradeRows.length - 1]?.close ?? null;
           next.signalClose = signalRows[signalRows.length - 1]?.close ?? null;
           next.ma5 = sma(closes, 5); next.ma10 = sma(closes, 10);
           next.ma20 = sma(closes, 20); next.ma20Prev = sma(closes.slice(0, -1), 20);
+          next.ma20DownDays = countMa20DownDays(closes);
+          next.belowMa20Days = countBelowMa20Days(closes);
           next.ma60 = sma(closes, 60);
           next.tradeMa20 = sma(tradeCloses, 20);
           // Turtle exit levels: 10-day and 20-day lowest close of signal index
           const fin = (v) => Number.isFinite(v);
           const last10c = closes.slice(-10).filter(fin), last20c = closes.slice(-20).filter(fin);
+          const prev10c = closes.slice(-11, -1).filter(fin), prev20c = closes.slice(-21, -1).filter(fin);
           next.min10 = last10c.length ? Math.min(...last10c) : null;
           next.min20 = last20c.length ? Math.min(...last20c) : null;
+          next.prevMin10 = prev10c.length ? Math.min(...prev10c) : null;
+          next.prevMin20 = prev20c.length ? Math.min(...prev20c) : null;
           // 多周期收益率（信号指数）
           next.ret5 = nDayReturn(signalRows, 5);
           next.ret20 = nDayReturn(signalRows, 20);
@@ -2581,15 +2684,58 @@
       const c = posCfg(), m = marketOf(), r = compute(c, m);
       const stamp = m.klineUpdatedAt ? `<span class="sd-block-stamp">${m.klineUpdatedAt}</span>` : "";
       $("sdContent").innerHTML =
+        sdExitDecisionHtml(c, m, r, stamp) +
         sdSummaryHtml(c, m, r, stamp) +
         sdRMultipleHtml(c, m, r, stamp) +
         sdTurtleHtml(c, m, r, stamp) +
         sdChandelierHtml(c, m, r, stamp) +
         sdTimeFacHtml(c, m, r, stamp) +
-        sdRatchetHistoryHtml(r);
+        sdRatchetHistoryHtml(r) +
+        sdExitRuleHtml(stamp);
     }
     function sdRow(label, val, cls="") {
       return `<div class="sd-row ${cls}"><span class="sd-row-label">${label}</span><span class="sd-row-val num">${val}</span></div>`;
+    }
+    function sdExitDecisionHtml(c, m, r, stamp) {
+      const d = computeExitDecision(c, m, r);
+      const stopPrice = m.currentPrice ?? m.tradeClose;
+      const signalClose = m.close;
+      const statRows = [
+        `止损口径价 ${fmt(stopPrice)}`,
+        `信号收盘 ${fmt(signalClose)}`,
+        `finalStop ${fmt(r.finalStop)}`,
+        `浮盈 ${fmtR(r.floatR)} / 持仓 ${Number.isFinite(r.holdingDays) ? r.holdingDays + "日" : "—"}`,
+      ].map(x => `<span class="verdict-stat">${x}</span>`).join("");
+      const yn = (hit, ok=true) => ok ? (hit ? ["是","tag-red"] : ["否","tag-green"]) : ["—","tag-neutral"];
+      const card = (label, value, tag, cls, desc) => `<div class="lvl-card">
+        <div class="lvl-card-label">${label}</div>
+        <div class="lvl-card-value num">${value}</div>
+        <span class="lvl-card-tag ${cls}">${tag}</span>
+        <div class="lvl-card-desc">${desc}</div>
+      </div>`;
+      const [maDownText, maDownCls] = yn(d.ma20Down, Number.isFinite(m.ma20DownDays));
+      const [belowText, belowCls] = yn(d.belowMa20, Number.isFinite(signalClose) && Number.isFinite(m.ma20));
+      const [break10Text, break10Cls] = yn(d.break10, Number.isFinite(signalClose) && Number.isFinite(m.prevMin10));
+      const [break20Text, break20Cls] = yn(d.break20, Number.isFinite(signalClose) && Number.isFinite(m.prevMin20));
+      const cards = [
+        card("MA20是否下行", maDownText, maDownText === "是" ? "触发" : maDownText === "否" ? "未触发" : "缺失", maDownCls, `MA20 ${fmt(m.ma20)} / 昨 ${fmt(m.ma20Prev)}`),
+        card("下行天数", Number.isFinite(m.ma20DownDays) ? `${m.ma20DownDays}日` : "—", Number.isFinite(m.ma20DownDays) && m.ma20DownDays > 0 ? "连续" : "未连续", Number.isFinite(m.ma20DownDays) && m.ma20DownDays > 0 ? "tag-yellow" : "tag-neutral", "最近连续 MA20 下行天数"),
+        card("是否低于MA20", belowText, belowText === "是" ? "触发" : belowText === "否" ? "未触发" : "缺失", belowCls, `信号收盘 ${fmt(signalClose)} / MA20 ${fmt(m.ma20)}`),
+        card("低于MA20天数", Number.isFinite(m.belowMa20Days) ? `${m.belowMa20Days}日` : "—", Number.isFinite(m.belowMa20Days) && m.belowMa20Days >= 2 ? "结构触发" : "未满足", Number.isFinite(m.belowMa20Days) && m.belowMa20Days >= 2 ? "tag-red" : "tag-neutral", "连续收盘低于 MA20 天数"),
+        card("ADX高点", Number.isFinite(m.adxPeak) ? fmt(m.adxPeak, 1) : "—", Number.isFinite(m.adxPeak) && m.adxPeak > 50 ? ">50" : "未过50", Number.isFinite(m.adxPeak) && m.adxPeak > 50 ? "tag-yellow" : "tag-neutral", `持仓期高点日期 ${m.adxPeakDate || "—"}`),
+        card("高点回落", Number.isFinite(m.adxDrawdown) ? `${fmt(m.adxDrawdown, 1)}点` : "—", Number.isFinite(m.adxDrawdown) && m.adxDrawdown >= 12 ? "≥12" : "未满足", Number.isFinite(m.adxDrawdown) && m.adxDrawdown >= 12 ? "tag-red" : "tag-neutral", `当前 ADX ${fmt(m.currentADX, 1)}`),
+        card("跌破10日新低", break10Text, break10Text === "是" ? "触发" : break10Text === "否" ? "未触发" : "缺失", break10Cls, `前10日低 ${fmt(m.prevMin10)} / 收盘 ${fmt(signalClose)}`),
+        card("跌破20日新低", break20Text, break20Text === "是" ? "触发" : break20Text === "否" ? "未触发" : "缺失", break20Cls, `前20日低 ${fmt(m.prevMin20)} / 收盘 ${fmt(signalClose)}`),
+      ].join("");
+      return `<div class="sd-block">
+        <div class="sd-block-title">操作结论${stamp}</div>
+        <div class="verdict-banner ${d.cls}">
+          <div class="verdict-title">${d.title}</div>
+          <div class="verdict-desc">${d.desc}</div>
+          <div class="verdict-stats">${statRows}</div>
+        </div>
+        <div class="sd-observe-grid">${cards}</div>
+      </div>`;
     }
     function sdSummaryHtml(c, m, r, stamp) {
       const lines = [
@@ -2677,8 +2823,8 @@
           ${sdRow("2N 硬止损（= 初始止损线）", `${fmt(r.line1)}（成本 ${fmt(c.cost)} − R ${fmt(r.R, 4)}）`)}
         </div>
         <div class="sd-kv" style="margin-top:8px">
-          ${turtleRow("10日新低出场线（信号指数）", m.min10)}
-          ${turtleRow("20日新低出场线（信号指数）", m.min20)}
+          ${turtleRow("前10日新低出场线（信号指数）", m.prevMin10 ?? m.min10)}
+          ${turtleRow("前20日新低出场线（信号指数）", m.prevMin20 ?? m.min20)}
         </div>
       </div>`;
     }
@@ -2760,18 +2906,37 @@
         </details>
       </div>`;
     }
+    function sdExitRuleHtml(stamp) {
+      const steps = [
+        ["硬止损", "今日收盘价（止损口径）≤ finalStop → 【硬止损】次日开盘清仓。"],
+        ["结构破坏", "未跌破 finalStop 时，若 MA20 下行且收盘连续2日低于 MA20，或信号指数收盘跌破前10日/前20日新低 → 进入 ADX 确认。"],
+        ["ADX 确认", "ADX 持仓期高点 > 50 且从高点回落 ≥ 12 点 → 【趋势破坏】清仓；否则先减半。"],
+        ["时间止损", "未触发结构破坏时，若持仓 > 30日 且浮盈 < +0.5R → 【时间止损】减半。"],
+        ["继续持有", "以上均未触发 → 【持有】维持当前 finalStop，不主动降止损线。"],
+      ].map(s => `<div class="sd-rule-step"><strong>${s[0]}</strong>${s[1]}</div>`).join("");
+      return `<div class="sd-block">
+        <div class="sd-block-title">止损执行规则（2026-06-10）${stamp}</div>
+        <div class="sd-rule-steps">${steps}</div>
+      </div>`;
+    }
     function renderExitTree() {
-      const r = compute(posCfg(), marketOf());
-      $("exitTree").innerHTML = `<svg viewBox="0 0 900 500" aria-label="出场决策树">
-        <rect width="900" height="500" fill="#fff"/>
-        ${node(330,24,240,58,"今日收盘 ≤ 最终止损线？", `止损线 ${fmt(r.finalStop)}`, "#dbeafe", "#1e40af")}
-        ${node(90,150,190,64,"硬止损", "次日开盘清仓", "#fee2e2", "#dc2626")}
-        ${node(385,142,320,72,"MA20下行且收盘<MA20 连续2日？", "趋势结构确认", "#f8fafc", "#475569")}
-        ${node(330,275,170,64,"趋势破坏", "清仓", "#fee2e2", "#dc2626")}
-        ${node(590,275,250,64,"持仓>30日且浮盈<+0.5R？", `当前 ${fmtR(r.floatR)}`, "#f8fafc", "#475569")}
-        ${node(545,405,140,58,"时间止损", "减半仓", "#fef3c7", "#d97706")}
-        ${node(735,405,140,58,"持有观察", "维持止损", "#d1fae5", "#059669")}
-        ${edge(330,82,185,150,"是")}${edge(570,82,545,142,"否")}${edge(505,214,415,275,"是")}${edge(645,214,715,275,"否")}${edge(690,339,615,405,"是")}${edge(780,339,805,405,"否")}
+      const c = posCfg(), m = marketOf(), r = compute(c, m), d = computeExitDecision(c, m, r);
+      $("exitTree").innerHTML = `<svg viewBox="0 0 900 560" aria-label="出场决策树">
+        <rect width="900" height="560" fill="#fff"/>
+        ${node(330,24,240,58,"今日收盘 ≤ finalStop？", `finalStop ${fmt(r.finalStop)}`, "#dbeafe", "#1e40af")}
+        ${node(80,145,190,64,"硬止损", "次日开盘清仓", "#fee2e2", "#dc2626")}
+        ${node(380,140,300,72,"结构破坏？", "MA20 / D10 / D20", "#f8fafc", "#475569")}
+        ${node(250,270,260,72,"ADX确认？", `高点>50 且回落≥12`, "#f8fafc", "#475569")}
+        ${node(140,420,150,58,"趋势破坏", "清仓", "#fee2e2", "#dc2626")}
+        ${node(380,420,150,58,"结构破坏", "减半", "#fef3c7", "#d97706")}
+        ${node(590,270,250,72,"时间止损？", `持仓>30日 且 <+0.5R`, "#f8fafc", "#475569")}
+        ${node(560,420,150,58,"时间止损", "减半", "#fef3c7", "#d97706")}
+        ${node(730,420,140,58,"持有", "维持止损", "#d1fae5", "#059669")}
+        ${node(315,505,270,38,"当前结论", d.title, d.cls === "forbid" ? "#fee2e2" : d.cls === "warn" ? "#fef3c7" : "#d1fae5", d.cls === "forbid" ? "#dc2626" : d.cls === "warn" ? "#d97706" : "#059669")}
+        ${edge(330,82,175,145,"是")}${edge(570,82,530,140,"否")}
+        ${edge(480,212,380,270,"是")}${edge(660,212,715,270,"否")}
+        ${edge(330,342,215,420,"是")}${edge(460,342,455,420,"否")}
+        ${edge(715,342,635,420,"是")}${edge(790,342,800,420,"否")}
       </svg>`;
     }
     function node(x, y, w, h, title, sub, fill, color) {
@@ -2900,7 +3065,11 @@
       loadTradeState();
       marketIds().forEach(id => {
         const c = POSITIONS_CONFIG[id] ? effectiveCfg(id) : assetCfg(id);
-        state.market[id] = { currentPrice:null, currentATR:null, currentRSI:null, currentADX:null, highestClose:c.highestClose };
+        state.market[id] = {
+          currentPrice:null, currentATR:null, currentRSI:null, currentADX:null, highestClose:c.highestClose,
+          prevMin10:null, prevMin20:null, ma20DownDays:null, belowMa20Days:null,
+          adxPeak:null, adxPeakDate:null, adxDrawdown:null,
+        };
       });
       renderAll(); syncInputsFromMarket(); refreshAll();
       showView(location.hash ? location.hash.slice(1) : "overview", false);

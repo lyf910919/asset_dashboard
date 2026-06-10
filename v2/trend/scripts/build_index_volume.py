@@ -239,6 +239,11 @@ def main():
     parser.add_argument("--limit", type=int, default=45)
     parser.add_argument("--workers", type=int, default=10)
     parser.add_argument("--min-success-rate", type=float, default=0.9)
+    parser.add_argument(
+        "--allow-stale-on-failure",
+        action="store_true",
+        help="Keep existing generated files and exit 0 when quote sources are below the success threshold.",
+    )
     args = parser.parse_args()
 
     config_path = ROOT / args.constituents
@@ -265,6 +270,16 @@ def main():
                 })
 
     payload = build_payload(config, results, failures, args.min_success_rate)
+    success = payload["success"]
+    if not success["ok"] and args.allow_stale_on_failure:
+        if output_path.exists() and js_output_path.exists():
+            print(
+                f"{config['indexName']} 成分股量能聚合："
+                f"{success['count']}/{success['total']} "
+                f"({success['rate']:.1%})，低于阈值；保留上一次生成文件。"
+            )
+            return 0
+
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
@@ -279,7 +294,6 @@ def main():
         + ";\n",
         encoding="utf-8",
     )
-    success = payload["success"]
     print(
         f"{payload['indexName']} 成分股量能聚合："
         f"{success['count']}/{success['total']} "
