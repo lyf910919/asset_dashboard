@@ -426,8 +426,48 @@
     .entry-asset-selector label{font-weight:600;color:var(--text-primary)}
     .entry-asset-selector select{border:1px solid var(--border);border-radius:8px;padding:7px 12px;background:var(--surface-2);color:var(--text-primary);cursor:pointer;font:inherit;font-size:13px;font-weight:600;min-width:200px}
     .entry-asset-selector .entry-asset-tag{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--surface-3,#f1f5f9);color:var(--text-secondary)}
+    /* ── 医疗服务前十大流通市值观察池 ── */
+    .med-rule{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;padding:12px 14px;border:1px solid #bfdbfe;border-radius:var(--radius-sm);background:#eff6ff;color:#1e3a8a;font-size:12px;line-height:1.6}
+    .med-rule strong{white-space:nowrap}
+    .med-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:14px}
+    .med-summary-card{padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2)}
+    .med-summary-card span,.med-summary-card small{display:block;color:var(--text-muted);font-size:10px}
+    .med-summary-card strong{display:block;margin:4px 0 2px;font-size:24px;color:var(--primary);font-variant-numeric:tabular-nums}
+    .med-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}
+    .med-toolbar p{margin:0;color:var(--text-muted);font-size:11px}
+    .med-filters{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}
+    .med-filter{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text-secondary);font-size:11px;cursor:pointer;white-space:nowrap}
+    .med-filter.active{border-color:var(--primary);background:var(--primary);color:white}
+    .med-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .med-card{padding:14px;border:1px solid var(--border);border-top:3px solid #94a3b8;border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm)}
+    .med-card.confirmed{border-top-color:var(--primary)}.med-card.caution{border-top-color:var(--yellow)}.med-card.live{border-top-color:#7c3aed}.med-card.near{border-top-color:#a855f7}
+    .med-card.locked{background:linear-gradient(180deg,#fff 0%,#f8fafc 100%)}
+    .med-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+    .med-name{font-size:16px;font-weight:800}.med-name span{margin-left:6px;color:var(--text-muted);font-size:10px}
+    .med-role{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:4px;color:var(--text-secondary);font-size:10px}
+    .med-board,.med-status{display:inline-flex;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:800;font-style:normal;white-space:nowrap}
+    .med-board.tradable{background:var(--green-bg);color:var(--green)}.med-board.locked{background:#e2e8f0;color:#64748b}
+    .med-status.confirmed{background:var(--primary-light);color:var(--primary)}.med-status.caution{background:var(--yellow-bg);color:var(--yellow)}.med-status.live{background:#ede9fe;color:#6d28d9}.med-status.near{background:#fae8ff;color:#a21caf}.med-status.wait{background:#f1f5f9;color:#64748b}
+    .med-price{display:flex;align-items:baseline;gap:8px;margin:14px 0 11px}.med-price strong{font-size:25px;font-variant-numeric:tabular-nums}.med-price .up{color:var(--red)}.med-price .down{color:var(--green)}.med-price small{margin-left:auto;color:var(--text-muted);font-size:9px}
+    .med-channels{overflow:hidden;border:1px solid var(--border);border-radius:var(--radius-sm)}
+    .med-channel{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 9px;background:var(--surface-2);font-size:10px}.med-channel+.med-channel{border-top:1px solid var(--border)}
+    .med-channel b{margin-right:5px}.med-channel em{padding:2px 5px;border-radius:999px;background:#e2e8f0;color:#64748b;font-size:8px;font-style:normal;font-weight:800}.med-channel em.on{background:var(--primary-light);color:var(--primary)}.med-channel em.touched{background:#ede9fe;color:#6d28d9}
+    .med-channel-val{text-align:right;font-variant-numeric:tabular-nums}.med-channel-val small{display:block;color:var(--text-muted);font-size:8px}
+    .med-ma{margin-top:9px;padding:8px 9px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2)}.med-ma strong{display:block;font-size:10px}.med-ma small{display:block;margin-top:3px;color:var(--text-muted);font-size:8px;font-variant-numeric:tabular-nums}
+    .med-ma.bull{border-color:#bfdbfe;background:#eff6ff}.med-ma.bull strong{color:var(--primary)}
+    .med-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:9px}.med-metric{padding:7px 4px;border-radius:7px;background:#f1f5f9;text-align:center}.med-metric span{display:block;color:var(--text-muted);font-size:8px}.med-metric b{display:block;margin-top:2px;font-size:10px;font-variant-numeric:tabular-nums}
+    .med-secondary{display:flex;justify-content:space-between;gap:6px;margin-top:8px;color:var(--text-muted);font-size:9px}.med-secondary b{color:var(--text-primary);font-variant-numeric:tabular-nums}
+    .med-decision{margin-top:10px;padding:9px 10px;border-radius:var(--radius-sm);background:var(--surface-2)}.med-decision strong{display:block;font-size:11px}.med-decision p{margin:3px 0 0;color:var(--text-secondary);font-size:9px;line-height:1.55}
+    .med-foot{margin-top:8px;color:var(--text-muted);font-size:8px;text-align:right}
+    .med-empty{padding:28px;text-align:center;color:var(--text-muted);border:1px dashed var(--border);border-radius:var(--radius-sm)}
+    .med-allocation{margin-top:18px;padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface-2)}
+    .med-allocation-head h3{margin:0;font-size:16px}.med-allocation-head p{margin:4px 0 0;color:var(--text-muted);font-size:10px;line-height:1.5}
+    .med-plan-notice{margin-top:11px;padding:10px 12px;border-radius:var(--radius-sm);font-size:11px;line-height:1.5}.med-plan-notice.ready{background:var(--green-bg);color:#065f46}.med-plan-notice.blocked{background:var(--yellow-bg);color:#92400e}
+    .med-allocation-table-wrap{margin-top:11px;overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)}
+    .med-allocation-table{width:100%;border-collapse:collapse;font-size:10px;font-variant-numeric:tabular-nums}.med-allocation-table th{padding:8px 10px;background:#f1f5f9;color:var(--text-muted);text-align:left;white-space:nowrap}.med-allocation-table td{padding:9px 10px;border-top:1px solid var(--border);white-space:nowrap}.med-allocation-table td:last-child{color:var(--primary);font-size:15px;font-weight:800}
     @media (min-width:720px){.entry-cards{grid-template-columns:repeat(4,minmax(0,1fr))}.sd-observe-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:900px){.med-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-summary{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}.med-grid{grid-template-columns:1fr}.med-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.med-toolbar{align-items:flex-start;flex-direction:column}.med-filters{width:100%}}
   </style>
 </head>
 <body>
@@ -438,6 +478,7 @@
       <button class="nav-tab" data-view="stop-detail">止损</button>
       <button class="nav-tab" data-view="status">持仓状态</button>
       <button class="nav-tab" data-view="entry">入场/加仓</button>
+      <button class="nav-tab" data-view="medical">医疗服务</button>
       <button class="nav-tab" data-view="position-calc">仓位</button>
       <button class="nav-tab" data-view="exit">出场</button>
       <button class="nav-tab" data-view="risk">风控</button>
@@ -507,6 +548,23 @@
       <div class="entry-block" id="entryAddBlockWrap"><div class="entry-block-title">§3 加仓金字塔（已持仓时适用）<button class="info" data-modal="modal-pyramid">ⓘ</button></div><div id="entryAddBlock"></div></div>
     </section>
 
+    <section id="medical" class="section view-panel">
+      <div class="section-head"><h2>医疗服务前十大流通市值观察池</h2><span id="medicalStamp" class="subtle"></span></div>
+      <div class="med-rule"><strong>执行原则</strong><span>只以最新价突破 D55 作为海龟价格入场条件，D20 仅观察；创业板、科创板保留完整指标，但不列入可买入标的。其他趋势与过热闸门沿用入场系统规则。</span></div>
+      <div id="medicalSummary" class="med-summary"></div>
+      <div class="med-toolbar">
+        <p>行情、K线与指标复用趋势系统统一数据状态；刷新失败时继续展示 IndexedDB 中最近一次成功快照。</p>
+        <div class="med-filters" role="group" aria-label="医疗服务信号筛选">
+          <button class="med-filter active" data-med-filter="all">全部 10 只</button>
+          <button class="med-filter" data-med-filter="eligible">满足入场</button>
+          <button class="med-filter" data-med-filter="d55">当前 D55</button>
+          <button class="med-filter" data-med-filter="waiting">等待</button>
+        </div>
+      </div>
+      <div id="medicalGrid" class="med-grid"></div>
+      <div id="medicalAllocation" class="med-allocation"></div>
+    </section>
+
     <section id="position-calc" class="section view-panel">
       <div class="section-head"><h2>§2 仓位计算器</h2></div>
       <div class="calc-grid">
@@ -546,7 +604,9 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { getConfigValue, initStorage, setConfigValue } from "../lib/storage.js?v=20260715-medical-watch";
+
     const POSITIONS_CONFIG = {
       "159781": {
         name:"科创创业ETF易方达", secid:"0.159781", signalSecid:"2.931643",
@@ -587,6 +647,19 @@
         signalName:"中国互联网50", observeOnly:true, group:"观察",
       }
     };
+    const MEDICAL_POOL_CONFIG = {
+      "603259": { name:"药明康德", role:"核心权重 · CRDMO", secid:"1.603259", signalSecid:"1.603259", board:"main", boardLabel:"主板", floatMarketCap:325236352349 },
+      "300015": { name:"爱尔眼科", role:"眼科医疗服务", secid:"0.300015", signalSecid:"0.300015", board:"chinext", boardLabel:"创业板", floatMarketCap:70659690406 },
+      "002821": { name:"凯莱英", role:"小分子 CDMO", secid:"0.002821", signalSecid:"0.002821", board:"main", boardLabel:"主板", floatMarketCap:62061335204 },
+      "300759": { name:"康龙化成", role:"CRO + CDMO", secid:"0.300759", signalSecid:"0.300759", board:"chinext", boardLabel:"创业板", floatMarketCap:57227287746 },
+      "603127": { name:"昭衍新药", role:"临床前 CRO", secid:"1.603127", signalSecid:"1.603127", board:"main", boardLabel:"主板", floatMarketCap:31908469569 },
+      "300347": { name:"泰格医药", role:"临床 CRO", secid:"0.300347", signalSecid:"0.300347", board:"chinext", boardLabel:"创业板", floatMarketCap:29400047621 },
+      "688131": { name:"皓元医药", role:"小分子研发服务", secid:"1.688131", signalSecid:"1.688131", board:"star", boardLabel:"科创板", floatMarketCap:19489596009 },
+      "002044": { name:"美年健康", role:"体检医疗服务", secid:"0.002044", signalSecid:"0.002044", board:"main", boardLabel:"主板", floatMarketCap:17705220255 },
+      "600763": { name:"通策医疗", role:"口腔医疗服务", secid:"1.600763", signalSecid:"1.600763", board:"main", boardLabel:"主板", floatMarketCap:16142664233 },
+      "300676": { name:"华大基因", role:"基因检测服务", secid:"0.300676", signalSecid:"0.300676", board:"chinext", boardLabel:"创业板", floatMarketCap:15547263452 },
+    };
+    const MARKET_SNAPSHOT_KEY = "trend-market-snapshot-v1";
     const ACCOUNT_CONFIG = { trendAccountPct:3.0, maxLossPct:-10.0 };
     const INDEX_VOLUME_FILES = {
       "2.931643":{
@@ -604,7 +677,8 @@
       activeId:"159781", overviewId:"159781", entryId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
       autoTimer:null, matrixTouched:false, planTouched:false,
       gateOverrides:{ poolWidth:false },
-      trades:{}, tradeEditId:null, tradeFormOpen:false,
+      trades:{}, tradeEditId:null, tradeFormOpen:false, medicalFilter:"all",
+      marketUpdatedAt:null, marketSnapshotLoaded:false,
       benchmarks:{}, breadth:{}
     };
     // 横截面对照标的: 沪深300 / 中证红利 / 创业板指
@@ -622,7 +696,9 @@
     const ids = () => Object.keys(POSITIONS_CONFIG);
     const overviewIds = () => [...ids(), ...Object.keys(OVERVIEW_WATCH_CONFIG)];
     const marketIds = () => [...new Set(overviewIds())];
-    const assetCfg = (id) => POSITIONS_CONFIG[id] || OVERVIEW_WATCH_CONFIG[id];
+    const medicalIds = () => Object.keys(MEDICAL_POOL_CONFIG);
+    const allMarketIds = () => [...new Set([...marketIds(), ...medicalIds()])];
+    const assetCfg = (id) => POSITIONS_CONFIG[id] || OVERVIEW_WATCH_CONFIG[id] || MEDICAL_POOL_CONFIG[id];
     const isNum = (v) => Number.isFinite(Number(v));
     const clean = (v) => Number.isFinite(v) ? v : null;
     const nullableNum = (v) => v == null ? null : (Number.isFinite(+v) ? +v : null);
@@ -637,6 +713,22 @@
     }
     function saveTradeState() {
       try { localStorage.setItem("trend_trades", JSON.stringify(state.trades)); } catch(e) {}
+    }
+    function loadMarketSnapshot() {
+      const snapshot = getConfigValue(MARKET_SNAPSHOT_KEY, null);
+      if (!snapshot?.market || typeof snapshot.market !== "object") return;
+      allMarketIds().forEach(id => {
+        if (snapshot.market[id]) state.market[id] = snapshot.market[id];
+      });
+      state.marketUpdatedAt = snapshot.updatedAt || null;
+      state.marketSnapshotLoaded = true;
+    }
+    async function saveMarketSnapshot() {
+      const market = Object.fromEntries(allMarketIds().map(id => [id, state.market[id]]));
+      const updatedAt = new Date().toISOString();
+      await setConfigValue(MARKET_SNAPSHOT_KEY, { version:1, updatedAt, market });
+      state.marketUpdatedAt = updatedAt;
+      state.marketSnapshotLoaded = false;
     }
     function firstDate(values) {
       const dates = values.filter(Boolean).sort();
@@ -730,7 +822,7 @@
         window[cbName] = (data) => {
           clearTimeout(timer); delete window[cbName]; script.remove(); resolve(data);
         };
-        const fields = "f12,f13,f14,f2,f3,f4,f5,f6,f7,f15,f16,f17,f20,f124";
+        const fields = "f12,f13,f14,f2,f3,f4,f5,f6,f7,f15,f16,f17,f20,f21,f124";
         script.src = "https://push2.eastmoney.com/api/qt/ulist.np/get"
           + `?cb=${cbName}&fltt=2&secids=${secids.join(",")}&fields=${fields}`;
         script.onerror = () => { clearTimeout(timer); delete window[cbName]; script.remove(); reject(new Error("script")); };
@@ -1618,7 +1710,8 @@
     }
     async function refreshAll() {
       setStatus("loading", "行情 刷新中");
-      const secids = [...new Set(marketIds().flatMap(id => [assetCfg(id).secid, assetCfg(id).signalSecid]))];
+      const trackedIds = allMarketIds();
+      const secids = [...new Set(trackedIds.flatMap(id => [assetCfg(id).secid, assetCfg(id).signalSecid]))];
       let quoteRows = {}, quoteOk = false, kOkCount = 0;
       try {
         const data = await fetchQuotes(secids);
@@ -1647,7 +1740,7 @@
         try { await refreshBreadth(cfg.signalSecid, url); }
         catch (e) { /* 静默：保留缓存 */ }
       }));
-      await Promise.all(marketIds().map(async (id) => {
+      await Promise.all(trackedIds.map(async (id) => {
         const cfg = POSITIONS_CONFIG[id] ? effectiveCfg(id) : assetCfg(id);
         const current = state.market[id] || {};
         const quote = quoteRows[cfg.secid] || {};
@@ -1657,6 +1750,8 @@
           next.currentPrice = +quote.f2; next.changePct = +quote.f3; next.high = +quote.f15;
           next.low = +quote.f16; next.open = +quote.f17; next.quoteTime = +quote.f124 || null;
         }
+        if (Number.isFinite(+quote.f21) && +quote.f21 > 0) next.floatMarketCap = +quote.f21;
+        else if (!Number.isFinite(next.floatMarketCap)) next.floatMarketCap = cfg.floatMarketCap ?? null;
         try {
           const tradeRows = await fetchKlines(cfg.secid);
           const signalRows = cfg.signalSecid && cfg.signalSecid !== cfg.secid
@@ -1758,8 +1853,11 @@
       }));
       const clock = new Date().toLocaleTimeString("zh-CN", {hour12:false});
       const label = quoteOk ? `行情 ${clock}` : (kOkCount ? `K线 ${clock} · 实时失败` : "行情 获取失败");
-      setStatus(quoteOk && kOkCount === marketIds().length ? "ok" : quoteOk || kOkCount ? "partial" : "bad", label);
+      setStatus(quoteOk && kOkCount === trackedIds.length ? "ok" : quoteOk || kOkCount ? "partial" : "bad", label);
       $("dataMode").textContent = quoteOk ? "实时联动" : (kOkCount ? "K线驱动" : "静态降级");
+      if (quoteOk || kOkCount) {
+        try { await saveMarketSnapshot(); } catch (e) {}
+      }
       syncInputsFromMarket();
       renderAll();
     }
@@ -2097,8 +2195,144 @@
       $("ovStamp").textContent = cfg.signalName ? `${cfg.observeOnly ? "观察" : "信号"}：${cfg.signalName}` : "";
     }
     // ===== end 趋势概览 =====
+    function medicalSignal(id) {
+      const cfg = MEDICAL_POOL_CONFIG[id];
+      const m = marketOf(id);
+      const price = m.currentPrice ?? m.tradeClose;
+      const high = m.high;
+      const d20 = m.donchian20, d55 = m.donchian55;
+      const liveD20 = Number.isFinite(price) && Number.isFinite(d20) && price > d20;
+      const liveD55 = Number.isFinite(price) && Number.isFinite(d55) && price > d55;
+      const touchedD20 = Number.isFinite(high) && Number.isFinite(d20) && high > d20;
+      const touchedD55 = Number.isFinite(high) && Number.isFinite(d55) && high > d55;
+      const distanceD20 = Number.isFinite(price) && Number.isFinite(d20) ? (price / d20 - 1) * 100 : null;
+      const distanceD55 = Number.isFinite(price) && Number.isFinite(d55) ? (price / d55 - 1) * 100 : null;
+      const aboveMa20 = Number.isFinite(price) && Number.isFinite(m.ma20) && price > m.ma20;
+      const ma20Up = Number.isFinite(m.ma20) && Number.isFinite(m.ma20Prev) && m.ma20 >= m.ma20Prev;
+      const maBull = Number.isFinite(price) && Number.isFinite(m.ma10) && Number.isFinite(m.ma20) && Number.isFinite(m.ma60)
+        && price > m.ma10 && m.ma10 > m.ma20 && m.ma20 > m.ma60;
+      const fullMaBull = maBull && Number.isFinite(m.ma5) && price > m.ma5 && m.ma5 > m.ma10;
+      const maArrangement = fullMaBull ? "价>MA5>MA10>MA20>MA60"
+        : maBull ? "价>MA10>MA20>MA60"
+        : aboveMa20 ? "站上MA20，尚未多头排列" : "未形成多头排列";
+      const tradable = cfg.board === "main";
+      const blockers = [
+        Number.isFinite(m.currentADX) && m.currentADX < 20 ? "ADX<20，无明确趋势" : null,
+        !ma20Up ? "MA20仍在下行" : null,
+        Number.isFinite(m.currentRSI) && m.currentRSI >= 80 ? "RSI≥80，短线过热" : null,
+        Number.isFinite(m.currentADX) && m.currentADX > 50 && Number.isFinite(m.currentRSI) && m.currentRSI > 75 && m.currentRSI < 80
+          ? "ADX>50且RSI>75，处于加速过热段" : null,
+      ].filter(Boolean);
+      const entryEligible = tradable && liveD55 && blockers.length === 0;
+      let statusKind = "wait", statusLabel = "等待";
+      if (liveD55) {
+        statusKind = !tradable || blockers.length ? "caution" : "confirmed";
+        statusLabel = !tradable ? "D55突破 · 无权限" : blockers.length ? "D55突破 · 暂缓" : "当前突破 D55";
+      } else if (liveD20) {
+        statusKind = "live"; statusLabel = "D20 观察";
+      } else if (touchedD55 || touchedD20) {
+        statusKind = "live"; statusLabel = touchedD55 ? "D55 突破后回落" : "D20 突破后回落";
+      } else if (Number.isFinite(distanceD55) && distanceD55 >= -1) {
+        statusKind = "near"; statusLabel = "逼近 D55";
+      }
+      const trendEvidence = `ADX ${fmt(m.currentADX,1)}，RSI ${fmt(m.currentRSI,1)}，${maArrangement}`;
+      let entryConclusion = "暂不入场";
+      let entryReason = `最新价尚未突破D55；${trendEvidence}。`;
+      if (!tradable) {
+        entryConclusion = "无权限 · 仅观察";
+        entryReason = `${cfg.boardLabel}不列入可买入标的；${liveD55 ? "最新价已突破D55" : "最新价未突破D55"}；${trendEvidence}。`;
+      } else if (entryEligible) {
+        entryConclusion = "满足海龟入场";
+        entryReason = `最新价已突破D55；${trendEvidence}；无禁止或过热闸门。`;
+      } else if (liveD55) {
+        entryConclusion = "暂缓入场";
+        entryReason = `最新价已突破D55，但${blockers.join("；")}。`;
+      } else if (touchedD55) {
+        entryReason = "今日最高价曾突破D55，但最新价已回落至D55通道内。";
+      } else if (liveD20) {
+        entryReason = `最新价只突破D20，尚未达到D55海龟入场标准；${trendEvidence}。`;
+      }
+      const volumeRatio20 = Number.isFinite(m.volume) && Number.isFinite(m.volumeMa20) && m.volumeMa20 > 0 ? m.volume / m.volumeMa20 : null;
+      const volumeState = !Number.isFinite(volumeRatio20) ? "盘中/数据不足" : volumeRatio20 >= 1.2 ? "放量" : volumeRatio20 < .8 ? "缩量" : "平量";
+      const stopDistancePct = Number.isFinite(m.currentATR) && Number.isFinite(price) && price > 0 ? 2 * m.currentATR / price * 100 : null;
+      return {
+        id, cfg, m, price, high, d20, d55, liveD20, liveD55, touchedD20, touchedD55,
+        distanceD20, distanceD55, aboveMa20, ma20Up, maBull, fullMaBull, maArrangement,
+        tradable, blockers, entryEligible, statusKind, statusLabel, entryConclusion, entryReason,
+        volumeState, stopDistancePct,
+        initialStop:Number.isFinite(price) && Number.isFinite(m.currentATR) ? price - 2 * m.currentATR : null,
+        floatMarketCap:state.market[id]?.floatMarketCap ?? cfg.floatMarketCap,
+      };
+    }
+    function medicalChannel(label, current, touched, level, distance) {
+      const tag = current ? `<em class="on">当前已突破</em>` : touched ? `<em class="touched">今日曾越过</em>` : `<em>${Number.isFinite(distance) && distance >= -1 ? "逼近" : "未突破"}</em>`;
+      return `<div class="med-channel"><div><b>${label}</b>${tag}</div><div class="med-channel-val">前高 ${fmt(level,2)}<small>${Number.isFinite(distance) ? fmtPct(distance) + " 距离" : "—"}</small></div></div>`;
+    }
+    function medicalCard(signal) {
+      const { cfg, m } = signal;
+      const changeCls = Number.isFinite(m.changePct) ? (m.changePct >= 0 ? "up" : "down") : "";
+      return `<article class="med-card ${signal.statusKind} ${signal.tradable ? "tradable" : "locked"}">
+        <div class="med-card-head"><div><div class="med-name">${cfg.name}<span>${signal.id}</span></div><div class="med-role"><span>${cfg.role}</span><i class="med-board ${signal.tradable ? "tradable" : "locked"}">${signal.tradable ? cfg.boardLabel+"可交易" : cfg.boardLabel+" · 无权限"}</i></div></div><span class="med-status ${signal.statusKind}">${signal.statusLabel}</span></div>
+        <div class="med-price"><strong>${fmt(signal.price,2)}</strong><span class="${changeCls}">${fmtPct(m.changePct)}</span><small>今日高 ${fmt(signal.high,2)}</small></div>
+        <div class="med-channels">${medicalChannel("D20",signal.liveD20,signal.touchedD20,signal.d20,signal.distanceD20)}${medicalChannel("D55",signal.liveD55,signal.touchedD55,signal.d55,signal.distanceD55)}</div>
+        <div class="med-ma ${signal.maBull ? "bull" : ""}"><strong>均线排列 · ${signal.maArrangement}</strong><small>MA5 ${fmt(m.ma5,2)} · MA10 ${fmt(m.ma10,2)} · MA20 ${fmt(m.ma20,2)} · MA60 ${fmt(m.ma60,2)}</small></div>
+        <div class="med-metrics"><div class="med-metric"><span>MA20</span><b>${signal.aboveMa20 ? "站上" : "跌破"}</b></div><div class="med-metric"><span>斜率</span><b>${signal.ma20Up ? "向上" : "向下"}</b></div><div class="med-metric"><span>ADX14</span><b>${fmt(m.currentADX,1)}</b></div><div class="med-metric"><span>RSI14</span><b>${fmt(m.currentRSI,1)}</b></div></div>
+        <div class="med-secondary"><span>5日 <b>${fmtPct(m.ret5)}</b></span><span>20日 <b>${fmtPct(m.ret20)}</b></span><span>量能 <b>${signal.volumeState}</b></span></div>
+        <div class="med-decision"><strong>${signal.entryConclusion}</strong><p>${signal.entryReason}</p></div>
+        <div class="med-foot">指标 ${m.klineUpdatedAt || "最近快照"}</div>
+      </article>`;
+    }
+    function cappedMedicalWeights(signals) {
+      const cap = signals.length >= 3 ? .35 : signals.length ? 1 / signals.length : 0;
+      const scores = new Map(signals.map(s => [s.id, Math.sqrt(s.floatMarketCap || 1)]));
+      const weights = new Map(), remaining = new Set(signals.map(s => s.id));
+      let budget = 1;
+      while (remaining.size) {
+        const total = [...remaining].reduce((sum,id) => sum + (scores.get(id) || 0), 0);
+        const capped = [...remaining].find(id => budget * (scores.get(id) || 0) / total > cap);
+        if (!capped) {
+          remaining.forEach(id => weights.set(id, budget * (scores.get(id) || 0) / total));
+          break;
+        }
+        weights.set(capped, cap); remaining.delete(capped); budget -= cap;
+      }
+      return weights;
+    }
+    function medicalAllocation(signals) {
+      const usable = signals.filter(s => s.entryEligible && Number.isFinite(s.stopDistancePct) && s.stopDistancePct > 0);
+      const riskWeights = cappedMedicalWeights(usable);
+      const rows = usable.map(signal => ({ signal, riskWeight:riskWeights.get(signal.id) || 0, score:(riskWeights.get(signal.id) || 0) / signal.stopDistancePct }));
+      const total = rows.reduce((sum,row) => sum + row.score, 0);
+      return rows.map(row => ({ ...row, unitWeight:total ? row.score / total : 0 }));
+    }
+    function renderMedical() {
+      const signals = medicalIds().map(medicalSignal);
+      const currentD20 = signals.filter(s => s.liveD20).length;
+      const currentD55 = signals.filter(s => s.liveD55).length;
+      const touched = signals.filter(s => s.touchedD20 || s.touchedD55).length;
+      const maBull = signals.filter(s => s.maBull).length;
+      const eligible = signals.filter(s => s.entryEligible).length;
+      $("medicalSummary").innerHTML = [
+        ["D20 当前突破",currentD20,"仅观察，不触发入场"],
+        ["D55 海龟突破",currentD55,"最新价高于D55"],
+        ["今日曾越过",touched,"含突破后回落"],
+        ["均线多头排列",maBull,"价>MA10>20>60"],
+        ["可入场候选",eligible,"主板+D55+风险闸门"],
+      ].map(x => `<div class="med-summary-card"><span>${x[0]}</span><strong>${x[1]}<small>/ 10</small></strong><small>${x[2]}</small></div>`).join("");
+      const visible = signals.filter(s => state.medicalFilter === "eligible" ? s.entryEligible : state.medicalFilter === "d55" ? s.liveD55 : state.medicalFilter === "waiting" ? !s.entryEligible : true);
+      $("medicalGrid").innerHTML = visible.length ? visible.map(medicalCard).join("") : `<div class="med-empty">当前没有符合该筛选条件的股票。</div>`;
+      document.querySelectorAll("[data-med-filter]").forEach(btn => btn.classList.toggle("active", btn.dataset.medFilter === state.medicalFilter));
+      const rows = medicalAllocation(signals);
+      const notice = rows.length
+        ? `<div class="med-plan-notice ready">当前买入单位包含 ${rows.length} 只主板股票：最新价突破D55，并通过ADX、MA20斜率和过热闸门。</div>`
+        : `<div class="med-plan-notice blocked">当前没有主板股票同时满足最新价突破D55和风险闸门，本次买入单位暂不执行。</div>`;
+      const table = rows.length ? `<div class="med-allocation-table-wrap"><table class="med-allocation-table"><thead><tr><th>股票</th><th>流通市值</th><th>基础风险权重</th><th>2×ATR距离</th><th>参考止损</th><th>单位内占比</th></tr></thead><tbody>${rows.map(row => `<tr><td><strong>${row.signal.cfg.name}</strong><br><small>${row.signal.id}</small></td><td>${(row.signal.floatMarketCap/1e8).toFixed(0)}亿</td><td>${(row.riskWeight*100).toFixed(1)}%</td><td>${row.signal.stopDistancePct.toFixed(2)}%</td><td>${fmt(row.signal.initialStop,2)}</td><td>${(row.unitWeight*100).toFixed(1)}%</td></tr>`).join("")}</tbody></table></div>` : "";
+      $("medicalAllocation").innerHTML = `<div class="med-allocation-head"><h3>每笔买入单位配比</h3><p>板块每笔买入单位固定为100%；单位内部按流通市值平方根分配基础风险权重，再除以2×ATR波动距离并归一化。无交易权限股票自动排除。</p></div>${notice}${table}`;
+      const stamp = state.marketUpdatedAt ? new Date(state.marketUpdatedAt).toLocaleString("zh-CN",{hour12:false}) : "等待行情";
+      setText("medicalStamp", `${state.marketSnapshotLoaded ? "历史快照" : "最近更新"} ${stamp}`);
+    }
     function renderAll() {
-      renderTabs(); renderOverview(); renderPositionPanel(); renderMatrix(); renderEntry();
+      renderTabs(); renderOverview(); renderPositionPanel(); renderMatrix(); renderEntry(); renderMedical();
       renderVolumeState(); renderPositionCalc(); renderStopDetail(); renderExitTree(); renderRisk();
     }
     function renderTabs() {
@@ -2986,6 +3220,11 @@
     document.addEventListener("click", (e) => {
       const navTab = e.target.closest("[data-view]");
       if (navTab) showView(navTab.dataset.view);
+      const medicalFilter = e.target.closest("[data-med-filter]");
+      if (medicalFilter) {
+        state.medicalFilter = medicalFilter.dataset.medFilter;
+        renderMedical();
+      }
       const modalBtn = e.target.closest("[data-modal]");
       if (modalBtn) openModal(modalBtn.dataset.modal);
       const tab = e.target.closest("[data-pos]");
@@ -3061,20 +3300,25 @@
     $("modalClose").addEventListener("click", closeModal);
     $("modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
-    function seedState() {
+    async function seedState() {
+      try {
+        await initStorage();
+        loadMarketSnapshot();
+      } catch (e) {}
       loadTradeState();
-      marketIds().forEach(id => {
+      allMarketIds().forEach(id => {
         const c = POSITIONS_CONFIG[id] ? effectiveCfg(id) : assetCfg(id);
-        state.market[id] = {
+        state.market[id] ||= {
           currentPrice:null, currentATR:null, currentRSI:null, currentADX:null, highestClose:c.highestClose,
           prevMin10:null, prevMin20:null, ma20DownDays:null, belowMa20Days:null,
           adxPeak:null, adxPeakDate:null, adxDrawdown:null,
+          floatMarketCap:c.floatMarketCap ?? null,
         };
       });
       renderAll(); syncInputsFromMarket(); refreshAll();
       showView(location.hash ? location.hash.slice(1) : "overview", false);
     }
-    seedState();
+    void seedState();
   </script>
 </body>
 </html>
