@@ -429,7 +429,7 @@
     /* ── 医疗服务前十大流通市值观察池 ── */
     .med-rule{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;padding:12px 14px;border:1px solid #bfdbfe;border-radius:var(--radius-sm);background:#eff6ff;color:#1e3a8a;font-size:12px;line-height:1.6}
     .med-rule strong{white-space:nowrap}
-    .med-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:14px}
+    .med-summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:14px}
     .med-summary-card{padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2)}
     .med-summary-card span,.med-summary-card small{display:block;color:var(--text-muted);font-size:10px}
     .med-summary-card strong{display:block;margin:4px 0 2px;font-size:24px;color:var(--primary);font-variant-numeric:tabular-nums}
@@ -465,9 +465,34 @@
     .med-plan-notice{margin-top:11px;padding:10px 12px;border-radius:var(--radius-sm);font-size:11px;line-height:1.5}.med-plan-notice.ready{background:var(--green-bg);color:#065f46}.med-plan-notice.blocked{background:var(--yellow-bg);color:#92400e}
     .med-allocation-table-wrap{margin-top:11px;overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)}
     .med-allocation-table{width:100%;border-collapse:collapse;font-size:10px;font-variant-numeric:tabular-nums}.med-allocation-table th{padding:8px 10px;background:#f1f5f9;color:var(--text-muted);text-align:left;white-space:nowrap}.med-allocation-table td{padding:9px 10px;border-top:1px solid var(--border);white-space:nowrap}.med-allocation-table td:last-child{color:var(--primary);font-size:15px;font-weight:800}
+    .med-score{margin-top:9px;padding:9px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2)}
+    .med-score-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px}
+    .med-score-head strong{font-size:16px;color:var(--primary);font-variant-numeric:tabular-nums}
+    .med-score-parts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:6px;color:var(--text-muted);font-size:8px;text-align:center}
+    .med-score-parts b{display:block;color:var(--text-primary);font-size:9px}
+    .med-holding{margin-top:9px;padding:9px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)}
+    .med-holding strong{font-size:10px}.med-holding-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:6px}
+    .med-holding-grid span{font-size:8px;color:var(--text-muted)}.med-holding-grid b{display:block;color:var(--text-primary);font-size:10px;font-variant-numeric:tabular-nums}
+    .med-pnl.up{color:var(--red)}.med-pnl.down{color:var(--green)}.med-pnl.flat{color:var(--text-primary)}
+    .med-stop-link{padding:0;border:0;border-bottom:1px dashed currentColor;background:transparent;color:var(--primary);font:inherit;font-weight:800;cursor:pointer}
+    .med-control-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin-top:12px}
+    .med-control-card{padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)}
+    .med-control-card span{display:block;color:var(--text-muted);font-size:8px}.med-control-card b{display:block;margin-top:3px;font-size:15px;font-variant-numeric:tabular-nums}
+    .med-control-card small{display:block;margin-top:2px;color:var(--text-muted);font-size:8px;font-variant-numeric:tabular-nums}
+    .med-stop-table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+    .med-stop-table th,.med-stop-table td{padding:9px 7px;border-top:1px solid var(--border);text-align:left;vertical-align:top}.med-stop-table th{white-space:nowrap;color:var(--text-primary)}
+    .med-stop-winner{margin-bottom:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--primary-light);color:var(--primary)}
+    .med-subsection{margin-top:16px}.med-subsection h4{margin:0 0 7px;font-size:13px}
+    .med-trade-list{display:grid;gap:6px}.med-trade-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:10px}
+    .med-trade-actions{display:flex;gap:4px}.med-trade-btn{padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface-2);font-size:9px;cursor:pointer}.med-trade-btn.del{color:var(--green)}
+    .med-trade-form{margin-top:8px;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)}
+    .med-trade-form-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.med-trade-form label{font-size:9px;color:var(--text-muted)}
+    .med-trade-form input,.med-trade-form select{width:100%;margin-top:3px;padding:6px;border:1px solid var(--border);border-radius:6px;background:var(--surface-2);color:var(--text-primary);font:inherit;box-sizing:border-box}
+    .med-trade-form-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
+    .med-explain{margin-top:8px;color:var(--text-muted);font-size:9px;line-height:1.55}
     @media (min-width:720px){.entry-cards{grid-template-columns:repeat(4,minmax(0,1fr))}.sd-observe-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-    @media (max-width:900px){.med-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-summary{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}.med-grid{grid-template-columns:1fr}.med-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.med-toolbar{align-items:flex-start;flex-direction:column}.med-filters{width:100%}}
+    @media (max-width:900px){.med-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.med-control-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}.med-grid{grid-template-columns:1fr}.med-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.med-toolbar{align-items:flex-start;flex-direction:column}.med-filters{width:100%}.med-control-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-trade-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
@@ -550,15 +575,15 @@
 
     <section id="medical" class="section view-panel">
       <div class="section-head"><h2>医疗服务前十大流通市值观察池</h2><span id="medicalStamp" class="subtle"></span></div>
-      <div class="med-rule"><strong>执行原则</strong><span>只以最新价突破 D55 作为海龟价格入场条件，D20 仅观察；创业板、科创板保留完整指标，但不列入可买入标的。其他趋势与过热闸门沿用入场系统规则。</span></div>
+      <div class="med-rule"><strong>执行原则</strong><span>最新价突破 D55 后，再按相对强势、均线、ADX/DI、突破强度和量价计算100分趋势强度；最多选3只主板领头羊，按整手数量和板块阶段风险分配。D20仅观察，创业板、科创板只展示。</span></div>
       <div id="medicalSummary" class="med-summary"></div>
       <div class="med-toolbar">
         <p>行情、K线与指标复用趋势系统统一数据状态；刷新失败时继续展示 IndexedDB 中最近一次成功快照。</p>
         <div class="med-filters" role="group" aria-label="医疗服务信号筛选">
-          <button class="med-filter active" data-med-filter="all">全部 10 只</button>
+          <button class="med-filter active" data-med-filter="held">已持仓</button>
           <button class="med-filter" data-med-filter="eligible">满足入场</button>
-          <button class="med-filter" data-med-filter="d55">当前 D55</button>
-          <button class="med-filter" data-med-filter="waiting">等待</button>
+          <button class="med-filter" data-med-filter="watch" title="未持仓的观察标的">观察池</button>
+          <button class="med-filter" data-med-filter="all">全部</button>
         </div>
       </div>
       <div id="medicalGrid" class="med-grid"></div>
@@ -659,6 +684,11 @@
       "600763": { name:"通策医疗", role:"口腔医疗服务", secid:"1.600763", signalSecid:"1.600763", board:"main", boardLabel:"主板", floatMarketCap:16142664233 },
       "300676": { name:"华大基因", role:"基因检测服务", secid:"0.300676", signalSecid:"0.300676", board:"chinext", boardLabel:"创业板", floatMarketCap:15547263452 },
     };
+    const MEDICAL_PORTFOLIO_CONFIG = {
+      totalCapital:200000, totalRisk:10000, maxStocks:3,
+      phaseCapital:[100000,150000,200000], phaseRisk:[5000,7500,10000],
+      stockCapital:120000, stockRisk:6000, minLeaderScore:60, maxLeaderGap:15,
+    };
     const MARKET_SNAPSHOT_KEY = "trend-market-snapshot-v1";
     const ACCOUNT_CONFIG = { trendAccountPct:3.0, maxLossPct:-10.0 };
     const INDEX_VOLUME_FILES = {
@@ -677,7 +707,8 @@
       activeId:"159781", overviewId:"159781", entryId:"159781", market:{}, overrides:{}, quoteStatus:"idle",
       autoTimer:null, matrixTouched:false, planTouched:false,
       gateOverrides:{ poolWidth:false },
-      trades:{}, tradeEditId:null, tradeFormOpen:false, medicalFilter:"all",
+      trades:{}, tradeEditId:null, tradeFormOpen:false, medicalFilter:"held",
+      medicalTradeId:"603127", medicalTradeEditId:null, medicalTradeFormOpen:false,
       marketUpdatedAt:null, marketSnapshotLoaded:false,
       benchmarks:{}, breadth:{}
     };
@@ -705,6 +736,7 @@
     function fmt(v, d=3) { return Number.isFinite(v) ? v.toFixed(d) : "—"; }
     function fmtPct(v, d=2) { return Number.isFinite(v) ? (v > 0 ? "+" : "") + v.toFixed(d) + "%" : "—"; }
     function fmtR(v) { return Number.isFinite(v) ? (v > 0 ? "+" : "") + v.toFixed(2) + "R" : "—"; }
+    function fmtMedicalMoney(v) { return Number.isFinite(v) ? "¥" + Math.round(v).toLocaleString("zh-CN") : "—"; }
     function secKey(row) { return `${row.f13}.${row.f12}`; }
     function posCfg() { return effectiveCfg(state.activeId); }
     // ── Trade log helpers ──
@@ -2195,6 +2227,45 @@
       $("ovStamp").textContent = cfg.signalName ? `${cfg.observeOnly ? "观察" : "信号"}：${cfg.signalName}` : "";
     }
     // ===== end 趋势概览 =====
+    function medicalPercentileMap(signals, getter) {
+      const valid = signals.map(s => ({ id:s.id, value:getter(s) })).filter(x => Number.isFinite(x.value)).sort((a,b) => a.value - b.value);
+      const out = new Map();
+      valid.forEach(row => {
+        const first = valid.findIndex(x => x.value === row.value);
+        const last = valid.findLastIndex(x => x.value === row.value);
+        out.set(row.id, valid.length <= 1 ? 50 : ((first + last) / 2) / (valid.length - 1) * 100);
+      });
+      return out;
+    }
+    function medicalTrendScores(signals) {
+      const p5 = medicalPercentileMap(signals, s => s.m.ret5);
+      const p20 = medicalPercentileMap(signals, s => s.m.ret20);
+      const p60 = medicalPercentileMap(signals, s => s.m.ret60);
+      signals.forEach(s => {
+        const rs = .45 * (.25 * (p5.get(s.id) || 0) + .45 * (p20.get(s.id) || 0) + .30 * (p60.get(s.id) || 0));
+        const ma = [s.price > s.m.ma5, s.m.ma5 > s.m.ma10, s.m.ma10 > s.m.ma20, s.m.ma20 > s.m.ma60, s.ma20Up].filter(Boolean).length * 4;
+        const adx = s.m.currentADX < 20 ? 0 : s.m.currentADX < 25 ? 8 : s.m.currentADX <= 40 ? 15 : s.m.currentADX <= 50 ? 13 : 8;
+        const direction = Number.isFinite(s.m.diPlus) && Number.isFinite(s.m.diMinus) && s.m.diPlus > s.m.diMinus ? 5 : 0;
+        const breakoutN = Number.isFinite(s.price) && Number.isFinite(s.d55) && Number.isFinite(s.m.currentATR) && s.m.currentATR > 0 ? (s.price - s.d55) / s.m.currentATR : null;
+        const d55 = Number.isFinite(breakoutN) ? 10 * Math.min(Math.max(breakoutN / .5, 0), 1) : 0;
+        const volumeRatio = Number.isFinite(s.m.volume) && Number.isFinite(s.m.volumeMa20) && s.m.volumeMa20 > 0 ? s.m.volume / s.m.volumeMa20 : null;
+        const volume = !Number.isFinite(volumeRatio) ? 2 : s.m.changePct < 0 ? 0 : volumeRatio >= 1.2 ? 5 : volumeRatio >= .8 ? 3 : 1;
+        s.scoreParts = { rs, ma, adxdi:adx + direction, d55, volume };
+        s.leaderScore = rs + ma + adx + direction + d55 + volume;
+        s.breakoutN = breakoutN;
+      });
+      const ranked = signals.filter(s => s.entryEligible && s.leaderScore >= MEDICAL_PORTFOLIO_CONFIG.minLeaderScore).sort((a,b) => b.leaderScore - a.leaderScore);
+      const top = ranked[0]?.leaderScore ?? null;
+      const leaders = ranked.filter(s => s.leaderScore >= top - MEDICAL_PORTFOLIO_CONFIG.maxLeaderGap).slice(0, MEDICAL_PORTFOLIO_CONFIG.maxStocks);
+      signals.forEach(s => {
+        s.leaderRank = ranked.findIndex(x => x.id === s.id) + 1 || null;
+        s.isLeader = leaders.some(x => x.id === s.id);
+        if (s.isLeader) { s.entryConclusion = "领头羊 · 满足第一笔"; s.entryReason = `最新价突破D55，趋势强度${fmt(s.leaderScore,1)}分，排名#${s.leaderRank}，进入最多3只领头羊。`; }
+        else if (s.entryEligible && s.leaderScore < MEDICAL_PORTFOLIO_CONFIG.minLeaderScore) { s.entryConclusion = "D55满足 · 强度不足"; s.entryReason = `价格闸门通过，但趋势强度${fmt(s.leaderScore,1)}分低于60分，不占用持仓席位。`; }
+        else if (s.entryEligible) { s.entryConclusion = "D55满足 · 领头羊候补"; s.entryReason = `趋势强度${fmt(s.leaderScore,1)}分，但未进入榜首15分范围内的前三名。`; }
+      });
+      return leaders;
+    }
     function medicalSignal(id) {
       const cfg = MEDICAL_POOL_CONFIG[id];
       const m = marketOf(id);
@@ -2216,7 +2287,10 @@
         : maBull ? "价>MA10>MA20>MA60"
         : aboveMa20 ? "站上MA20，尚未多头排列" : "未形成多头排列";
       const tradable = cfg.board === "main";
+      const required = [price,d55,m.currentATR,m.ma5,m.ma10,m.ma20,m.ma60,m.ma20Prev,m.currentADX,m.currentRSI,m.ret5,m.ret20,m.ret60];
       const blockers = [
+        required.some(v => !Number.isFinite(v)) ? "关键趋势数据不足" : null,
+        state.marketSnapshotLoaded ? "当前仅有历史行情快照" : null,
         Number.isFinite(m.currentADX) && m.currentADX < 20 ? "ADX<20，无明确趋势" : null,
         !ma20Up ? "MA20仍在下行" : null,
         Number.isFinite(m.currentRSI) && m.currentRSI >= 80 ? "RSI≥80，短线过热" : null,
@@ -2264,6 +2338,45 @@
         floatMarketCap:state.market[id]?.floatMarketCap ?? cfg.floatMarketCap,
       };
     }
+    function medicalHolding(signal, extraLots=0) {
+      const d = derivedFromTrades(signal.id);
+      const currentLots = Math.max(0, d.netUnits || 0);
+      const price = signal.price;
+      const lots = currentLots + extraLots;
+      if (!lots || !Number.isFinite(price)) return { held:false, lots:0, capital:0, principalRisk:0, givebackRisk:0, buyCount:0 };
+      const cost = extraLots > 0 ? ((d.avgCost || 0) * currentLots + price * extraLots) / lots : d.avgCost;
+      const entryATR = d.entryATR ?? signal.m.currentATR;
+      const openedAt = d.openedAt || new Date().toISOString().slice(0,10);
+      const holdingMarket = { ...signal.m, highestClose:highestCloseSinceEntry(signal.m.tradeRows, openedAt, price) };
+      const openedAtSource = d.openedAt ? "医疗服务交易账本" : "测算开仓日";
+      const riskCalc = compute({ id:signal.id, cost, entryATR, openedAt, openedAtSource, initialStop:cost - 2 * entryATR }, holdingMarket);
+      const finalStop = riskCalc.finalStop;
+      const capital = lots * 100 * cost;
+      const marketValue = lots * 100 * price;
+      const unrealPnl = marketValue - capital;
+      const unrealPct = Number.isFinite(cost) && cost > 0 ? (price / cost - 1) * 100 : null;
+      const principalRisk = Number.isFinite(finalStop) ? Math.max(lots * 100 * (cost - finalStop), 0) : lots * 100 * 2 * entryATR;
+      const givebackRisk = Number.isFinite(finalStop) ? Math.max(lots * 100 * (price - finalStop), 0) : null;
+      const buys = tradesOf(signal.id).filter(t => t.type === "buy").sort((a,b) => a.date < b.date ? -1 : 1);
+      const lastBuy = buys[buys.length - 1] || null;
+      const distN = lastBuy && Number.isFinite(signal.m.currentATR) && signal.m.currentATR > 0 ? (price - Number(lastBuy.price)) / signal.m.currentATR : null;
+      const sameDay = lastBuy?.date === new Date().toISOString().slice(0,10);
+      const dayDrawdown = Number.isFinite(signal.high) && signal.high > 0 ? (signal.high - price) / signal.high * 100 : null;
+      const addReasons = [
+        sameDay ? "今日刚成交" : null, riskCalc.floatR < 0 ? "当前浮盈低于0R" : null,
+        signal.blockers[0] ? signal.blockers.join("；") : null, dayDrawdown >= 1.2 ? "日内回撤≥1.2%" : null,
+        signal.m.upperShadowPct >= 1.2 ? "上影线≥1.2%" : null, !signal.isLeader ? "当前未进入领头羊前三" : null,
+      ].filter(Boolean);
+      const addBlocked = addReasons.length > 0;
+      const secondEligible = buys.length === 1 && !addBlocked && riskCalc.floatR >= .5 && distN >= .5;
+      const thirdEligible = buys.length === 2 && !addBlocked && riskCalc.floatR >= 1 && distN >= 1;
+      const exitDecision = computeExitDecision({ id:signal.id, cost, entryATR, openedAt }, holdingMarket, riskCalc);
+      return {
+        held:true, lots, currentLots, cost, entryATR, openedAt, openedAtSource, capital, marketValue, unrealPnl, unrealPct, principalRisk, givebackRisk,
+        riskCalc, finalStop, exitDecision, buyCount:buys.length, lastBuy, distN, sameDay, dayDrawdown, addBlocked, addReasons,
+        secondEligible, thirdEligible,
+      };
+    }
     function medicalChannel(label, current, touched, level, distance) {
       const tag = current ? `<em class="on">当前已突破</em>` : touched ? `<em class="touched">今日曾越过</em>` : `<em>${Number.isFinite(distance) && distance >= -1 ? "逼近" : "未突破"}</em>`;
       return `<div class="med-channel"><div><b>${label}</b>${tag}</div><div class="med-channel-val">前高 ${fmt(level,2)}<small>${Number.isFinite(distance) ? fmtPct(distance) + " 距离" : "—"}</small></div></div>`;
@@ -2271,6 +2384,15 @@
     function medicalCard(signal) {
       const { cfg, m } = signal;
       const changeCls = Number.isFinite(m.changePct) ? (m.changePct >= 0 ? "up" : "down") : "";
+      const h = medicalHolding(signal);
+      const p = signal.scoreParts || {};
+      const leaderText = signal.isLeader ? `领头羊 #${signal.leaderRank}` : signal.leaderRank ? `候选 #${signal.leaderRank}` : "未入围";
+      const scoreHtml = `<div class="med-score"><div class="med-score-head"><span>趋势强度 · ${leaderText}</span><strong>${fmt(signal.leaderScore,1)}</strong></div><div class="med-score-parts"><span>相对强势<b>${fmt(p.rs,1)}/45</b></span><span>均线<b>${fmt(p.ma,0)}/20</b></span><span>ADX/DI<b>${fmt(p.adxdi,1)}/20</b></span><span>D55<b>${fmt(p.d55,1)}/10</b></span><span>量价<b>${fmt(p.volume,1)}/5</b></span></div></div>`;
+      const trigger = h.buyCount === 1 ? `二笔：浮盈≥0.5R且距上笔≥0.5N` : h.buyCount === 2 ? `三笔：浮盈≥1R且距上笔≥1N` : h.buyCount >= 3 ? "三笔已完成" : "";
+      const addStatus = h.secondEligible ? "满足第二笔" : h.thirdEligible ? "满足第三笔" : h.buyCount >= 3 ? "三笔完成" : h.addBlocked ? "暂停加仓" : "等待触发";
+      const addReason = h.addBlocked ? h.addReasons.join("；") : trigger || "等待下一阶段";
+      const pnlCls = h.unrealPct > 0 ? "up" : h.unrealPct < 0 ? "down" : "flat";
+      const holdingHtml = h.held ? `<div class="med-holding"><strong>持仓 ${h.lots.toFixed(0)}手 · ${h.buyCount}笔 · ${addStatus}</strong><div class="med-holding-grid"><span>成本<b>${fmt(h.cost,2)}</b></span><span>当前盈亏<b class="med-pnl ${pnlCls}">${fmtPct(h.unrealPct)} · ${fmtMedicalMoney(h.unrealPnl)}</b></span><span>浮盈R<b>${fmtR(h.riskCalc.floatR)}</b></span><span>最终止损<b><button class="med-stop-link" data-med-stop="${signal.id}">${fmt(h.finalStop,2)} · 查看四线</button></b></span><span>本金风险<b>${fmtMedicalMoney(h.principalRisk)}</b></span><span>距上笔<b>${Number.isFinite(h.distN) ? h.distN.toFixed(2)+"N" : "—"}</b></span><span>持仓裁决<b>${h.exitDecision.title}</b></span></div><div class="med-explain">加仓判断：${addReason}</div></div>` : "";
       return `<article class="med-card ${signal.statusKind} ${signal.tradable ? "tradable" : "locked"}">
         <div class="med-card-head"><div><div class="med-name">${cfg.name}<span>${signal.id}</span></div><div class="med-role"><span>${cfg.role}</span><i class="med-board ${signal.tradable ? "tradable" : "locked"}">${signal.tradable ? cfg.boardLabel+"可交易" : cfg.boardLabel+" · 无权限"}</i></div></div><span class="med-status ${signal.statusKind}">${signal.statusLabel}</span></div>
         <div class="med-price"><strong>${fmt(signal.price,2)}</strong><span class="${changeCls}">${fmtPct(m.changePct)}</span><small>今日高 ${fmt(signal.high,2)}</small></div>
@@ -2278,35 +2400,142 @@
         <div class="med-ma ${signal.maBull ? "bull" : ""}"><strong>均线排列 · ${signal.maArrangement}</strong><small>MA5 ${fmt(m.ma5,2)} · MA10 ${fmt(m.ma10,2)} · MA20 ${fmt(m.ma20,2)} · MA60 ${fmt(m.ma60,2)}</small></div>
         <div class="med-metrics"><div class="med-metric"><span>MA20</span><b>${signal.aboveMa20 ? "站上" : "跌破"}</b></div><div class="med-metric"><span>斜率</span><b>${signal.ma20Up ? "向上" : "向下"}</b></div><div class="med-metric"><span>ADX14</span><b>${fmt(m.currentADX,1)}</b></div><div class="med-metric"><span>RSI14</span><b>${fmt(m.currentRSI,1)}</b></div></div>
         <div class="med-secondary"><span>5日 <b>${fmtPct(m.ret5)}</b></span><span>20日 <b>${fmtPct(m.ret20)}</b></span><span>量能 <b>${signal.volumeState}</b></span></div>
+        ${scoreHtml}${holdingHtml}
         <div class="med-decision"><strong>${signal.entryConclusion}</strong><p>${signal.entryReason}</p></div>
         <div class="med-foot">指标 ${m.klineUpdatedAt || "最近快照"}</div>
       </article>`;
     }
-    function cappedMedicalWeights(signals) {
-      const cap = signals.length >= 3 ? .35 : signals.length ? 1 / signals.length : 0;
-      const scores = new Map(signals.map(s => [s.id, Math.sqrt(s.floatMarketCap || 1)]));
+    function cappedLeaderWeights(signals) {
+      if (signals.length === 1) return new Map([[signals[0].id, 1]]);
+      const scores = new Map(signals.map(s => [s.id, Math.max(s.leaderScore - 50, 0)]));
       const weights = new Map(), remaining = new Set(signals.map(s => s.id));
       let budget = 1;
       while (remaining.size) {
         const total = [...remaining].reduce((sum,id) => sum + (scores.get(id) || 0), 0);
-        const capped = [...remaining].find(id => budget * (scores.get(id) || 0) / total > cap);
+        if (!total) { remaining.forEach(id => weights.set(id, budget / remaining.size)); break; }
+        const capped = [...remaining].find(id => budget * (scores.get(id) || 0) / total > .6);
         if (!capped) {
           remaining.forEach(id => weights.set(id, budget * (scores.get(id) || 0) / total));
           break;
         }
-        weights.set(capped, cap); remaining.delete(capped); budget -= cap;
+        weights.set(capped, .6); remaining.delete(capped); budget -= .6;
       }
       return weights;
     }
-    function medicalAllocation(signals) {
-      const usable = signals.filter(s => s.entryEligible && Number.isFinite(s.stopDistancePct) && s.stopDistancePct > 0);
-      const riskWeights = cappedMedicalWeights(usable);
-      const rows = usable.map(signal => ({ signal, riskWeight:riskWeights.get(signal.id) || 0, score:(riskWeights.get(signal.id) || 0) / signal.stopDistancePct }));
-      const total = rows.reduce((sum,row) => sum + row.score, 0);
-      return rows.map(row => ({ ...row, unitWeight:total ? row.score / total : 0 }));
+    function medicalPortfolioState(signals, leaders) {
+      const holdings = new Map(signals.map(s => [s.id, medicalHolding(s)]));
+      const heldSignals = signals.filter(s => holdings.get(s.id).held);
+      const phaseIndex = heldSignals.some(s => holdings.get(s.id).buyCount >= 3 || holdings.get(s.id).thirdEligible) ? 2
+        : heldSignals.some(s => holdings.get(s.id).buyCount >= 2 || holdings.get(s.id).secondEligible) ? 1 : 0;
+      const capital = heldSignals.reduce((sum,s) => sum + holdings.get(s.id).capital, 0);
+      const marketValue = heldSignals.reduce((sum,s) => sum + holdings.get(s.id).marketValue, 0);
+      const unrealPnl = capital > 0 ? marketValue - capital : null;
+      const unrealPct = capital > 0 ? unrealPnl / capital * 100 : null;
+      const risk = heldSignals.reduce((sum,s) => sum + holdings.get(s.id).principalRisk, 0);
+      const heldCandidates = leaders.filter(s => {
+        const h = holdings.get(s.id);
+        return h.held && (h.secondEligible || h.thirdEligible);
+      });
+      const freeSlots = Math.max(MEDICAL_PORTFOLIO_CONFIG.maxStocks - heldSignals.length, 0);
+      const newCandidates = leaders.filter(s => !holdings.get(s.id).held).slice(0, freeSlots);
+      const candidates = [...heldCandidates, ...newCandidates];
+      return {
+        holdings, heldSignals, phaseIndex, capital, marketValue, unrealPnl, unrealPct, risk, candidates,
+        capitalCap:MEDICAL_PORTFOLIO_CONFIG.phaseCapital[phaseIndex],
+        riskCap:MEDICAL_PORTFOLIO_CONFIG.phaseRisk[phaseIndex],
+      };
+    }
+    function medicalPlanSimulation(signal, holding, extraLots) {
+      const simulated = medicalHolding(signal, extraLots);
+      const addedCapital = extraLots * 100 * signal.price;
+      const addedRisk = Math.max(simulated.principalRisk - (holding.principalRisk || 0), 0);
+      return { extraLots, addedCapital, addedRisk, simulated };
+    }
+    function medicalPlanFeasible(plan, row, next, portfolio) {
+      const otherRisk = plan.reduce((sum,x) => sum + (x === row ? 0 : x.sim.addedRisk), 0);
+      const otherCapital = plan.reduce((sum,x) => sum + (x === row ? 0 : x.sim.addedCapital), 0);
+      return portfolio.capital + otherCapital + next.addedCapital <= portfolio.capitalCap
+        && portfolio.risk + otherRisk + next.addedRisk <= portfolio.riskCap
+        && next.simulated.capital <= MEDICAL_PORTFOLIO_CONFIG.stockCapital
+        && next.simulated.principalRisk <= MEDICAL_PORTFOLIO_CONFIG.stockRisk;
+    }
+    function medicalExecutionPlan(portfolio) {
+      const candidates = portfolio.candidates.filter(s => Number.isFinite(s.price) && Number.isFinite(s.m.currentATR) && s.m.currentATR > 0);
+      const weights = cappedLeaderWeights(candidates);
+      const availableCash = Math.max(portfolio.capitalCap - portfolio.capital, 0);
+      const availableRisk = Math.max(portfolio.riskCap - portfolio.risk, 0);
+      const plan = candidates.map(signal => {
+        const holding = portfolio.holdings.get(signal.id);
+        const action = !holding.held ? "第1笔" : holding.buyCount === 1 ? "第2笔" : "第3笔";
+        const row = { signal, holding, action, weight:weights.get(signal.id) || 0, targetCash:0, targetRisk:0 };
+        row.targetCash = availableCash * row.weight;
+        row.targetRisk = availableRisk * row.weight;
+        row.sim = medicalPlanSimulation(signal, holding, 0);
+        return row;
+      });
+      plan.sort((a,b) => b.signal.leaderScore - a.signal.leaderScore);
+      plan.forEach(row => {
+        const next = medicalPlanSimulation(row.signal, row.holding, 1);
+        if (medicalPlanFeasible(plan, row, next, portfolio)) row.sim = next;
+      });
+      for (let loop=0; loop<200; loop++) {
+        const feasible = plan.map(row => {
+          const next = medicalPlanSimulation(row.signal, row.holding, row.sim.extraLots + 1);
+          if (!medicalPlanFeasible(plan, row, next, portfolio)) return null;
+          const cashGap = (row.targetCash - row.sim.addedCapital) / Math.max(row.targetCash, 1);
+          const riskGap = (row.targetRisk - row.sim.addedRisk) / Math.max(row.targetRisk, 1);
+          return { row, next, need:.5 * cashGap + .5 * riskGap };
+        }).filter(Boolean).sort((a,b) => b.need - a.need || b.row.signal.leaderScore - a.row.signal.leaderScore);
+        if (!feasible.length || feasible[0].need <= 0) break;
+        feasible[0].row.sim = feasible[0].next;
+      }
+      return plan.filter(row => row.sim.extraLots > 0);
+    }
+    function renderMedicalTradeForm() {
+      if (!state.medicalTradeFormOpen) return `<button class="tl-add-btn" id="med-add-trade">＋ 录入医疗服务交易</button>`;
+      const id = state.medicalTradeId;
+      const editing = state.medicalTradeEditId;
+      const existing = editing ? tradesOf(id).find(t => t.id === editing) || {} : {};
+      const m = marketOf(id);
+      const date = existing.date || new Date().toISOString().slice(0,10);
+      const price = existing.price ?? (Number.isFinite(m.currentPrice) ? m.currentPrice : "");
+      const atr = existing.entryATR ?? (Number.isFinite(m.currentATR) ? m.currentATR.toFixed(4) : "");
+      const options = medicalIds().filter(x => MEDICAL_POOL_CONFIG[x].board === "main").map(x => `<option value="${x}" ${x===id?"selected":""}>${MEDICAL_POOL_CONFIG[x].name} ${x}</option>`).join("");
+      return `<div class="med-trade-form"><div class="med-trade-form-grid">
+        <label>股票<select id="med-tf-stock">${options}</select></label>
+        <label>类型<select id="med-tf-type"><option value="buy" ${existing.type!=="sell"?"selected":""}>买入</option><option value="sell" ${existing.type==="sell"?"selected":""}>卖出</option></select></label>
+        <label>日期<input id="med-tf-date" type="date" value="${date}"></label>
+        <label>成交价<input id="med-tf-price" type="number" step="0.01" value="${price}"></label>
+        <label>数量（手）<input id="med-tf-units" type="number" min="1" step="1" value="${existing.units ?? ""}"></label>
+        <label>入场ATR14<input id="med-tf-atr" type="number" step="0.0001" value="${atr}"></label>
+      </div><div class="med-explain">第一笔ATR会锁定并用于R值；第二、第三笔仍填写成交记录，但不会覆盖第一笔ATR。数量必须为整数手。</div>
+      <div class="med-trade-form-actions"><button class="med-trade-btn" id="med-tf-cancel">取消</button><button class="med-trade-btn" id="med-tf-save">保存记录</button></div></div>`;
+    }
+    function renderMedicalTradeBook() {
+      const rows = medicalIds().flatMap(id => tradesOf(id).map(t => ({ ...t, stockId:id }))).sort((a,b) => b.date.localeCompare(a.date));
+      const list = rows.length ? rows.map(t => `<div class="med-trade-item"><div><strong>${MEDICAL_POOL_CONFIG[t.stockId].name}</strong> · ${t.type==="buy"?"买入":"卖出"} ${Number(t.units).toFixed(0)}手 @ ${fmt(Number(t.price),2)}<br><span class="subtle">${t.date}${Number.isFinite(Number(t.entryATR)) ? ` · ATR ${Number(t.entryATR).toFixed(4)}` : ""}</span></div><div class="med-trade-actions"><button class="med-trade-btn" data-med-edit="${t.stockId}:${t.id}">编辑</button><button class="med-trade-btn del" data-med-del="${t.stockId}:${t.id}">删除</button></div></div>`).join("") : `<div class="med-empty">尚未录入医疗服务个股交易；录入后才会计算真实成本、止损线和加仓阶段。</div>`;
+      return `<div class="med-subsection"><h4>医疗服务交易账本</h4><div class="med-trade-list">${list}</div>${renderMedicalTradeForm()}</div>`;
+    }
+    function renderMedicalPortfolio(signals, leaders) {
+      const pf = medicalPortfolioState(signals, leaders);
+      const plan = medicalExecutionPlan(pf);
+      const addedCash = plan.reduce((sum,x) => sum + x.sim.addedCapital, 0);
+      const addedRisk = plan.reduce((sum,x) => sum + x.sim.addedRisk, 0);
+      const leaderNames = leaders.length ? leaders.map(s => `${s.cfg.name} ${fmt(s.leaderScore,1)}分`).join(" · ") : "当前没有合格主板领头羊";
+      const pnlCls = pf.unrealPct > 0 ? "up" : pf.unrealPct < 0 ? "down" : "flat";
+      const controls = [
+        ["当前阶段",`第${pf.phaseIndex+1}阶段`],["投入本金",fmtMedicalMoney(pf.capital)],["阶段资金上限",fmtMedicalMoney(pf.capitalCap)],
+        ["当前盈亏",fmtPct(pf.unrealPct),fmtMedicalMoney(pf.unrealPnl),pnlCls],
+        ["组合本金风险",fmtMedicalMoney(pf.risk)],["阶段风险上限",fmtMedicalMoney(pf.riskCap)],["持仓席位",`${pf.heldSignals.length} / 3`],
+      ].map(x => `<div class="med-control-card"><span>${x[0]}</span><b class="${x[3] ? `med-pnl ${x[3]}` : ""}">${x[1]}</b>${x[2] ? `<small>${x[2]}</small>` : ""}</div>`).join("");
+      const rows = plan.length ? plan.map(row => `<tr><td><strong>${row.signal.cfg.name}</strong><br><small>#${row.signal.leaderRank} · ${fmt(row.signal.leaderScore,1)}分</small></td><td>${row.action}</td><td>${(row.weight*100).toFixed(1)}%</td><td>${row.sim.extraLots.toFixed(0)}手</td><td>${fmtMedicalMoney(row.sim.addedCapital)}</td><td>${fmtMedicalMoney(row.sim.addedRisk)}</td><td>${fmt(row.sim.simulated.finalStop,2)}</td></tr>`).join("") : "";
+      const table = rows ? `<div class="med-allocation-table-wrap"><table class="med-allocation-table"><thead><tr><th>股票</th><th>规则阶段</th><th>强度权重</th><th>测算手数</th><th>新增本金</th><th>新增风险</th><th>测算止损</th></tr></thead><tbody>${rows}</tbody></table></div>` : "";
+      const notice = plan.length ? `<div class="med-plan-notice ready">规则测算新增 ${plan.reduce((s,x)=>s+x.sim.extraLots,0)} 手、${fmtMedicalMoney(addedCash)}，买后本金风险约 ${fmtMedicalMoney(pf.risk+addedRisk)}；最终以实际成交写回后重算。</div>` : `<div class="med-plan-notice blocked">当前没有能够同时通过领头羊、加仓阶段、整手资金与风险约束的操作单位。</div>`;
+      return `<div class="med-allocation-head"><h3>医疗服务板块仓位总控</h3><p>20万元板块上限；阶段累计资金10万/15万/20万，累计本金风险5000/7500/10000元；单股本金/风险上限12万元/6000元。</p></div><div class="med-control-grid">${controls}</div><div class="med-explain"><strong>当前领头羊：</strong>${leaderNames}</div>${notice}${table}${renderMedicalTradeBook()}`;
     }
     function renderMedical() {
       const signals = medicalIds().map(medicalSignal);
+      const leaders = medicalTrendScores(signals);
       const currentD20 = signals.filter(s => s.liveD20).length;
       const currentD55 = signals.filter(s => s.liveD55).length;
       const touched = signals.filter(s => s.touchedD20 || s.touchedD55).length;
@@ -2318,16 +2547,19 @@
         ["今日曾越过",touched,"含突破后回落"],
         ["均线多头排列",maBull,"价>MA10>20>60"],
         ["可入场候选",eligible,"主板+D55+风险闸门"],
+        ["领头羊",leaders.length,"≥60分且距榜首≤15分"],
       ].map(x => `<div class="med-summary-card"><span>${x[0]}</span><strong>${x[1]}<small>/ 10</small></strong><small>${x[2]}</small></div>`).join("");
-      const visible = signals.filter(s => state.medicalFilter === "eligible" ? s.entryEligible : state.medicalFilter === "d55" ? s.liveD55 : state.medicalFilter === "waiting" ? !s.entryEligible : true);
-      $("medicalGrid").innerHTML = visible.length ? visible.map(medicalCard).join("") : `<div class="med-empty">当前没有符合该筛选条件的股票。</div>`;
+      const sortedSignals = [...signals].sort((a,b) => b.leaderScore - a.leaderScore || a.id.localeCompare(b.id));
+      const visible = sortedSignals.filter(s => {
+        const held = medicalHolding(s).held;
+        if (state.medicalFilter === "held") return held;
+        if (state.medicalFilter === "eligible") return s.entryEligible;
+        if (state.medicalFilter === "watch") return !held;
+        return true;
+      });
+      $("medicalGrid").innerHTML = visible.length ? visible.map(medicalCard).join("") : `<div class="med-empty">当前分类没有股票。</div>`;
       document.querySelectorAll("[data-med-filter]").forEach(btn => btn.classList.toggle("active", btn.dataset.medFilter === state.medicalFilter));
-      const rows = medicalAllocation(signals);
-      const notice = rows.length
-        ? `<div class="med-plan-notice ready">当前买入单位包含 ${rows.length} 只主板股票：最新价突破D55，并通过ADX、MA20斜率和过热闸门。</div>`
-        : `<div class="med-plan-notice blocked">当前没有主板股票同时满足最新价突破D55和风险闸门，本次买入单位暂不执行。</div>`;
-      const table = rows.length ? `<div class="med-allocation-table-wrap"><table class="med-allocation-table"><thead><tr><th>股票</th><th>流通市值</th><th>基础风险权重</th><th>2×ATR距离</th><th>参考止损</th><th>单位内占比</th></tr></thead><tbody>${rows.map(row => `<tr><td><strong>${row.signal.cfg.name}</strong><br><small>${row.signal.id}</small></td><td>${(row.signal.floatMarketCap/1e8).toFixed(0)}亿</td><td>${(row.riskWeight*100).toFixed(1)}%</td><td>${row.signal.stopDistancePct.toFixed(2)}%</td><td>${fmt(row.signal.initialStop,2)}</td><td>${(row.unitWeight*100).toFixed(1)}%</td></tr>`).join("")}</tbody></table></div>` : "";
-      $("medicalAllocation").innerHTML = `<div class="med-allocation-head"><h3>每笔买入单位配比</h3><p>板块每笔买入单位固定为100%；单位内部按流通市值平方根分配基础风险权重，再除以2×ATR波动距离并归一化。无交易权限股票自动排除。</p></div>${notice}${table}`;
+      $("medicalAllocation").innerHTML = renderMedicalPortfolio(signals, leaders);
       const stamp = state.marketUpdatedAt ? new Date(state.marketUpdatedAt).toLocaleString("zh-CN",{hour12:false}) : "等待行情";
       setText("medicalStamp", `${state.marketSnapshotLoaded ? "历史快照" : "最近更新"} ${stamp}`);
     }
@@ -3209,6 +3441,25 @@
       $("modalBody").innerHTML = data[1];
       $("modal").classList.add("show");
     }
+    function openMedicalStopModal(id) {
+      const signals = medicalIds().map(medicalSignal);
+      medicalTrendScores(signals);
+      const signal = signals.find(s => s.id === id);
+      const h = signal ? medicalHolding(signal) : null;
+      if (!h?.held) return;
+      const r = h.riskCalc;
+      const hh = highestCloseSinceEntry(signal.m.tradeRows, h.openedAt, signal.price);
+      const rows = [
+        ["①初始止损","① 初始止损",r.line1,`成本 ${fmt(h.cost,2)} − R ${fmt(r.R,2)}；第一笔ATR ${fmt(h.entryATR,4)} 已锁定`],
+        ["②R-Ladder","② R-Ladder",r.line2,Number.isFinite(r.line2) ? `当前浮盈 ${fmtR(r.floatR)}，按阶梯保护` : `当前浮盈 ${fmtR(r.floatR)}，尚未达到 +0.5R`],
+        ["③Chandelier","③ Chandelier 时间修正版",r.line3t,`持仓最高收盘 ${fmt(hh,2)} − ${fmt(r.kTimeInfo.k,1)} × 当前ATR ${fmt(signal.m.currentATR,4)}`],
+        ["④棘轮记忆","④ 棘轮记忆",r.line4,Number.isFinite(r.line4) ? `从 ${r.ratchetInfo.startDate || h.openedAt || "—"} 回放；${r.ratchetInfo.source || h.openedAtSource}；只升不降` : `开仓日 ${h.openedAt}；等待开仓日及后续K线形成棘轮`],
+      ];
+      const table = rows.map(row => `<tr><th>${row[1]}${r.winner === row[0] ? " · 胜出" : ""}</th><td><strong>${fmt(row[2],2)}</strong><br><small>${row[3]}</small></td></tr>`).join("");
+      $("modalTitle").textContent = `${signal.cfg.name} · 四线保护来源`;
+      $("modalBody").innerHTML = `<div class="med-stop-winner"><strong>最终止损 ${fmt(r.finalStop,2)}</strong><br>取四条保护线最大值，当前由 ${r.winner} 胜出。</div><table class="med-stop-table"><tbody>${table}</tbody></table><p>本金风险 ${fmtMedicalMoney(h.principalRisk)}；当前盈亏 <span class="med-pnl ${h.unrealPct>0?"up":h.unrealPct<0?"down":"flat"}">${fmtPct(h.unrealPct)}</span>。止损执行仍以收盘确认规则为准。</p>`;
+      $("modal").classList.add("show");
+    }
     function closeModal() { $("modal").classList.remove("show"); }
     function showView(viewId, updateHash=true) {
       if (!$(viewId)) viewId = "overview";
@@ -3225,6 +3476,37 @@
         state.medicalFilter = medicalFilter.dataset.medFilter;
         renderMedical();
       }
+      if (e.target.id === "med-add-trade") {
+        state.medicalTradeFormOpen = true; state.medicalTradeEditId = null; renderMedical(); return;
+      }
+      const medEdit = e.target.closest("[data-med-edit]");
+      if (medEdit) {
+        const [id, tradeId] = medEdit.dataset.medEdit.split(":");
+        state.medicalTradeId = id; state.medicalTradeEditId = tradeId; state.medicalTradeFormOpen = true; renderMedical(); return;
+      }
+      const medDel = e.target.closest("[data-med-del]");
+      if (medDel) {
+        const [id, tradeId] = medDel.dataset.medDel.split(":");
+        state.trades[id] = tradesOf(id).filter(t => t.id !== tradeId); saveTradeState(); renderAll(); return;
+      }
+      if (e.target.id === "med-tf-save") {
+        const id = $("med-tf-stock").value;
+        const type = $("med-tf-type").value;
+        const date = $("med-tf-date").value;
+        const price = parseFloat($("med-tf-price").value);
+        const units = parseInt($("med-tf-units").value,10);
+        const entryATR = parseFloat($("med-tf-atr").value);
+        if (!date || !Number.isFinite(price) || price <= 0 || !Number.isInteger(units) || units <= 0) { setStatus("error","交易记录未保存：请检查日期、价格和整数手数"); return; }
+        const trade = { id:state.medicalTradeEditId || "mt"+Date.now(), type, date, price, units, entryATR:Number.isFinite(entryATR) ? entryATR : null };
+        state.trades[id] ||= [];
+        state.trades[id] = state.medicalTradeEditId ? state.trades[id].map(t => t.id === state.medicalTradeEditId ? trade : t) : [...state.trades[id], trade];
+        state.medicalTradeId = id; state.medicalTradeEditId = null; state.medicalTradeFormOpen = false; saveTradeState(); renderAll(); return;
+      }
+      if (e.target.id === "med-tf-cancel") {
+        state.medicalTradeEditId = null; state.medicalTradeFormOpen = false; renderMedical(); return;
+      }
+      const medStop = e.target.closest("[data-med-stop]");
+      if (medStop) { openMedicalStopModal(medStop.dataset.medStop); return; }
       const modalBtn = e.target.closest("[data-modal]");
       if (modalBtn) openModal(modalBtn.dataset.modal);
       const tab = e.target.closest("[data-pos]");
@@ -3286,6 +3568,7 @@
       if (e.target.matches("[data-pos-select]")) setActivePosition(e.target.value);
       if (e.target.matches("[data-ov-select]")) setOverviewAsset(e.target.value);
       if (e.target.matches("[data-entry-select]")) setEntryAsset(e.target.value);
+      if (e.target.id === "med-tf-stock") { state.medicalTradeId = e.target.value; state.medicalTradeEditId = null; renderMedical(); }
     });
     function setEntryAsset(id) {
       if (!assetCfg(id)) return;
