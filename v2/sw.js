@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260715-medical-watch";
+const ASSET_VERSION = "20260721-live-estimate";
 const CACHE_NAME = `qdii-dashboard-v2-${ASSET_VERSION}`;
 const ASSET_LIST = [
   "./",

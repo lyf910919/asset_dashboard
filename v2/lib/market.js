@@ -1,4 +1,5 @@
 const JSONP_TIMEOUT_MS = 8000;
+const SINA_ESTIMATE_URL = "https://stock.finance.sina.com.cn/fundInfo/api/openapi.php/FdFundService.getEstimateNetworthPic";
 const FX_TIMEOUT_MS = 5000;
 const OVERSEAS_LIST_CACHE_TTL_MS = 5 * 60 * 1000;
 const SUPPORTED_CURRENCY_CODES = ["USD", "CNY", "HKD", "EUR", "GBP", "JPY", "AUD", "CAD", "SGD"];
@@ -6,7 +7,6 @@ const SUPPORTED_CURRENCY_CODES = ["USD", "CNY", "HKD", "EUR", "GBP", "JPY", "AUD
 const pingzhongCache = new Map();
 let overseasFundListCache = null;
 let overseasFundListExpiresAt = 0;
-let estimateChain = Promise.resolve();
 let pingzhongChain = Promise.resolve();
 
 function nowIso() {
@@ -136,16 +136,39 @@ function loadJsonp(url, callbackParam = "callback", { timeoutMs = JSONP_TIMEOUT_
   });
 }
 
-function enqueueSerial(kind, task) {
-  if (kind === "estimate") {
-    const next = estimateChain.catch(() => {}).then(task);
-    estimateChain = next.catch(() => {});
-    return next;
-  }
-
+function enqueuePingzhong(task) {
   const next = pingzhongChain.catch(() => {}).then(task);
   pingzhongChain = next.catch(() => {});
   return next;
+}
+
+export function normalizeSinaEstimateResponse(code, payload) {
+  const expectedCode = String(code || "").trim();
+  const data = payload?.result?.data;
+  const points = Array.isArray(data?.networth) ? data.networth : [];
+  const latest = points[points.length - 1];
+  if (!isFundCode(expectedCode) || String(latest?.symbol || "").trim() !== expectedCode) return null;
+
+  const estimate = parseFloatSafe(latest?.pre_nav);
+  const growthRate = parseFloatSafe(latest?.growthrate);
+  if (!Number.isFinite(estimate)) return null;
+
+  const navDateText = String(data?.worth_date || "").trim();
+  const navDate = /^(\d{4})(\d{2})(\d{2})$/.test(navDateText)
+    ? `${navDateText.slice(0, 4)}-${navDateText.slice(4, 6)}-${navDateText.slice(6, 8)}`
+    : navDateText || null;
+  const estimateDate = String(latest?.pre_date || "").trim();
+  const estimateTime = String(latest?.min_time || "").trim();
+
+  return {
+    name: expectedCode,
+    gsz: estimate,
+    gszzl: Number.isFinite(growthRate) ? growthRate * 100 : null,
+    dwjz: data?.worth ?? null,
+    jzrq: navDate,
+    gztime: [estimateDate, estimateTime].filter(Boolean).join(" ") || null,
+    sourceLabel: "新浪盘中估值",
+  };
 }
 
 export function isLikelyExchangeFundCode(code) {
@@ -185,33 +208,9 @@ export function chooseLatestNavSnapshot(primary, fallback) {
 }
 
 async function fetchEstimateJsonp(code) {
-  return enqueueSerial("estimate", () =>
-    new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      const timeoutId = setTimeout(() => {
-        cleanupGlobal("jsonpgz");
-        script.remove();
-        reject(new Error("估值请求超时"));
-      }, JSONP_TIMEOUT_MS);
-
-      window.jsonpgz = (payload) => {
-        clearTimeout(timeoutId);
-        cleanupGlobal("jsonpgz");
-        script.remove();
-        resolve(payload || null);
-      };
-
-      script.async = true;
-      script.src = `https://fundgz.1234567.com.cn/js/${code}.js?rt=${Date.now()}`;
-      script.onerror = () => {
-        clearTimeout(timeoutId);
-        cleanupGlobal("jsonpgz");
-        script.remove();
-        reject(new Error("估值脚本加载失败"));
-      };
-      document.head.appendChild(script);
-    }),
-  );
+  const params = new URLSearchParams({ symbol: code });
+  const payload = await loadJsonp(`${SINA_ESTIMATE_URL}?${params.toString()}`, "callback");
+  return normalizeSinaEstimateResponse(code, payload);
 }
 
 async function fetchNavJsonp(code) {
@@ -394,7 +393,7 @@ async function fetchPingzhongSnapshot(code) {
     return pingzhongCache.get(code);
   }
 
-  const snapshot = await enqueueSerial("pingzhong", async () => {
+  const snapshot = await enqueuePingzhong(async () => {
     await loadScript(`https://fund.eastmoney.com/pingzhongdata/${code}.js?v=${Date.now()}`);
     const parsed = readPingzhongSnapshotFromWindow(code);
     cleanupGlobal("fS_name");
@@ -422,7 +421,7 @@ function buildSnapshotFromEstimate(code, payload) {
     currency,
     currencyLabel: null,
     source: "ESTIMATE",
-    sourceLabel: "盘中估值",
+    sourceLabel: String(payload?.sourceLabel || "盘中估值").trim() || "盘中估值",
     price,
     estimateNav: price,
     estimateDate: String(payload?.gztime || "").trim() || null,
