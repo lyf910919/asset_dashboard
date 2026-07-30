@@ -94,6 +94,18 @@ body.modal-open {
   color: var(--primary);
 }
 
+.pension-panel-link {
+  border-color: #bde1d1;
+  background: #f4fbf7;
+  color: #157a4d;
+}
+
+.pension-panel-link::after {
+  content: "↗";
+  margin-left: 4px;
+  font-size: 12px;
+}
+
 .trend-panel-link::after {
   content: "↗";
   margin-left: 4px;

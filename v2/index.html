@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QDII 资产监控看板 v2.0</title>
     <meta name="theme-color" content="#2b8fb8" />
-    <link rel="manifest" href="./manifest.webmanifest?v=20260730-hkdiv-watch" />
-    <link rel="stylesheet" href="./styles.css?v=20260730-hkdiv-watch" />
+    <link rel="manifest" href="./manifest.webmanifest?v=20260730-pension-calc" />
+    <link rel="stylesheet" href="./styles.css?v=20260730-pension-calc" />
   </head>
   <body>
     <div class="page-bg"></div>
@@ -17,6 +17,7 @@
           <button id="tab-pie-btn" class="tab-btn" data-tab="pie">饼图</button>
           <button id="tab-performance-btn" class="tab-btn" data-tab="performance">收益曲线</button>
           <button id="tab-config-btn" class="tab-btn" data-tab="config">配置管理</button>
+          <a class="tab-btn pension-panel-link" href="./pension/">养老金计算器</a>
           <a class="tab-btn trend-panel-link" href="./trend/">趋势交易面板</a>
         </div>
 
@@ -584,10 +585,10 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20260730-hkdiv-watch" type="module"></script>
+    <script src="./app.js?v=20260730-pension-calc" type="module"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js?v=20260730-hkdiv-watch").catch(() => {});
+        navigator.serviceWorker.register("./sw.js?v=20260730-pension-calc").catch(() => {});
       }
     </script>
   </body>

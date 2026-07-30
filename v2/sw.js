@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260730-hkdiv-watch";
+const ASSET_VERSION = "20260730-pension-calc";
 const CACHE_NAME = `qdii-dashboard-v2-${ASSET_VERSION}`;
 const ASSET_LIST = [
   "./",
@@ -8,6 +8,7 @@ const ASSET_LIST = [
   "./icon.svg",
   `./manifest.webmanifest?v=${ASSET_VERSION}`,
   "./trend/index.html",
+  "./pension/index.html",
   "./trend/manifest.json",
   "./trend/data/generated/index-volume-931643.json",
   "./trend/data/generated/index-volume-931643.js",

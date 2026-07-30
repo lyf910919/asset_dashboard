@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#157a4d" />
+    <title>个人养老金仓位计算器</title>
+    <style>
+      :root { --bg:#eef6fa; --surface:#fff; --soft:#f7fbf9; --line:#cddfe8; --text:#102532; --muted:#597485; --green:#157a4d; --green-soft:#e8f6ee; --blue:#2b8fb8; --amber:#a96805; --amber-soft:#fff6df; --shadow:0 8px 24px rgba(16,33,41,.08); --radius:8px; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--text); background:var(--bg); font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif; }
+      body::before { content:""; position:fixed; inset:0; z-index:-1; background:linear-gradient(145deg,#eef6fa,#dceef0); }
+      button,input { font:inherit; }
+      button { cursor:pointer; }
+      .topbar { position:sticky; top:0; z-index:3; display:flex; align-items:center; gap:12px; min-height:56px; padding:10px max(14px,calc((100% - 1120px)/2)); border-bottom:1px solid var(--line); background:rgba(248,252,254,.94); backdrop-filter:blur(12px); }
+      .back { color:var(--green); text-decoration:none; font-size:14px; font-weight:800; white-space:nowrap; }
+      .brand { flex:1; min-width:0; font-size:16px; font-weight:800; }
+      .brand small { display:block; margin-top:2px; color:var(--muted); font-size:12px; font-weight:500; }
+      .reset { border:1px solid #bde1d1; border-radius:7px; background:#f4fbf7; color:var(--green); padding:7px 10px; font-size:13px; font-weight:700; }
+      main { width:min(1120px,calc(100% - 24px)); margin:18px auto 52px; display:grid; gap:14px; }
+      .panel { padding:16px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); box-shadow:0 4px 14px rgba(16,33,41,.05); }
+      .hero { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr); gap:16px; align-items:stretch; }
+      h1,h2,h3,p { margin:0; }
+      h1 { font-size:22px; } h2 { font-size:16px; } h3 { font-size:14px; }
+      .sub { margin-top:5px; color:var(--muted); font-size:13px; }
+      .input-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:15px; }
+      .field { display:grid; gap:5px; min-width:0; }
+      label { color:var(--muted); font-size:12px; font-weight:700; }
+      input { width:100%; min-width:0; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); padding:9px 10px; font-variant-numeric:tabular-nums; }
+      input:focus { outline:2px solid #a9d8c1; border-color:#78b993; }
+      .summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+      .metric { padding:12px; border:1px solid #bde1d1; border-radius:7px; background:var(--soft); }
+      .metric span { display:block; color:var(--muted); font-size:12px; } .metric strong { display:block; margin-top:5px; color:var(--green); font-size:20px; font-variant-numeric:tabular-nums; }
+      .metric.wide { grid-column:1 / -1; } .metric.wide strong { font-size:17px; }
+      .grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:14px; align-items:start; }
+      .section-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; }
+      .section-head p { color:var(--muted); font-size:12px; }
+      .result-list { display:grid; gap:8px; }
+      .result-row { display:grid; grid-template-columns:minmax(0,1fr) 92px 108px; gap:10px; align-items:center; padding:11px 12px; border:1px solid var(--line); border-radius:7px; background:#fff; }
+      .result-row.fof { border-color:#9bd3b5; background:var(--soft); }
+      .fund-name { font-size:14px; font-weight:800; } .fund-meta { margin-top:2px; color:var(--muted); font-size:12px; }
+      .pct,.money { text-align:right; font-variant-numeric:tabular-nums; } .pct { color:var(--muted); font-size:13px; } .money { color:var(--green); font-size:17px; font-weight:800; }
+      .note { margin-top:10px; padding:10px 12px; border-radius:7px; background:var(--amber-soft); color:#80520a; font-size:12px; line-height:1.6; }
+      .tabs { display:flex; gap:6px; padding:4px; overflow:auto; border:1px solid var(--line); border-radius:8px; background:#edf3f6; }
+      .tab { flex:0 0 auto; border:0; border-radius:6px; background:transparent; color:var(--muted); padding:8px 12px; font-size:13px; font-weight:800; }
+      .tab.active { background:#fff; color:var(--green); box-shadow:0 1px 3px rgba(16,33,41,.08); }
+      .config { display:none; } .config.active { display:block; }
+      .config + .config { margin-top:14px; }
+      .config-card { margin-top:12px; padding:14px; border:1px solid var(--line); border-radius:7px; background:var(--soft); }
+      .config-title { display:flex; justify-content:space-between; gap:12px; align-items:baseline; } .config-title p { color:var(--muted); font-size:12px; }
+      .table-wrap { overflow:auto; margin-top:10px; }
+      table { width:100%; min-width:610px; border-collapse:collapse; font-size:13px; }
+      th,td { padding:8px 6px; border-bottom:1px solid var(--line); text-align:left; vertical-align:middle; } th { color:var(--muted); font-size:12px; font-weight:700; }
+      td input { min-width:72px; padding:7px 8px; }
+      .mini { min-width:0; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--muted); padding:6px 8px; font-size:12px; }
+      .danger { color:#a73333; border-color:#e8b9b9; background:#fff7f7; }
+      .actions { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:12px; }
+      .status { color:var(--muted); font-size:12px; } .status.bad { color:#a96805; }
+      @media (max-width:760px) { .hero,.grid { grid-template-columns:1fr; } .input-row { grid-template-columns:1fr 1fr; } .result-row { grid-template-columns:minmax(0,1fr) 72px 94px; } .topbar { padding-inline:12px; } }
+      @media (max-width:440px) { .input-row { grid-template-columns:1fr; } .brand small { display:none; } .result-row { grid-template-columns:minmax(0,1fr) 74px; } .money { grid-column:2; } }
+    </style>
+  </head>
+  <body>
+    <header class="topbar"><a class="back" href="../">← 资产概览</a><div class="brand">个人养老金仓位计算器<small>温度驱动的年度新钱分配</small></div><button id="reset" class="reset" type="button">恢复默认</button></header>
+    <main>
+      <section class="panel hero">
+        <div><h1>新钱分配</h1><p class="sub">以全市场温度决定股债层级，以指数温度决定权益内部倾斜。</p>
+          <div class="input-row"><div class="field"><label for="newMoney">新钱金额（元）</label><input id="newMoney" type="number" min="0" step="100" value="12000"></div><div class="field"><label for="marketTemp">全市场温度（°）</label><input id="marketTemp" type="number" min="0" max="100" step="1" value="42"></div><div class="field"><label for="fofName">稳健 FOF</label><input id="fofName" type="text" value="017384 兴全安泰稳健"></div></div>
+        </div>
+        <div class="summary"><div class="metric"><span>指数基金合计</span><strong id="indexPct">--</strong></div><div class="metric"><span>017384</span><strong id="fofPct">--</strong></div><div class="metric wide"><span>组合实际权益暴露</span><strong id="effectiveEquity">--</strong></div><div class="metric wide"><span>当前规则档位</span><strong id="activeBand">--</strong></div></div>
+      </section>
+      <section class="grid"><section class="panel"><div class="section-head"><h2>建议买入金额</h2><p id="allocationHint">按当前规则</p></div><div id="resultList" class="result-list"></div><p class="note">金额按元取整并确保合计等于新钱金额。017384的实际权益暴露按其规则范围估算，不把它当作纯债。</p></section>
+      <section class="panel"><div class="section-head"><h2>温度输入</h2><p>各指数只影响权益内部比例</p></div><div id="indexInputs" class="input-row"></div><div class="note">温度数据建议在年度投入或季度复核时更新；本页只计算目标分配，不替代你设定的再平衡阈值。</div></section></section>
+      <section class="panel"><div class="tabs"><button class="tab active" data-tab="layer1" type="button">第一层：总仓位</button><button class="tab" data-tab="layer2" type="button">第二层：权益内部</button><button class="tab" data-tab="settings" type="button">基金与约束</button></div>
+        <div id="layer1" class="config active"><div class="config-card"><div class="config-title"><h2>全市场温度与大类比例</h2><p>温度落入哪一行，就使用该行比例</p></div><div class="table-wrap"><table><thead><tr><th>温度下限</th><th>温度上限</th><th>四只指数合计%</th><th>017384%</th><th></th></tr></thead><tbody id="layer1Rows"></tbody></table></div><div class="actions"><button id="addLayer1" class="mini" type="button">新增档位</button><span id="layer1Status" class="status"></span></div></div></div>
+        <div id="layer2" class="config"><div class="config-card"><div class="config-title"><h2>指数温度与配置系数</h2><p>中性权重 × 系数后归一化</p></div><div class="table-wrap"><table><thead><tr><th>温度下限</th><th>温度上限</th><th>配置系数</th><th></th></tr></thead><tbody id="layer2Rows"></tbody></table></div><div class="actions"><button id="addLayer2" class="mini" type="button">新增档位</button><span id="layer2Status" class="status"></span></div></div></div>
+        <div id="settings" class="config"><div class="config-card"><div class="config-title"><h2>权益基金中性权重与约束</h2><p>下限、上限均以权益内部仓位计</p></div><div class="table-wrap"><table><thead><tr><th>名称</th><th>中性权重%</th><th>下限%</th><th>上限%</th></tr></thead><tbody id="fundRows"></tbody></table></div></div><div class="config-card"><div class="config-title"><h2>017384 内含权益范围</h2><p>用于展示组合实际权益暴露</p></div><div class="input-row"><div class="field"><label for="fofEquityMin">最低权益%</label><input id="fofEquityMin" type="number" min="0" max="100" step="1" value="10"></div><div class="field"><label for="fofEquityMax">最高权益%</label><input id="fofEquityMax" type="number" min="0" max="100" step="1" value="25"></div></div></div></div>
+      </section>
+    </main>
+    <script>
+      const DEFAULT = { layer1:[{min:0,max:30,index:90,fof:10},{min:30,max:50,index:80,fof:20},{min:50,max:70,index:70,fof:30},{min:70,max:85,index:55,fof:45},{min:85,max:100,index:40,fof:60}], layer2:[{min:0,max:30,coef:1.3},{min:30,max:50,coef:1.1},{min:50,max:70,coef:.8},{min:70,max:85,coef:.55},{min:85,max:100,coef:.3}], funds:[{name:"沪深300",temp:60,base:35,min:25,max:45},{name:"中证500",temp:68,base:25,min:15,max:30},{name:"中证红利",temp:28,base:20,min:15,max:35},{name:"创业板",temp:64,base:20,min:10,max:25}], fofName:"017384 兴全安泰稳健", fofEquityMin:10, fofEquityMax:25, newMoney:12000, marketTemp:42 };
+      const KEY = "pension_position_calculator_v1";
+      const clone = value => JSON.parse(JSON.stringify(value));
+      let state = load();
+      const $ = id => document.getElementById(id);
+      function load(){ try { return {...clone(DEFAULT),...JSON.parse(localStorage.getItem(KEY) || "{}")}; } catch { return clone(DEFAULT); } }
+      function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+      function num(value, fallback=0){ const n=Number(value); return Number.isFinite(n) ? n : fallback; }
+      function bandFor(rows, temp){ const sorted=[...rows].sort((a,b)=>num(a.min)-num(b.min)); return sorted.find(row=>temp>=num(row.min)&&temp<=num(row.max)) || sorted.reduce((best,row)=>Math.abs(temp-(num(row.min)+num(row.max))/2)<Math.abs(temp-(num(best.min)+num(best.max))/2)?row:best,sorted[0]); }
+      function capWeights(raw, funds){ let weights=raw.map(v=>v/raw.reduce((a,b)=>a+b,0)*100); for(let pass=0;pass<12;pass++){ const fixed=weights.map((w,i)=>w<num(funds[i].min)||w>num(funds[i].max)); const next=weights.map((w,i)=>Math.min(num(funds[i].max),Math.max(num(funds[i].min),w))); const used=next.reduce((sum,w,i)=>sum+(fixed[i]?w:0),0); const open=raw.map((v,i)=>fixed[i]?0:v).reduce((a,b)=>a+b,0); if(!fixed.some(Boolean)||open<=0) return next; weights=next.map((w,i)=>fixed[i]?w:(100-used)*raw[i]/open); } return weights; }
+      function wholeYuan(total, weights){ const raw=weights.map(w=>total*w/100); const amounts=raw.map(Math.floor); let left=Math.round(total-amounts.reduce((a,b)=>a+b,0)); raw.map((v,i)=>({i,rest:v-Math.floor(v)})).sort((a,b)=>b.rest-a.rest).forEach(({i})=>{if(left>0){amounts[i]++;left--;}}); return amounts; }
+      function calc(){ const total=Math.max(0,num(state.newMoney)); const temp=Math.max(0,Math.min(100,num(state.marketTemp))); const top=bandFor(state.layer1,temp); const scores=state.funds.map(f=>num(f.base)*num(bandFor(state.layer2,Math.max(0,Math.min(100,num(f.temp)))).coef,1)); const weights=capWeights(scores,state.funds); const indexPct=num(top.index), fofPct=num(top.fof); const indexAmounts=wholeYuan(total*indexPct/100,weights); const fofAmount=Math.round(total-indexAmounts.reduce((a,b)=>a+b,0)); return {temp,top,weights,indexPct,fofPct,indexAmounts,fofAmount,effectiveMin:indexPct+fofPct*num(state.fofEquityMin)/100,effectiveMax:indexPct+fofPct*num(state.fofEquityMax)/100}; }
+      function money(n){ return `${Math.round(n).toLocaleString("zh-CN")} 元`; }
+      function render(){ state.newMoney=num($("newMoney")?.value,state.newMoney); state.marketTemp=num($("marketTemp")?.value,state.marketTemp); state.fofName=$("fofName")?.value||state.fofName; state.fofEquityMin=num($("fofEquityMin")?.value,state.fofEquityMin); state.fofEquityMax=num($("fofEquityMax")?.value,state.fofEquityMax); const c=calc(); $("indexPct").textContent=`${c.indexPct.toFixed(0)}%`; $("fofPct").textContent=`${c.fofPct.toFixed(0)}%`; $("effectiveEquity").textContent=`${c.effectiveMin.toFixed(1)}% - ${c.effectiveMax.toFixed(1)}%`; $("activeBand").textContent=`${num(c.top.min)}° - ${num(c.top.max)}°`; $("allocationHint").textContent=`新钱 ${money(state.newMoney)}，合计 ${money(state.newMoney)}`; $("resultList").innerHTML=state.funds.map((fund,i)=>`<div class="result-row"><div><div class="fund-name">${fund.name}</div><div class="fund-meta">温度 ${num(fund.temp)}° · 权益内部 ${c.weights[i].toFixed(1)}%</div></div><div class="pct">${(c.weights[i]*c.indexPct/100).toFixed(1)}%</div><div class="money">${money(c.indexAmounts[i])}</div></div>`).join("")+`<div class="result-row fof"><div><div class="fund-name">${state.fofName}</div><div class="fund-meta">内含权益 ${state.fofEquityMin}% - ${state.fofEquityMax}%</div></div><div class="pct">${c.fofPct.toFixed(1)}%</div><div class="money">${money(c.fofAmount)}</div></div>`; renderInputs(); renderTables(); save(); }
+      function renderInputs(){ $("indexInputs").innerHTML=state.funds.map((fund,i)=>`<div class="field"><label for="temp-${i}">${fund.name}（°）</label><input id="temp-${i}" data-temp="${i}" type="number" min="0" max="100" step="1" value="${num(fund.temp)}"></div>`).join(""); }
+      function rowInput(group,index,key,value){ return `<input data-group="${group}" data-index="${index}" data-key="${key}" type="number" step="0.01" value="${num(value)}">`; }
+      function renderTables(){ $("layer1Rows").innerHTML=state.layer1.map((row,i)=>`<tr><td>${rowInput("layer1",i,"min",row.min)}</td><td>${rowInput("layer1",i,"max",row.max)}</td><td>${rowInput("layer1",i,"index",row.index)}</td><td>${rowInput("layer1",i,"fof",row.fof)}</td><td><button class="mini danger" data-remove="layer1" data-index="${i}" type="button">删除</button></td></tr>`).join(""); $("layer2Rows").innerHTML=state.layer2.map((row,i)=>`<tr><td>${rowInput("layer2",i,"min",row.min)}</td><td>${rowInput("layer2",i,"max",row.max)}</td><td>${rowInput("layer2",i,"coef",row.coef)}</td><td><button class="mini danger" data-remove="layer2" data-index="${i}" type="button">删除</button></td></tr>`).join(""); $("fundRows").innerHTML=state.funds.map((fund,i)=>`<tr><td>${fund.name}</td><td>${rowInput("funds",i,"base",fund.base)}</td><td>${rowInput("funds",i,"min",fund.min)}</td><td>${rowInput("funds",i,"max",fund.max)}</td></tr>`).join(""); $("layer1Status").textContent=state.layer1.every(row=>Math.abs(num(row.index)+num(row.fof)-100)<.001)?"各档位合计 100%":"注意：大类比例未合计为 100%"; $("layer1Status").className=$("layer1Status").textContent.includes("注意")?"status bad":"status"; }
+      document.addEventListener("input", event=>{ const el=event.target; if(el.matches("[data-temp]")){state.funds[num(el.dataset.temp)].temp=num(el.value); render();} if(el.matches("[data-group]")){state[el.dataset.group][num(el.dataset.index)][el.dataset.key]=num(el.value); render();} if(["newMoney","marketTemp","fofName","fofEquityMin","fofEquityMax"].includes(el.id)) render(); });
+      document.addEventListener("click", event=>{ const tab=event.target.closest(".tab"); if(tab){document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===tab)); document.querySelectorAll(".config").forEach(x=>x.classList.toggle("active",x.id===tab.dataset.tab));} const remove=event.target.closest("[data-remove]"); if(remove&&state[remove.dataset.remove].length>1){state[remove.dataset.remove].splice(num(remove.dataset.index),1);render();} });
+      $("addLayer1").addEventListener("click",()=>{state.layer1.push({min:0,max:100,index:70,fof:30});render();}); $("addLayer2").addEventListener("click",()=>{state.layer2.push({min:0,max:100,coef:1});render();}); $("reset").addEventListener("click",()=>{state=clone(DEFAULT); localStorage.removeItem(KEY); $("newMoney").value=state.newMoney; $("marketTemp").value=state.marketTemp; $("fofName").value=state.fofName; $("fofEquityMin").value=state.fofEquityMin; $("fofEquityMax").value=state.fofEquityMax; render();});
+      render();
+    </script>
+  </body>
+</html>
