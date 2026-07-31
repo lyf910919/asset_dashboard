@@ -342,7 +342,7 @@
     .ratchet-row{display:flex;align-items:center;gap:8px;font-size:13px}
     .ratchet-row input{width:90px;padding:6px 9px;border-radius:var(--radius-sm);border:1px solid var(--border);font:inherit;font-size:13px;text-align:right}
     .ratchet-save{padding:6px 14px;border-radius:var(--radius-sm);background:var(--primary);color:white;border:none;font-size:13px;font-weight:700;cursor:pointer}
-    .pos-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 18px}
+    .pos-card-grid{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0 18px}
     .pos-card{padding:14px;border:1px solid var(--border);border-top:3px solid var(--primary);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);text-align:left;cursor:pointer;font:inherit;color:inherit}
     .pos-card:hover{border-color:var(--primary);background:var(--primary-light)}
     .pos-card-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.pos-card-name{font-size:16px;font-weight:800}.pos-card-name small{margin-left:5px;font-size:10px;color:var(--text-muted)}
@@ -497,9 +497,9 @@
     .med-trade-form input,.med-trade-form select{width:100%;margin-top:3px;padding:6px;border:1px solid var(--border);border-radius:6px;background:var(--surface-2);color:var(--text-primary);font:inherit;box-sizing:border-box}
     .med-trade-form-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
     .med-explain{margin-top:8px;color:var(--text-muted);font-size:9px;line-height:1.55}
-    @media (min-width:720px){.entry-cards{grid-template-columns:repeat(4,minmax(0,1fr))}.sd-observe-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    @media (min-width:720px){.entry-cards{grid-template-columns:repeat(4,minmax(0,1fr))}.sd-observe-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.pos-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media (max-width:900px){.med-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.med-control-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}.med-grid,.pos-card-grid{grid-template-columns:1fr}.med-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.med-toolbar{align-items:flex-start;flex-direction:column}.med-filters{width:100%}.med-control-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-trade-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}.med-grid{grid-template-columns:1fr}.med-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.med-toolbar{align-items:flex-start;flex-direction:column}.med-filters{width:100%}.med-control-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-trade-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
@@ -2639,7 +2639,7 @@
           }).join("") + `</select>`;
       }
       const html = tabHtml(allIds, state.activeId, "pos");
-      const heldIds = allIds.filter(id => derivedFromTrades(id).netUnits > 0 || (POSITIONS_CONFIG[id].positionPct || 0) > 0);
+      const heldIds = allIds.filter(id => derivedFromTrades(id).netUnits > 0);
       const shownIds = state.positionFilter === "held" ? heldIds : allIds.filter(id => !heldIds.includes(id));
       $("positionTabs").innerHTML = `<div class="tabs"><button class="tab ${state.positionFilter === "held" ? "active" : ""}" data-position-filter="held">已持仓 ${heldIds.length}</button><button class="tab ${state.positionFilter === "watch" ? "active" : ""}" data-position-filter="watch">无持仓 ${allIds.length - heldIds.length}</button></div><div class="pos-card-grid">${shownIds.length ? shownIds.map(positionCardHtml).join("") : `<div class="tl-empty">当前没有${state.positionFilter === "held" ? "已持仓" : "无持仓"}标的。</div>`}</div>`;
       $("marketTabs").innerHTML = html;
@@ -2652,7 +2652,7 @@
       const pnl = Number.isFinite(m.currentPrice) && Number.isFinite(c.cost) && d.netUnits > 0 ? (m.currentPrice / c.cost - 1) * 100 : null;
       const pnlCls = pnl > 0 ? "positive" : pnl < 0 ? "negative" : "neutral";
       const changeCls = m.changePct > 0 ? "positive" : m.changePct < 0 ? "negative" : "neutral";
-      const holding = d.netUnits > 0 ? `${d.netUnits.toFixed(1)} 手` : (c.positionPct > 0 ? "已配置 · 待补录" : "无持仓");
+      const holding = d.netUnits > 0 ? `${d.netUnits.toFixed(1)} 手` : "无持仓";
       return `<button type="button" class="pos-card" data-pos-card="${id}">
         <div class="pos-card-head"><div><div class="pos-card-name">${c.name}<small>${id}</small></div><div class="pos-card-meta">信号：${c.signalName || "—"}</div></div><span class="pos-card-status">${holding}</span></div>
         <div class="pos-card-price"><strong>${fmt(m.currentPrice)}</strong><span class="${changeCls}">${fmtPct(m.changePct)}</span></div>
@@ -3513,7 +3513,8 @@
       return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#94a3b8" stroke-width="1.5"/><text x="${mx}" y="${my-6}" font-size="12" fill="#475569">${label}</text>`;
     }
     function renderRisk() {
-      const used = ids().reduce((sum, id) => sum + (effectiveCfg(id).positionPct || 0), 0);
+      const used = ids().filter(id => derivedFromTrades(id).netUnits > 0)
+        .reduce((sum, id) => sum + (effectiveCfg(id).positionPct || 0), 0);
       $("riskCards").innerHTML = [
         `<div class="risk-card"><div>趋势账户上限</div><strong class="num">${fmt(ACCOUNT_CONFIG.trendAccountPct, 1)}%</strong><div class="subtle">占总资产<br>当前已用：${fmt(used, 1)}%</div></div>`,
         `<div class="risk-card"><div>单仓初始风险</div><strong class="num">1%</strong><div class="subtle">占趋势账户<br>单笔最大亏损</div></div>`,
