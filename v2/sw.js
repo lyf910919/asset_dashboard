@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260731-trade-book";
+const ASSET_VERSION = "20260731-hk-atr-stamp";
 const CACHE_NAME = `qdii-dashboard-v2-${ASSET_VERSION}`;
 const ASSET_LIST = [
   "./",
