@@ -545,7 +545,7 @@
 
         <section id="status" class="section view-panel">
           <div class="section-head"><h2>持仓记录</h2><span id="positionStamp" class="subtle"></span></div>
-          <div id="positionTabs" class="tabs"></div>
+          <div id="positionTabs"></div>
           <div id="statusContent"></div>
           <div id="positionTotal"></div>
         </section>
@@ -638,7 +638,7 @@
   </div>
 
   <script type="module">
-    import { getConfigValue, initStorage, setConfigValue } from "../lib/storage.js?v=20260715-medical-watch";
+    import { getConfigValue, initStorage, setConfigValue } from "../lib/storage.js?v=20260731-trade-book";
 
     const POSITIONS_CONFIG = {
       "159781": {
@@ -721,6 +721,8 @@
       stockCapital:120000, stockRisk:6000, minLeaderScore:60, maxLeaderGap:15,
     };
     const MARKET_SNAPSHOT_KEY = "trend-market-snapshot-v1";
+    const TRADE_BOOK_KEY = "trend-trade-book-v1";
+    const LEGACY_TRADE_BOOK_KEY = "trend_trades";
     const ACCOUNT_CONFIG = { trendAccountPct:3.0, maxLossPct:-10.0 };
     const INDEX_VOLUME_FILES = {
       "2.931643":{
@@ -771,11 +773,48 @@
     function secKey(row) { return `${row.f13}.${row.f12}`; }
     function posCfg() { return effectiveCfg(state.activeId); }
     // ── Trade log helpers ──
+    function canonicalTradeAssetId(value) {
+      const raw = String(value || "").trim();
+      if (POSITIONS_CONFIG[raw]) return raw;
+      const code = raw.match(/(\d{5,6})/)?.[1];
+      return code && POSITIONS_CONFIG[code] ? code : raw;
+    }
+    function normalizeTradeBook(raw) {
+      const source = raw?.trades && typeof raw.trades === "object" ? raw.trades : raw;
+      if (!source || typeof source !== "object" || Array.isArray(source)) return {};
+      const book = {};
+      Object.entries(source).forEach(([assetId, rows]) => {
+        if (!Array.isArray(rows)) return;
+        const id = canonicalTradeAssetId(assetId);
+        if (!POSITIONS_CONFIG[id]) return;
+        book[id] = rows.map((row, index) => {
+          const rawType = String(row?.type || row?.action || "").toLowerCase();
+          const type = rawType.includes("buy") || rawType.includes("买") ? "buy" : "sell";
+          return { ...row, id: row?.id || `legacy-${id}-${index}`, type, units: row?.units ?? row?.amount };
+        }).filter(row => row.date && Number(row.price) > 0 && Number(row.units) > 0);
+      });
+      return book;
+    }
+    function mergeTradeBooks(...books) {
+      const merged = {};
+      books.map(normalizeTradeBook).forEach(book => {
+        Object.entries(book).forEach(([id, rows]) => {
+          const byId = new Map((merged[id] || []).map(row => [row.id, row]));
+          rows.forEach(row => byId.set(row.id, row));
+          merged[id] = [...byId.values()];
+        });
+      });
+      return merged;
+    }
     function loadTradeState() {
-      try { const t = localStorage.getItem("trend_trades"); if (t) state.trades = JSON.parse(t); } catch(e) {}
+      let legacy = null;
+      try { const text = localStorage.getItem(LEGACY_TRADE_BOOK_KEY); legacy = text ? JSON.parse(text) : null; } catch(e) {}
+      state.trades = mergeTradeBooks(legacy, getConfigValue(TRADE_BOOK_KEY, null));
+      if (Object.keys(state.trades).length) void setConfigValue(TRADE_BOOK_KEY, state.trades).catch(() => {});
     }
     function saveTradeState() {
-      try { localStorage.setItem("trend_trades", JSON.stringify(state.trades)); } catch(e) {}
+      try { localStorage.setItem(LEGACY_TRADE_BOOK_KEY, JSON.stringify(state.trades)); } catch(e) {}
+      void setConfigValue(TRADE_BOOK_KEY, state.trades).catch(() => {});
     }
     function loadMarketSnapshot() {
       const snapshot = getConfigValue(MARKET_SNAPSHOT_KEY, null);
@@ -2649,14 +2688,15 @@
     }
     function positionCardHtml(id) {
       const c = effectiveCfg(id), m = marketOf(id), r = compute(c, m), d = derivedFromTrades(id);
-      const pnl = Number.isFinite(m.currentPrice) && Number.isFinite(c.cost) && d.netUnits > 0 ? (m.currentPrice / c.cost - 1) * 100 : null;
+      const isHeld = d.netUnits > 0;
+      const pnl = Number.isFinite(m.currentPrice) && Number.isFinite(c.cost) && isHeld ? (m.currentPrice / c.cost - 1) * 100 : null;
       const pnlCls = pnl > 0 ? "positive" : pnl < 0 ? "negative" : "neutral";
       const changeCls = m.changePct > 0 ? "positive" : m.changePct < 0 ? "negative" : "neutral";
-      const holding = d.netUnits > 0 ? `${d.netUnits.toFixed(1)} 手` : "无持仓";
+      const holding = isHeld ? `${d.netUnits.toFixed(1)} 手` : "无持仓";
       return `<button type="button" class="pos-card" data-pos-card="${id}">
         <div class="pos-card-head"><div><div class="pos-card-name">${c.name}<small>${id}</small></div><div class="pos-card-meta">信号：${c.signalName || "—"}</div></div><span class="pos-card-status">${holding}</span></div>
         <div class="pos-card-price"><strong>${fmt(m.currentPrice)}</strong><span class="${changeCls}">${fmtPct(m.changePct)}</span></div>
-        <div class="pos-card-gridline"><span>成本<b>${fmt(c.cost)}</b></span><span>当前收益<b class="${pnlCls}">${fmtPct(pnl)}</b></span><span>最终止损<b>${fmt(r.finalStop)}</b></span><span>交易记录<b>${tradesOf(id).length} 笔</b></span></div>
+        <div class="pos-card-gridline"><span>成本<b>${isHeld ? fmt(c.cost) : "—"}</b></span><span>当前收益<b class="${pnlCls}">${fmtPct(pnl)}</b></span><span>最终止损<b>${isHeld ? fmt(r.finalStop) : "—"}</b></span><span>交易记录<b>${tradesOf(id).length} 笔</b></span></div>
       </button>`;
     }
     function renderEntryAssetSelector() {
