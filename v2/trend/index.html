@@ -342,6 +342,13 @@
     .ratchet-row{display:flex;align-items:center;gap:8px;font-size:13px}
     .ratchet-row input{width:90px;padding:6px 9px;border-radius:var(--radius-sm);border:1px solid var(--border);font:inherit;font-size:13px;text-align:right}
     .ratchet-save{padding:6px 14px;border-radius:var(--radius-sm);background:var(--primary);color:white;border:none;font-size:13px;font-weight:700;cursor:pointer}
+    .pos-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 18px}
+    .pos-card{padding:14px;border:1px solid var(--border);border-top:3px solid var(--primary);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);text-align:left;cursor:pointer;font:inherit;color:inherit}
+    .pos-card:hover{border-color:var(--primary);background:var(--primary-light)}
+    .pos-card-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.pos-card-name{font-size:16px;font-weight:800}.pos-card-name small{margin-left:5px;font-size:10px;color:var(--text-muted)}
+    .pos-card-status{padding:3px 7px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);font-size:10px;color:var(--text-secondary);white-space:nowrap}
+    .pos-card-price{margin-top:12px;display:flex;align-items:baseline;gap:8px}.pos-card-price strong{font-size:24px}.pos-card-meta{margin-top:4px;font-size:11px;color:var(--text-secondary)}
+    .pos-card-gridline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:12px}.pos-card-gridline span{font-size:10px;color:var(--text-muted)}.pos-card-gridline b{display:block;margin-top:2px;font-size:12px;color:var(--text-primary);font-variant-numeric:tabular-nums}
     /* ── §1 入场决策面板 ── */
     .entry-block{margin-top:18px}
     .entry-block-title{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px;display:flex;align-items:center;gap:6px}
@@ -492,7 +499,7 @@
     .med-explain{margin-top:8px;color:var(--text-muted);font-size:9px;line-height:1.55}
     @media (min-width:720px){.entry-cards{grid-template-columns:repeat(4,minmax(0,1fr))}.sd-observe-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
     @media (max-width:900px){.med-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.med-control-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}.med-grid{grid-template-columns:1fr}.med-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.med-toolbar{align-items:flex-start;flex-direction:column}.med-filters{width:100%}.med-control-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-trade-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}.med-grid,.pos-card-grid{grid-template-columns:1fr}.med-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.med-toolbar{align-items:flex-start;flex-direction:column}.med-filters{width:100%}.med-control-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-trade-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
@@ -2609,11 +2616,23 @@
           }).join("") + `</select>`;
       }
       const html = tabHtml(allIds, state.activeId, "pos");
-      $("positionTabs").innerHTML = html;
+      $("positionTabs").innerHTML = `<div class="pos-card-grid">${allIds.map(positionCardHtml).join("")}</div>`;
       $("marketTabs").innerHTML = html;
       $("sdAssetBar").innerHTML = html;
       $("ovAssetBar").innerHTML = tabHtml(overviewIds(), state.overviewId, "ov");
       renderEntryAssetSelector();
+    }
+    function positionCardHtml(id) {
+      const c = effectiveCfg(id), m = marketOf(id), r = compute(c, m), d = derivedFromTrades(id);
+      const pnl = Number.isFinite(m.currentPrice) && Number.isFinite(c.cost) && d.netUnits > 0 ? (m.currentPrice / c.cost - 1) * 100 : null;
+      const pnlCls = pnl > 0 ? "positive" : pnl < 0 ? "negative" : "neutral";
+      const changeCls = m.changePct > 0 ? "positive" : m.changePct < 0 ? "negative" : "neutral";
+      const holding = d.netUnits > 0 ? `${d.netUnits.toFixed(1)} 手` : "待补录";
+      return `<button type="button" class="pos-card" data-pos-card="${id}">
+        <div class="pos-card-head"><div><div class="pos-card-name">${c.name}<small>${id}</small></div><div class="pos-card-meta">信号：${c.signalName || "—"}</div></div><span class="pos-card-status">${holding}</span></div>
+        <div class="pos-card-price"><strong>${fmt(m.currentPrice)}</strong><span class="${changeCls}">${fmtPct(m.changePct)}</span></div>
+        <div class="pos-card-gridline"><span>成本<b>${fmt(c.cost)}</b></span><span>当前收益<b class="${pnlCls}">${fmtPct(pnl)}</b></span><span>最终止损<b>${fmt(r.finalStop)}</b></span><span>交易记录<b>${tradesOf(id).length} 笔</b></span></div>
+      </button>`;
     }
     function renderEntryAssetSelector() {
       const eb = $("entryAssetBar");
@@ -2663,11 +2682,10 @@
       if (v < 2) return "positive";
       return "deep-green";
     }
-    function renderPositionPanel() {
+    function positionModalHtml() {
       const id = state.activeId;
       const c = effectiveCfg(id), m = marketOf(id), r = compute(c, m);
       const d = derivedFromTrades(id);
-      $("positionStamp").textContent = c.signalName ? `信号：${c.signalName}` : "";
 
       // Summary cards
       const cp = m.currentPrice;
@@ -2729,7 +2747,7 @@
         </div>
       </div>`;
 
-      $("statusContent").innerHTML = `
+      return `
         <div class="pos-summary">${sumCards}</div>
         <div class="tl-header">进出记录</div>
         <div class="tl-list">${tradeItems}</div>
@@ -2737,10 +2755,21 @@
         <button class="tl-add-btn" id="addTradeBtn">＋ 添加记录</button>
         ${ratchetHtml}
       `;
-
-      // Bind events after render
-      const addBtn = $("addTradeBtn");
-      if (addBtn) addBtn.onclick = () => { state.tradeFormOpen = true; state.tradeEditId = null; renderPositionPanel(); };
+    }
+    function renderPositionPanel() {
+      $("positionStamp").textContent = `共 ${ids().length} 个标的 · 点击卡片维护交易记录`;
+      $("statusContent").innerHTML = "";
+    }
+    function renderPositionModal() {
+      $("modalTitle").textContent = `${effectiveCfg(state.activeId).name} · 持仓与交易记录`;
+      $("modalBody").innerHTML = positionModalHtml();
+    }
+    function openPositionModal(id) {
+      if (!POSITIONS_CONFIG[id]) return;
+      state.activeId = id; state.tradeEditId = null; state.tradeFormOpen = false;
+      if (POSITIONS_CONFIG[state.entryId]) state.entryId = id;
+      syncInputsFromMarket(); renderAll(); renderPositionModal();
+      $("modal").classList.add("show");
     }
     function renderPositionTotal() {
       const rows = ids().map(id => {
@@ -3506,7 +3535,7 @@
       $("modalBody").innerHTML = `<div class="med-stop-winner"><strong>最终止损 ${fmt(r.finalStop,2)}</strong><br>取四条保护线最大值，当前由 ${r.winner} 胜出。</div><table class="med-stop-table"><tbody>${table}</tbody></table><p>本金风险 ${fmtMedicalMoney(h.principalRisk)}；当前盈亏 <span class="med-pnl ${h.unrealPct>0?"up":h.unrealPct<0?"down":"flat"}">${fmtPct(h.unrealPct)}</span>。止损执行仍以收盘确认规则为准。</p>`;
       $("modal").classList.add("show");
     }
-    function closeModal() { $("modal").classList.remove("show"); }
+    function closeModal() { state.tradeFormOpen = false; state.tradeEditId = null; $("modal").classList.remove("show"); }
     function showView(viewId, updateHash=true) {
       if (!$(viewId)) viewId = "overview";
       document.querySelectorAll(".view-panel").forEach(panel => panel.classList.toggle("active", panel.id === viewId));
@@ -3555,23 +3584,29 @@
       if (medStop) { openMedicalStopModal(medStop.dataset.medStop); return; }
       const modalBtn = e.target.closest("[data-modal]");
       if (modalBtn) openModal(modalBtn.dataset.modal);
+      const posCard = e.target.closest("[data-pos-card]");
+      if (posCard) { openPositionModal(posCard.dataset.posCard); return; }
       const tab = e.target.closest("[data-pos]");
       if (tab) setActivePosition(tab.dataset.pos);
       const ovTab = e.target.closest("[data-ov]");
       if (ovTab) setOverviewAsset(ovTab.dataset.ov);
+      if (e.target.id === "addTradeBtn") {
+        state.tradeEditId = null; state.tradeFormOpen = true;
+        renderPositionModal(); return;
+      }
       // Trade log edit
       const editBtn = e.target.closest("[data-edit]");
       if (editBtn) {
         state.tradeEditId = editBtn.dataset.edit;
         state.tradeFormOpen = true;
-        renderPositionPanel(); return;
+        renderPositionModal(); return;
       }
       // Trade log delete
       const delBtn = e.target.closest("[data-del]");
       if (delBtn) {
         const id = state.activeId;
         state.trades[id] = (state.trades[id] || []).filter(t => t.id !== delBtn.dataset.del);
-        saveTradeState(); renderAll(); return;
+        saveTradeState(); renderAll(); renderPositionModal(); return;
       }
       // Trade form save
       if (e.target.id === "tf-save") {
@@ -3594,12 +3629,12 @@
           state.trades[id].push(trade);
         }
         state.tradeFormOpen = false; state.tradeEditId = null;
-        saveTradeState(); renderAll(); return;
+        saveTradeState(); renderAll(); renderPositionModal(); return;
       }
       // Trade form cancel
       if (e.target.id === "tf-cancel") {
         state.tradeFormOpen = false; state.tradeEditId = null;
-        renderPositionPanel(); return;
+        renderPositionModal(); return;
       }
     });
     ["matrixAdx","matrixRsi"].forEach(id => $(id).addEventListener("input", () => { state.matrixTouched = true; renderMatrix(); }));
