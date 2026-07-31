@@ -540,6 +540,7 @@
           <div class="section-head"><h2>持仓记录</h2><span id="positionStamp" class="subtle"></span></div>
           <div id="positionTabs" class="tabs"></div>
           <div id="statusContent"></div>
+          <div id="positionTotal"></div>
         </section>
 
         <section id="market" class="section view-panel">
@@ -653,6 +654,11 @@
       "512800": {
         name:"银行ETF", secid:"1.512800", signalSecid:"0.399986",
         signalName:"中证银行", openedAt:"2026-07-31", positionPct:0.0,
+        group:"持仓",
+      },
+      "03070": {
+        name:"平安香港高息ETF", secid:"116.03070", signalSecid:"116.03070",
+        signalName:"平安香港高息", openedAt:"2026-07-31", positionPct:0.0,
         group:"持仓",
       }
     };
@@ -939,6 +945,7 @@
       if (!code) return null;
       if (m === "0") return `${code}.SZ`;
       if (m === "1") return `${code}.SS`;
+      if (m === "116") return `${code}.HK`;
       return null; // market=2 (CSI indices) not on Yahoo
     }
     function parseYahooKlines(data) {
@@ -2582,7 +2589,7 @@
       setText("medicalStamp", `${state.marketSnapshotLoaded ? "历史快照" : "最近更新"} ${stamp}`);
     }
     function renderAll() {
-      renderTabs(); renderOverview(); renderPositionPanel(); renderMatrix(); renderEntry(); renderMedical();
+      renderTabs(); renderOverview(); renderPositionPanel(); renderPositionTotal(); renderMatrix(); renderEntry(); renderMedical();
       renderVolumeState(); renderPositionCalc(); renderStopDetail(); renderExitTree(); renderRisk();
     }
     function renderTabs() {
@@ -2734,6 +2741,27 @@
       // Bind events after render
       const addBtn = $("addTradeBtn");
       if (addBtn) addBtn.onclick = () => { state.tradeFormOpen = true; state.tradeEditId = null; renderPositionPanel(); };
+    }
+    function renderPositionTotal() {
+      const rows = ids().map(id => {
+        const d = derivedFromTrades(id), c = effectiveCfg(id), price = marketOf(id).currentPrice;
+        const cost = d.netUnits > 0 && Number.isFinite(c.cost) ? c.cost * d.netUnits * 100 : null;
+        const value = d.netUnits > 0 && Number.isFinite(price) ? price * d.netUnits * 100 : null;
+        return { cost, value };
+      }).filter(row => Number.isFinite(row.cost) && Number.isFinite(row.value));
+      const cost = rows.reduce((sum, row) => sum + row.cost, 0);
+      const value = rows.reduce((sum, row) => sum + row.value, 0);
+      const pnl = rows.length ? value - cost : null;
+      const rate = cost > 0 && Number.isFinite(pnl) ? pnl / cost * 100 : null;
+      const money = v => Number.isFinite(v) ? "¥" + Math.abs(v).toLocaleString("zh-CN", {maximumFractionDigits:0}) : "—";
+      const signed = v => Number.isFinite(v) ? (v >= 0 ? "+" : "−") + money(v) : "—";
+      $("positionTotal").innerHTML = `<div class="tl-header" style="margin-top:20px">持仓总状态</div><div class="pos-summary">
+        <div class="pos-sum-card"><div class="pos-sum-label">当前持仓资产</div><div class="pos-sum-val num">${rows.length ? money(value) : "—"}</div></div>
+        <div class="pos-sum-card"><div class="pos-sum-label">持仓成本</div><div class="pos-sum-val num">${rows.length ? money(cost) : "—"}</div></div>
+        <div class="pos-sum-card"><div class="pos-sum-label">当前收益</div><div class="pos-sum-val ${pnl > 0 ? "positive" : pnl < 0 ? "negative" : "neutral"} num">${signed(pnl)}</div></div>
+        <div class="pos-sum-card"><div class="pos-sum-label">收益率</div><div class="pos-sum-val ${rate > 0 ? "positive" : rate < 0 ? "negative" : "neutral"} num">${fmtPct(rate)}</div></div>
+        <div class="pos-sum-card wide"><div class="pos-sum-label">统计范围</div><div class="pos-sum-val">已录入 ${rows.length} 个持仓；仅统计当前持仓，不含现金、已清仓收益及待补录交易。</div></div>
+      </div>`;
     }
     function renderTradeForm(id) {
       const m = marketOf(id);
