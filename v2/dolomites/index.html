@@ -3,162 +3,192 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="2026年秋季多洛米蒂旅行摄影动态决策树">
-  <title>多洛米蒂天气决策树｜2026秋季摄影行程</title>
+  <meta name="description" content="2026年中秋国庆意大利与多洛米蒂动态摄影行程决策树">
+  <title>多洛米蒂动态行程决策树｜2026秋季</title>
   <style>
     :root {
-      --ink:#edf6f4; --muted:#93aaac; --dim:#68858a; --bg:#06131b; --panel:#0b2029;
-      --panel2:#102a34; --line:rgba(184,221,219,.17); --cyan:#6bd0ce; --gold:#f2bd63;
-      --blue:#8aaee8; --red:#e18878; --shadow:0 24px 70px rgba(0,0,0,.28);
+      --bg:#f5f7f6; --paper:#ffffff; --ink:#162328; --muted:#68787c; --hair:#dfe7e5;
+      --green:#19766e; --green-soft:#e8f4f1; --amber:#b96b16; --amber-soft:#fff4e5;
+      --blue:#3d67a7; --blue-soft:#edf3fc; --red:#aa4d43; --red-soft:#fbecea;
+      --shadow:0 10px 30px rgba(24,49,53,.08);
     }
     * { box-sizing:border-box; }
     html { scroll-behavior:smooth; }
-    body { margin:0; color:var(--ink); background:radial-gradient(circle at 85% 12%,rgba(43,135,134,.15),transparent 28%),var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+    body { margin:0; color:var(--ink); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
     button { font:inherit; }
-    .topbar { max-width:1420px; height:76px; margin:auto; padding:0 5vw; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); }
-    .brand { display:flex; align-items:center; gap:12px; }
-    .brand-mark { width:38px; height:38px; display:grid; place-items:center; color:#07131b; background:var(--gold); border-radius:12px; font-size:20px; box-shadow:0 8px 24px rgba(242,189,99,.22); }
-    .eyebrow { margin:0 0 4px; color:var(--cyan); font-size:11px; font-weight:800; letter-spacing:.16em; }
-    .brand-title { margin:0; font-weight:760; }
-    .dates { color:#bdcdcc; font-size:14px; }
-    .hero-wrap { max-width:1420px; margin:auto; padding:28px 5vw 0; }
-    .hero { min-height:445px; position:relative; display:flex; align-items:flex-end; overflow:hidden; border:1px solid rgba(255,255,255,.1); border-radius:28px; background-color:#0c2934; background-image:linear-gradient(90deg,rgba(3,13,19,.94) 0%,rgba(3,13,19,.72) 46%,rgba(3,13,19,.12) 78%),linear-gradient(0deg,rgba(5,18,25,.96),transparent 53%),url('https://tourismmedia.italia.it/is/image/mitur/1600X1000_alba_nelle_dolomiti_2-1?fit=constrain%2C1&fmt=webp&hei=1000&wid=1600'); background-size:cover; background-position:center 38%; box-shadow:var(--shadow); }
-    .hero-copy { max-width:720px; padding:58px 56px 92px; position:relative; z-index:1; }
-    .pill { display:inline-flex; align-items:center; gap:8px; margin-bottom:23px; padding:8px 12px; color:#ffdc98; background:rgba(67,54,27,.72); border:1px solid rgba(255,216,137,.36); border-radius:999px; font-size:13px; font-weight:750; }
-    h1 { margin:0; font-size:clamp(38px,5.4vw,75px); line-height:1.02; letter-spacing:-.055em; }
-    .hero-copy>p { max-width:620px; margin:22px 0 0; color:#c8d4d3; font-size:16px; line-height:1.8; }
-    .hard-rules { position:absolute; z-index:2; left:28px; right:28px; bottom:22px; display:grid; grid-template-columns:repeat(3,1fr); background:rgba(5,19,27,.78); border:1px solid rgba(235,249,247,.15); border-radius:16px; backdrop-filter:blur(14px); }
-    .hard-rules div { padding:15px; color:#9fb4b5; font-size:13px; text-align:center; border-right:1px solid var(--line); }
-    .hard-rules div:last-child { border:0; }.hard-rules strong { color:white; margin-right:6px; }
-    .section { max-width:1280px; margin:auto; padding:80px 28px 0; }
-    .section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:30px; margin-bottom:24px; }
-    .section-head h2 { margin:0; font-size:clamp(27px,3vw,39px); letter-spacing:-.035em; }
-    .section-head>p { max-width:530px; margin:0; color:var(--muted); line-height:1.65; text-align:right; }
-    .gate-tabs { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-    .gate-tab { min-height:90px; padding:16px; display:flex; align-items:center; gap:14px; color:#a9bcbd; background:#091b24; border:1px solid var(--line); border-radius:15px; text-align:left; cursor:pointer; transition:.2s ease; }
-    .gate-tab:hover { color:white; background:#102a34; transform:translateY(-1px); }
-    .gate-tab.active { color:#fff; background:#17343f; border-color:#59b6b4; box-shadow:inset 0 -2px var(--cyan); }
-    .gate-num { color:var(--cyan); font:800 12px ui-monospace,SFMono-Regular,Menlo,monospace; }
-    .gate-tab strong,.gate-tab small { display:block; }.gate-tab strong { margin-bottom:6px; font-size:15px; }.gate-tab small { color:#829da1; }
-    .gate-detail { margin-top:12px; padding:22px 24px; display:grid; grid-template-columns:.75fr 1fr .82fr 1.7fr; gap:22px; align-items:center; background:linear-gradient(100deg,rgba(96,195,193,.16),rgba(18,44,54,.4)); border:1px solid rgba(107,208,206,.25); border-radius:16px; animation:reveal .25s ease; }
-    .gate-detail>div { min-height:48px; padding-right:20px; border-right:1px solid var(--line); }.gate-detail>div:last-child { border:0; }
-    .gate-detail small,.gate-detail strong { display:block; }.gate-detail small { margin-bottom:7px; color:#819da1; font-size:12px; }.gate-detail strong { font-size:15px; line-height:1.45; }
-    .gate-signal { color:var(--cyan); font-weight:750; }
-    @keyframes reveal { from { opacity:.3; transform:translateY(5px); } to { opacity:1; transform:none; } }
-    .tree-box { padding:38px; background:rgba(9,27,36,.72); border:1px solid var(--line); border-radius:25px; }
-    .node { padding:23px; background:#102630; border:1px solid rgba(113,190,189,.28); border-radius:17px; box-shadow:0 15px 34px rgba(0,0,0,.13); }
-    .node.root { max-width:510px; margin:auto; text-align:center; border-color:rgba(242,189,99,.55); background:linear-gradient(145deg,#192f36,#10232c); }
-    .node-date { color:var(--cyan); font:800 11px ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.06em; }
-    .node h3 { margin:11px 0 8px; font-size:18px; line-height:1.5; }.node h3 em { color:var(--gold); font-style:normal; }.node p { margin:0; color:var(--muted); font-size:13px; line-height:1.6; }
-    .split { max-width:710px; height:74px; margin:auto; display:flex; align-items:center; justify-content:space-between; color:var(--cyan); font-size:12px; font-weight:800; }
-    .split:before,.split:after { content:""; width:42%; height:1px; background:linear-gradient(90deg,transparent,#37676c); }.split b { width:28px; height:28px; display:grid; place-items:center; border:1px solid #356269; border-radius:50%; }
-    .tree-grid { display:grid; grid-template-columns:1fr .8fr 1.08fr; gap:24px; align-items:start; }
-    .path { padding:25px; background:#0b2029; border:1px solid var(--line); border-radius:19px; }
-    .path-a { min-height:100%; border-color:rgba(242,189,99,.38); background:linear-gradient(150deg,rgba(242,189,99,.11),#0b2029 54%); }
-    .path-b { border-color:rgba(107,208,206,.38); }.path-c { border-color:rgba(138,174,232,.4); }.path-stop { border-color:rgba(225,136,120,.4); }
-    .path-label { display:inline-flex; align-items:center; gap:6px; margin-bottom:15px; color:var(--gold); font-size:12px; font-weight:800; }.path-b .path-label { color:var(--cyan); }.path-c .path-label { color:var(--blue); }.path-stop .path-label { color:var(--red); }
-    .path h3 { margin:0 0 10px; font-size:19px; }.path>p { margin:0 0 18px; color:var(--muted); font-size:13px; line-height:1.68; }
-    .route { display:flex; flex-wrap:wrap; align-items:center; gap:5px 1px; }
-    .route span { display:inline-flex; align-items:center; color:#dce8e6; font-size:12px; }.route span:not(:last-child):after { content:"›"; margin:0 3px; color:#587a7e; font-size:18px; }.route i { padding:5px 7px; background:rgba(151,186,187,.09); border-radius:7px; font-style:normal; }
-    .path-foot { margin-top:22px; padding-top:17px; color:#c4d4d3; font-size:13px; border-top:1px solid var(--line); }
-    .spine { display:grid; gap:12px; }.spine-arrow { height:43px; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#568c90; font-size:11px; }.spine-arrow b { font-size:19px; line-height:1; }.node.final { border-color:rgba(225,136,120,.48); }
-    .right-paths { display:grid; gap:14px; }
-    .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-    .card { position:relative; min-height:330px; padding:27px; display:flex; flex-direction:column; overflow:hidden; background:#0b2029; border:1px solid var(--line); border-radius:20px; }
-    .card:after { content:""; position:absolute; right:-66px; top:-70px; width:170px; height:170px; background:currentColor; opacity:.065; border-radius:50%; }.card.gold { color:var(--gold); }.card.cyan { color:var(--cyan); }.card.blue { color:var(--blue); }
-    .card-code { position:absolute; right:24px; top:17px; font:800 45px ui-monospace,SFMono-Regular,Menlo,monospace; opacity:.2; }.card small { color:currentColor; font-size:12px; }.card h3 { margin:6px 0 24px; color:white; font-size:21px; }.card .route { margin-bottom:24px; }.card>p { margin:auto 0 0; padding-top:20px; color:var(--muted); font-size:13px; line-height:1.65; border-top:1px solid var(--line); }
-    .criteria { margin-top:82px; padding:34px; display:grid; grid-template-columns:.7fr 2fr; gap:36px; background:linear-gradient(125deg,rgba(242,189,99,.13),rgba(13,36,45,.84)); border:1px solid rgba(242,189,99,.26); border-radius:23px; }
-    .criteria-title { display:flex; align-items:center; gap:15px; }.criteria-icon { font-size:37px; }.criteria h2 { margin:0; font-size:30px; }
-    .criteria-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18px 26px; }.criteria-grid>div { display:flex; gap:12px; }.criteria-grid span { color:var(--gold); font:800 11px ui-monospace,SFMono-Regular,Menlo,monospace; }.criteria-grid p { margin:0; color:#9eb2b3; font-size:13px; line-height:1.6; }.criteria-grid strong { color:#f0f7f6; }
-    .risk { margin-top:18px; padding:18px 21px; display:flex; gap:12px; background:rgba(225,136,120,.1); border:1px solid rgba(225,136,120,.28); border-radius:14px; color:#c9d5d3; font-size:13px; line-height:1.65; }.risk strong { color:#f2a698; }
-    footer { max-width:1280px; margin:70px auto 0; padding:24px 28px 40px; display:flex; flex-wrap:wrap; gap:18px 28px; color:#718d91; font-size:12px; border-top:1px solid var(--line); } footer span:last-child { margin-left:auto; }
-    @media(max-width:960px) { .gate-tabs { grid-template-columns:repeat(2,1fr); }.gate-detail { grid-template-columns:repeat(2,1fr); }.gate-detail>div { border:0; }.tree-grid { grid-template-columns:1fr; }.path-a { min-height:auto; }.cards { grid-template-columns:1fr; }.card { min-height:250px; }.criteria { grid-template-columns:1fr; } }
-    @media(max-width:640px) { .topbar { height:68px; padding:0 19px; }.dates { display:none; }.hero-wrap { padding:14px 14px 0; }.hero { min-height:545px; border-radius:20px; }.hero-copy { padding:38px 24px 160px; }.hero-copy h1 { font-size:40px; }.hard-rules { left:12px; right:12px; bottom:12px; grid-template-columns:1fr; }.hard-rules div { padding:10px; border-right:0; border-bottom:1px solid var(--line); }.section { padding:60px 18px 0; }.section-head { align-items:flex-start; flex-direction:column; gap:9px; }.section-head>p { text-align:left; }.gate-tabs,.gate-detail { grid-template-columns:1fr; }.tree-box { padding:17px; }.split { height:54px; }.criteria-grid { grid-template-columns:1fr; } footer { padding:22px 20px 34px; flex-direction:column; } footer span:last-child { margin-left:0; } }
+    .page-header { position:sticky; top:0; z-index:20; background:rgba(255,255,255,.92); border-bottom:1px solid var(--hair); backdrop-filter:blur(12px); }
+    .header-inner { max-width:1480px; min-height:72px; margin:auto; padding:12px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+    .title-wrap { display:flex; align-items:center; gap:12px; }
+    .mark { width:39px; height:39px; display:grid; place-items:center; color:#fff; background:var(--green); border-radius:11px; font-weight:800; }
+    .kicker { margin:0 0 2px; color:var(--green); font-size:11px; font-weight:800; letter-spacing:.13em; }
+    h1 { margin:0; font-size:20px; letter-spacing:-.02em; }
+    .trip-meta { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:14px; }
+    .trip-meta strong { color:var(--ink); }
+    .shell { max-width:1480px; margin:auto; padding:28px 32px 64px; }
+    .intro { display:flex; align-items:flex-end; justify-content:space-between; gap:28px; margin-bottom:22px; }
+    .intro h2 { margin:0 0 7px; font-size:clamp(27px,3vw,42px); letter-spacing:-.045em; }
+    .intro p { max-width:730px; margin:0; color:var(--muted); font-size:15px; line-height:1.7; }
+    .legend { flex:0 0 auto; display:flex; gap:14px; padding:10px 13px; color:var(--muted); background:#fff; border:1px solid var(--hair); border-radius:10px; font-size:12px; }
+    .legend span { display:flex; align-items:center; gap:5px; }.legend i { width:8px; height:8px; border-radius:50%; }.legend .yes { background:var(--green); }.legend .watch { background:var(--amber); }.legend .stop { background:var(--red); }
+    .focus-bar { margin-bottom:14px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+    .focus-label { margin-right:4px; color:var(--muted); font-size:13px; }
+    .focus-button { padding:8px 12px; color:var(--muted); background:#fff; border:1px solid var(--hair); border-radius:9px; cursor:pointer; transition:.18s ease; }
+    .focus-button:hover,.focus-button.active { color:#fff; background:var(--ink); border-color:var(--ink); }
+
+    .tree-scroll { overflow-x:auto; padding-bottom:12px; border-radius:18px; box-shadow:var(--shadow); }
+    .tree-board { position:relative; width:1360px; height:1120px; overflow:hidden; background:var(--paper); border:1px solid var(--hair); border-radius:18px; }
+    .timeline-head { position:absolute; z-index:4; left:0; top:0; width:140px; height:58px; display:grid; place-items:center; color:var(--muted); background:#f9fbfa; border-right:1px solid var(--hair); border-bottom:1px solid var(--hair); font-size:12px; font-weight:800; letter-spacing:.08em; }
+    .tree-head { position:absolute; z-index:4; left:140px; right:0; top:0; height:58px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; background:#f9fbfa; border-bottom:1px solid var(--hair); }
+    .tree-head strong { font-size:14px; }.tree-head span { color:var(--muted); font-size:12px; }
+    .time-row { position:absolute; z-index:1; left:0; right:0; height:1px; background:var(--hair); }
+    .time-row::before { content:""; position:absolute; left:140px; right:0; top:-1px; border-top:1px dashed rgba(68,101,102,.11); }
+    .time-label { position:absolute; z-index:3; left:0; width:140px; padding:0 15px; display:flex; flex-direction:column; justify-content:center; background:#f9fbfa; border-right:1px solid var(--hair); }
+    .time-label strong { font-size:14px; }.time-label span { margin-top:4px; color:var(--muted); font-size:11px; line-height:1.4; }
+    .row-1 { top:58px; }.row-2 { top:198px; }.row-3 { top:353px; }.row-4 { top:525px; }.row-5 { top:700px; }.row-6 { top:865px; }.row-7 { top:1005px; }
+    .label-1 { top:58px; height:140px; }.label-2 { top:198px; height:155px; }.label-3 { top:353px; height:172px; }.label-4 { top:525px; height:175px; }.label-5 { top:700px; height:165px; }.label-6 { top:865px; height:140px; }.label-7 { top:1005px; height:115px; }
+    .timeline-line { position:absolute; z-index:2; left:33px; top:93px; bottom:35px; width:2px; background:#c8d7d4; }.timeline-line::before,.timeline-line::after { content:""; position:absolute; left:-4px; width:10px; height:10px; background:#fff; border:2px solid var(--green); border-radius:50%; }.timeline-line::before { top:0; }.timeline-line::after { bottom:0; }
+    .tick { position:absolute; z-index:4; left:29px; width:10px; height:10px; background:#fff; border:2px solid #9db4b0; border-radius:50%; }.tick-2{top:270px}.tick-3{top:433px}.tick-4{top:610px}.tick-5{top:780px}.tick-6{top:930px}
+
+    svg.connectors { position:absolute; z-index:1; left:140px; top:58px; width:1220px; height:1062px; pointer-events:none; overflow:visible; }
+    .connector { fill:none; stroke:#a9bbb8; stroke-width:2; vector-effect:non-scaling-stroke; }
+    .connector.green { stroke:#5c9a93; }.connector.amber { stroke:#cf9a5a; }.connector.blue { stroke:#819ac2; }.connector.red { stroke:#c98780; stroke-dasharray:5 5; }
+    .branch-word { font-size:12px; font-weight:800; paint-order:stroke; stroke:#fff; stroke-width:5px; stroke-linejoin:round; }
+
+    .node { position:absolute; z-index:5; padding:14px 16px; background:#fff; border:1px solid #cfdcda; border-radius:13px; box-shadow:0 5px 16px rgba(24,49,53,.065); transition:.2s ease; }
+    .node:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(24,49,53,.12); }
+    .node[data-path].dim { opacity:.2; filter:grayscale(.55); }.connector.dim { opacity:.12; }
+    .node.decision { border:2px solid var(--amber); background:var(--amber-soft); }
+    .node.start { border:2px solid var(--green); background:var(--green-soft); text-align:center; }
+    .node.route-a { border-left:5px solid var(--green); }.node.route-b { border-left:5px solid var(--amber); }.node.route-c { border-left:5px solid var(--blue); }.node.no-go { border-left:5px solid var(--red); background:var(--red-soft); }
+    .node.final { border:2px solid var(--ink); background:#edf2f1; text-align:center; }
+    .badge { display:inline-block; margin-bottom:6px; padding:3px 6px; color:var(--muted); background:#eef3f2; border-radius:5px; font-size:10px; font-weight:800; letter-spacing:.05em; }
+    .decision .badge { color:var(--amber); background:#fff; }.start .badge { color:var(--green); background:#fff; }.route-a .badge { color:var(--green); }.route-b .badge { color:var(--amber); }.route-c .badge { color:var(--blue); }.no-go .badge { color:var(--red); background:#fff; }
+    .node h3 { margin:0 0 5px; font-size:15px; line-height:1.35; }.node p { margin:0; color:var(--muted); font-size:12px; line-height:1.55; }
+    .node .days { margin-top:7px; padding-top:7px; color:#3c5055; border-top:1px solid rgba(59,87,88,.11); font-size:11px; font-weight:700; }
+    .root-node { left:540px; top:78px; width:370px; }
+    .front-transfer { left:185px; top:225px; width:292px; }.rome-first { left:885px; top:225px; width:300px; }
+    .front-dolo { left:180px; top:382px; width:302px; }.rome-check { left:850px; top:375px; width:370px; }
+    .front-south { left:170px; top:553px; width:322px; }.middle-dolo { left:565px; top:552px; width:305px; }.late-buffer { left:950px; top:545px; width:320px; }
+    .front-cities { left:170px; top:730px; width:322px; }.middle-paris { left:565px; top:728px; width:305px; }.late-dolo { left:905px; top:720px; width:290px; }.no-weather { left:1205px; top:720px; width:140px; padding:13px; }
+    .front-rome { left:170px; top:890px; width:322px; }.middle-return { left:565px; top:890px; width:305px; }.late-return { left:905px; top:883px; width:290px; }.no-go-return { left:1205px; top:883px; width:140px; padding:13px; }
+    .brussels-final { left:510px; top:1028px; width:480px; }
+
+    .summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:22px; }
+    .summary-card { padding:18px; background:#fff; border:1px solid var(--hair); border-radius:13px; }
+    .summary-card small { color:var(--muted); font-size:11px; font-weight:800; }.summary-card h3 { margin:7px 0 8px; font-size:16px; }.summary-card p { margin:0; color:var(--muted); font-size:13px; line-height:1.65; }.summary-card.a { border-top:4px solid var(--green); }.summary-card.b { border-top:4px solid var(--amber); }.summary-card.c { border-top:4px solid var(--blue); }.summary-card.d { border-top:4px solid var(--red); }
+    .rules { margin-top:22px; padding:22px; display:grid; grid-template-columns:190px 1fr; gap:24px; background:#172a2f; color:#fff; border-radius:15px; }
+    .rules h2 { margin:3px 0 0; font-size:22px; }.rules .kicker { color:#83d2ca; }
+    .rule-list { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }.rule-list div { padding-left:13px; border-left:1px solid rgba(255,255,255,.18); }.rule-list strong { display:block; margin-bottom:5px; color:#fff; font-size:13px; }.rule-list span { color:#b8c8c8; font-size:12px; line-height:1.55; }
+    footer { margin-top:22px; display:flex; justify-content:space-between; color:var(--muted); font-size:12px; }
+    @media(max-width:900px) { .header-inner,.shell { padding-left:18px; padding-right:18px; }.intro { align-items:flex-start; flex-direction:column; }.legend { align-self:stretch; justify-content:center; }.summary-grid { grid-template-columns:repeat(2,1fr); }.rules { grid-template-columns:1fr; }.rule-list { grid-template-columns:repeat(2,1fr); }.tree-scroll::after { content:"左右滑动查看完整分支 →"; position:sticky; left:14px; display:inline-block; margin:10px 0 0; padding:7px 10px; color:var(--muted); background:#fff; border:1px solid var(--hair); border-radius:8px; font-size:12px; } }
+    @media(max-width:580px) { .trip-meta { display:none; }.summary-grid,.rule-list { grid-template-columns:1fr; }.focus-label { width:100%; }.focus-button { flex:1; padding:8px 6px; font-size:12px; } }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand"><span class="brand-mark">◉</span><div><p class="eyebrow">ITALY · 2026 AUTUMN</p><p class="brand-title">多洛米蒂天气决策台</p></div></div>
-    <div class="dates">▣　9月26日 — 10月6日</div>
+  <header class="page-header">
+    <div class="header-inner">
+      <div class="title-wrap"><span class="mark">D</span><div><p class="kicker">2026 AUTUMN · PHOTO TRIP</p><h1>多洛米蒂动态行程决策树</h1></div></div>
+      <div class="trip-meta"><span>总行程</span><strong>9月26日—10月6日</strong><span>·</span><span>10月5日晚回到布鲁塞尔</span></div>
+    </div>
   </header>
 
-  <section class="hero-wrap">
-    <div class="hero">
-      <div class="hero-copy"><span class="pill">☀　好天气优先于固定顺序</span><h1>让山决定出发日，<br>让城市吸收坏天气。</h1><p>以3天内预报为执行依据、5天内预报为路线依据。三峰山与布雷耶斯湖拥有最高优先级。</p></div>
-      <div class="hard-rules"><div><strong>≥ 2天</strong>可用山地窗口</div><div><strong>10月2日</strong>最终决策点</div><div><strong>10月5日晚</strong>回到布鲁塞尔</div></div>
-    </div>
-  </section>
+  <main class="shell">
+    <section class="intro">
+      <div><h2>从天气窗口倒推整段行程</h2><p>3天内预报用于执行，5天内预报用于转场。只要三峰山与布雷耶斯湖出现连续两天以上的可用窗口，就暂停城市行程，经威尼斯启动多洛米蒂模块。</p></div>
+      <div class="legend"><span><i class="yes"></i>启动</span><span><i class="watch"></i>继续观察</span><span><i class="stop"></i>停止等待</span></div>
+    </section>
 
-  <section class="section">
-    <div class="section-head"><div><p class="eyebrow">ROLLING DECISION</p><h2>四次滚动判断</h2></div><p>点击日期节点，查看当时应该观察的天气区间和下一步动作。</p></div>
-    <div class="gate-tabs">
-      <button class="gate-tab active" data-gate="0"><span class="gate-num">01</span><span><strong>9月23–25日</strong><small>出发前判断</small></span></button>
-      <button class="gate-tab" data-gate="1"><span class="gate-num">02</span><span><strong>9月27–28日</strong><small>罗马期间复核</small></span></button>
-      <button class="gate-tab" data-gate="2"><span class="gate-num">03</span><span><strong>9月29日–10月1日</strong><small>弹性城市判断</small></span></button>
-      <button class="gate-tab" data-gate="3"><span class="gate-num">04</span><span><strong>10月2日</strong><small>最终截止判断</small></span></button>
+    <div class="focus-bar" aria-label="高亮路线">
+      <span class="focus-label">高亮路径</span>
+      <button class="focus-button active" data-focus="all">全部</button>
+      <button class="focus-button" data-focus="a">A 前置</button>
+      <button class="focus-button" data-focus="b">B 中段</button>
+      <button class="focus-button" data-focus="c">C 后置</button>
+      <button class="focus-button" data-focus="d">无窗口</button>
     </div>
-    <div class="gate-detail" id="gate-detail"><div class="gate-signal">◎　本次要看</div><div><small>预报对象</small><strong id="forecast">9月27–30日</strong></div><div><small>可信范围</small><strong id="horizon">2–5天预报</strong></div><div><small>满足条件后的动作</small><strong id="action">决定多洛米蒂前置，还是先去罗马</strong></div></div>
-  </section>
 
-  <section class="section">
-    <div class="section-head"><div><p class="eyebrow">MASTER FLOW</p><h2>完整决策树</h2></div><p>黄色为立即启动，青色为继续观察，红色为最终截止。</p></div>
-    <div class="tree-box">
-      <article class="node root"><span class="node-date">9月23–25日 · 出发前</span><h3>9月27–30日是否出现<br><em>至少2天</em>可用天气？</h3><p>5天趋势用于决定路线；3天预报用于确认执行。</p></article>
-      <div class="split"><span>是</span><b>↓</b><span>否</span></div>
-      <div class="tree-grid">
-        <article class="path path-a"><div class="path-label">✓　立即采用 A</div><h3>多洛米蒂前置</h3><p>抵达布鲁塞尔后转威尼斯。9月27日不安排日出，可根据抵达时间在威尼斯休整，或直接进入Dobbiaco。</p><div class="route"><span><i>布鲁塞尔</i></span><span><i>威尼斯</i></span><span><i>多洛米蒂</i></span><span><i>威尼斯</i></span><span><i>佛罗伦萨</i></span><span><i>五渔村*</i></span><span><i>罗马</i></span><span><i>布鲁塞尔</i></span></div><div class="path-foot">约9月30日完成山地模块；随后一路向南，城市段不再受山地天气牵制。</div></article>
-        <div class="spine">
-          <article class="node"><span class="node-date">9月27–28日 · 罗马</span><h3>9月30日是否开始<br>出现连续好窗口？</h3><p>若是，9月29日必须完成罗马→威尼斯→Dobbiaco转场。</p></article>
-          <div class="spine-arrow"><b>↓</b><span>仍不好</span></div>
-          <article class="node"><span class="node-date">9月29日–10月1日</span><h3>10月1–4日是否<br>形成可用窗口？</h3><p>继续佛罗伦萨；五渔村作为最先删除的天气缓冲。</p></article>
-          <div class="spine-arrow"><b>↓</b><span>继续等待</span></div>
-          <article class="node final"><span class="node-date">10月2日 · 最终判断</span><h3>10月3–5日是否还能<br>执行2天压缩版？</h3><p>这是同时保留三峰山与布雷耶斯湖的最后门槛。</p></article>
-        </div>
-        <div class="right-paths">
-          <article class="path path-b"><div class="path-label">✓　9月30日起转好</div><h3>中段启动 · 完成后去巴黎</h3><div class="route"><span><i>罗马 9/27–28</i></span><span><i>威尼斯 9/29</i></span><span><i>多洛米蒂 9/30–10/2</i></span><span><i>巴黎 10/3–5</i></span><span><i>布鲁塞尔</i></span></div><p>10月3日转场巴黎，4日和5日游览；5日晚乘高铁回布鲁塞尔。</p></article>
-          <article class="path path-c"><div class="path-label">✓　10月1–2日起转好</div><h3>后置启动 · 山地压轴</h3><div class="route"><span><i>罗马</i></span><span><i>佛罗伦萨</i></span><span><i>五渔村*</i></span><span><i>威尼斯 9/30或10/1</i></span><span><i>多洛米蒂</i></span><span><i>威尼斯</i></span><span><i>布鲁塞尔 10/5</i></span></div><p>取消巴黎。根据好天气的首日，提前一晚抵达Dobbiaco。</p></article>
-          <article class="path path-stop"><div class="path-label">×　最终窗口仍不可用</div><h3>停止等待多洛米蒂</h3><p>留在威尼斯或转巴黎，10月5日晚回到布鲁塞尔；不再叠加山路与返程航班风险。</p></article>
-        </div>
+    <section class="tree-scroll" aria-label="行程时间线与决策树">
+      <div class="tree-board">
+        <div class="timeline-head">总时间线</div>
+        <div class="tree-head"><strong>天气决策与对应行程</strong><span>每个节点与左侧日期横向对齐</span></div>
+        <div class="timeline-line"></div><i class="tick tick-2"></i><i class="tick tick-3"></i><i class="tick tick-4"></i><i class="tick tick-5"></i><i class="tick tick-6"></i>
+        <div class="time-row row-1"></div><div class="time-row row-2"></div><div class="time-row row-3"></div><div class="time-row row-4"></div><div class="time-row row-5"></div><div class="time-row row-6"></div><div class="time-row row-7"></div>
+        <div class="time-label label-1"><strong>9月23–25日</strong><span>出发前<br>第一次判断</span></div>
+        <div class="time-label label-2"><strong>9月26日</strong><span>抵达欧洲<br>路线分流</span></div>
+        <div class="time-label label-3"><strong>9月27–29日</strong><span>第一窗口<br>罗马复核</span></div>
+        <div class="time-label label-4"><strong>9月30日–10月2日</strong><span>中段窗口<br>最终判断</span></div>
+        <div class="time-label label-5"><strong>10月3–4日</strong><span>后段执行<br>或巴黎奖励</span></div>
+        <div class="time-label label-6"><strong>10月5日</strong><span>统一收束<br>返回比利时</span></div>
+        <div class="time-label label-7"><strong>10月5日晚</strong><span>布鲁塞尔<br>返程安全线</span></div>
+
+        <svg class="connectors" viewBox="0 0 1220 1062" preserveAspectRatio="none" aria-hidden="true">
+          <path class="connector green path-a" data-path="a" d="M585 116 V142 H191 V167"/><text class="branch-word" x="376" y="134" fill="#19766e">有 ≥2天窗口</text>
+          <path class="connector amber path-b path-c path-d" data-path="b c d" d="M585 116 V142 H895 V167"/><text class="branch-word" x="748" y="134" fill="#b96b16">前段天气不好</text>
+          <path class="connector green path-a" data-path="a" d="M191 267 V324"/><path class="connector green path-a" data-path="a" d="M191 417 V495"/><path class="connector green path-a" data-path="a" d="M191 590 V672"/><path class="connector green path-a" data-path="a" d="M191 770 V832"/>
+          <path class="connector amber path-b path-c path-d" data-path="b c d" d="M895 267 V317"/>
+          <path class="connector amber path-b" data-path="b" d="M895 407 V440 H577 V494"/><text class="branch-word" x="684" y="431" fill="#b96b16">9月30日起转好</text>
+          <path class="connector blue path-c path-d" data-path="c d" d="M895 407 V482 H970 V487"/><text class="branch-word" x="966" y="451" fill="#3d67a7">仍不好，继续北上</text>
+          <path class="connector amber path-b" data-path="b" d="M577 590 V670"/><path class="connector amber path-b" data-path="b" d="M577 770 V832"/>
+          <path class="connector blue path-c" data-path="c" d="M970 585 V621 H910 V662"/><text class="branch-word" x="785" y="614" fill="#3d67a7">10月1–3日转好</text>
+          <path class="connector red path-d" data-path="d" d="M970 585 V621 H1135 V662"/><text class="branch-word" x="1073" y="614" fill="#aa4d43">10月2日仍无窗口</text>
+          <path class="connector blue path-c" data-path="c" d="M910 770 V825"/><path class="connector red path-d" data-path="d" d="M1135 770 V825"/>
+          <path class="connector green path-a" data-path="a" d="M191 928 V956 H610 V970"/>
+          <path class="connector amber path-b" data-path="b" d="M577 928 V970"/>
+          <path class="connector blue path-c" data-path="c" d="M910 928 V956 H610 V970"/>
+          <path class="connector red path-d" data-path="d" d="M1135 928 V956 H610 V970"/>
+        </svg>
+
+        <article class="node decision root-node" data-path="a b c d"><span class="badge">决策 01 · 看9月27–30日</span><h3>是否出现连续 ≥2天的多洛米蒂好天气？</h3><p>9月23–25日看5天趋势；临近72小时后确认是否执行。</p></article>
+        <article class="node start route-a front-transfer" data-path="a"><span class="badge">A · 前置方案</span><h3>布鲁塞尔 → 威尼斯</h3><p>9月26日抵达后转VCE；不追9月27日日出，可休整后进山。</p><div class="days">交通/休整：1天</div></article>
+        <article class="node route-b rome-first" data-path="b c d"><span class="badge">前段天气不好</span><h3>布鲁塞尔 → 罗马</h3><p>先进行古建筑摄影，同时滚动观察下一阶段山地天气。</p><div class="days">罗马：9月27–28日，2个完整日</div></article>
+        <article class="node route-a front-dolo" data-path="a"><span class="badge">第一天气窗口</span><h3>三峰山 + 布雷耶斯湖</h3><p>Dobbiaco为底座；湖面低风清晨拍湖，最好的山顶窗口给三峰山。</p><div class="days">多洛米蒂：2–3个摄影日，约9月30日结束</div></article>
+        <article class="node decision rome-check" data-path="b c d"><span class="badge">决策 02 · 9月27–28日复核</span><h3>9月30日是否开始出现连续好窗口？</h3><p>查看9月30日–10月3日；若确认，9月29日必须转场威尼斯并进山。</p></article>
+        <article class="node route-a front-south" data-path="a"><span class="badge">山地模块完成</span><h3>威尼斯 → 佛罗伦萨</h3><p>VCE还车后乘高铁南下，不再受多洛米蒂天气影响。</p><div class="days">威尼斯0–1天 · 佛罗伦萨1–2天</div></article>
+        <article class="node route-b middle-dolo" data-path="b"><span class="badge">B · 中段方案</span><h3>9月29日转场，9月30日进山</h3><p>罗马→威尼斯高铁，VCE取车进入Dobbiaco。</p><div class="days">多洛米蒂：9月30日–10月2日，3天</div></article>
+        <article class="node route-c late-buffer" data-path="c d"><span class="badge">决策 03 / 04</span><h3>继续城市缓冲，同时靠近VCE</h3><p>佛罗伦萨优先；五渔村仅天气合适时保留。9月30日或10月1日到威尼斯。</p><div class="days">佛罗伦萨1–2天 · 五渔村0–1天 · 威尼斯0–1天</div></article>
+        <article class="node route-a front-cities" data-path="a"><span class="badge">一路向南</span><h3>佛罗伦萨 → 五渔村* → 罗马</h3><p>五渔村天气不好直接删除，优先保证罗马有两个完整摄影日。</p><div class="days">五渔村0–1天 · 罗马2天</div></article>
+        <article class="node route-b middle-paris" data-path="b"><span class="badge">山地提前完成</span><h3>10月3日威尼斯 → 巴黎</h3><p>从VCE飞巴黎；10月4日及5日白天安排巴黎城市摄影。</p><div class="days">巴黎：约2天</div></article>
+        <article class="node route-c late-dolo" data-path="c"><span class="badge">C · 后置方案</span><h3>启动最后的多洛米蒂窗口</h3><p>根据好天气首日提前一晚住Dobbiaco，集中拍三峰山和布雷耶斯湖。</p><div class="days">多洛米蒂：2–3天，主要摄影最晚10月4日结束</div></article>
+        <article class="node no-go no-weather" data-path="d"><span class="badge">NO-GO</span><h3>不再进山</h3><p>10月2日仍无可用窗口。</p></article>
+        <article class="node route-a front-rome" data-path="a"><span class="badge">A 收束</span><h3>罗马 → 布鲁塞尔</h3><p>罗马作为最后一站，航班选择最多。</p><div class="days">10月5日飞回BRU</div></article>
+        <article class="node route-b middle-return" data-path="b"><span class="badge">B 收束</span><h3>巴黎 → 布鲁塞尔</h3><p>10月5日下午或傍晚乘Eurostar回布鲁塞尔。</p><div class="days">巴黎2天 · 无返程航班压力</div></article>
+        <article class="node route-c late-return" data-path="c"><span class="badge">C 收束</span><h3>多洛米蒂 → VCE → BRU</h3><p>10月5日还车并从威尼斯飞回布鲁塞尔；取消巴黎。</p><div class="days">不要把10月5日三峰日出作为常规安排</div></article>
+        <article class="node no-go no-go-return" data-path="d"><span class="badge">D 收束</span><h3>威尼斯/巴黎</h3><p>改走城市行程，5日晚回BRU。</p></article>
+        <article class="node final brussels-final" data-path="a b c d"><span class="badge">所有路径统一终点</span><h3>10月5日晚抵达布鲁塞尔</h3><p>入住机场附近；10月6日乘HU7922返程。</p></article>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="section">
-    <div class="section-head"><div><p class="eyebrow">ROUTE CARDS</p><h2>三种成功路径</h2></div><p>* 五渔村仅在天气值得、时间足够时保留。</p></div>
-    <div class="cards">
-      <article class="card gold"><span class="card-code">A</span><div><small>9月27–30日出现 ≥2天好天气</small><h3>前置方案</h3></div><div class="route"><span><i>BRU</i></span><span><i>VCE</i></span><span><i>多洛米蒂</i></span><span><i>佛罗伦萨</i></span><span><i>五渔村*</i></span><span><i>罗马</i></span><span><i>BRU</i></span></div><p>约9月30日完成山地模块；之后一路向南。五渔村只在天气值得时保留。</p></article>
-      <article class="card cyan"><span class="card-code">B</span><div><small>9月30日开始转好</small><h3>中段启动</h3></div><div class="route"><span><i>罗马 9/27–28</i></span><span><i>VCE 9/29</i></span><span><i>多洛米蒂 9/30–10/2</i></span><span><i>巴黎 10/3–5</i></span><span><i>BRU</i></span></div><p>多洛米蒂提前完成，巴黎吸收剩余日期；10月5日晚回到布鲁塞尔。</p></article>
-      <article class="card blue"><span class="card-code">C</span><div><small>10月1–2日才开始转好</small><h3>后置方案</h3></div><div class="route"><span><i>罗马</i></span><span><i>佛罗伦萨</i></span><span><i>五渔村*</i></span><span><i>VCE</i></span><span><i>多洛米蒂</i></span><span><i>BRU 10/5</i></span></div><p>城市在前、山地压轴；取消巴黎，主要山地摄影最好在10月4日完成。</p></article>
-    </div>
-  </section>
+    <section class="summary-grid">
+      <article class="summary-card a"><small>A · 9月27–30日好</small><h3>前置多洛米蒂</h3><p>山地2–3天 → 佛罗伦萨1–2天 → 五渔村0–1天 → 罗马2天。</p></article>
+      <article class="summary-card b"><small>B · 9月30日起好</small><h3>中段多洛米蒂</h3><p>罗马2天 → 山地3天 → 巴黎约2天 → 10月5日晚BRU。</p></article>
+      <article class="summary-card c"><small>C · 10月1–3日起好</small><h3>后置多洛米蒂</h3><p>罗马2天 → 佛罗伦萨/五渔村弹性 → 山地2–3天 → VCE返程。</p></article>
+      <article class="summary-card d"><small>D · 始终无好窗口</small><h3>城市替代方案</h3><p>放弃进山，继续威尼斯或巴黎；不为单次天气机会承担返程风险。</p></article>
+    </section>
 
-  <section class="section">
-    <div class="criteria"><div class="criteria-title"><span class="criteria-icon">☀</span><div><p class="eyebrow">GO / NO-GO</p><h2>启动条件</h2></div></div><div class="criteria-grid"><div><span>01</span><p><strong>布雷耶斯湖</strong>至少一个低风、无持续降水的清晨。</p></div><div><span>02</span><p><strong>三峰山</strong>至少一个山顶可见的日出或日落窗口。</p></div><div><span>03</span><p><strong>交通安全</strong>三峰公路没有降雪封闭或明显结冰风险。</p></div><div><span>04</span><p><strong>执行门槛</strong>48–72小时内主要天气模型方向基本一致。</p></div></div></div>
-    <div class="risk"><span>!</span><div><strong>返程边界：</strong>若10月5日仍在三峰山，日出后赶威尼斯12:30直飞风险很高。后置方案最好10月4日结束主要摄影，10月5日从VCE返回BRU。</div></div>
-  </section>
-
-  <footer><span>⌖　威尼斯 VCE 固定取还车</span><span>⇄　城市间优先高铁</span><span>✈　10月5日晚必须到布鲁塞尔</span><span>本地单文件版本 · 无需登录</span></footer>
+    <section class="rules">
+      <div><p class="kicker">WEATHER RULES</p><h2>什么时候算“可以启动”</h2></div>
+      <div class="rule-list"><div><strong>窗口长度</strong><span>至少连续2天可用，不要求全程晴天。</span></div><div><strong>布雷耶斯湖</strong><span>至少一个低风、无持续降水的清晨。</span></div><div><strong>三峰山</strong><span>至少一个山顶可见的日出或日落窗口。</span></div><div><strong>交通安全</strong><span>公路没有降雪封闭或明显结冰风险。</span></div></div>
+    </section>
+    <footer><span>威尼斯VCE固定取还车 · 城市间优先高铁</span><span>更新时间：2026年9月</span></footer>
+  </main>
 
   <script>
-    const gates = [
-      { forecast:'9月27–30日', horizon:'2–5天预报', action:'决定多洛米蒂前置，还是先去罗马' },
-      { forecast:'9月30日–10月3日', horizon:'3–5天预报', action:'若9月30日起转好，9月29日北上威尼斯' },
-      { forecast:'10月1–4日', horizon:'1–5天预报', action:'按窗口压缩佛罗伦萨、五渔村和威尼斯' },
-      { forecast:'10月3–5日', horizon:'1–3天预报', action:'启动2天压缩版，或停止等待多洛米蒂' }
-    ];
-    document.querySelectorAll('.gate-tab').forEach((button) => {
-      button.addEventListener('click', () => {
-        document.querySelectorAll('.gate-tab').forEach((item) => item.classList.remove('active'));
-        button.classList.add('active');
-        const gate = gates[Number(button.dataset.gate)];
-        const detail = document.getElementById('gate-detail');
-        document.getElementById('forecast').textContent = gate.forecast;
-        document.getElementById('horizon').textContent = gate.horizon;
-        document.getElementById('action').textContent = gate.action;
-        detail.style.animation = 'none';
-        requestAnimationFrame(() => { detail.style.animation = 'reveal .25s ease'; });
+    const buttons = document.querySelectorAll('.focus-button');
+    const nodes = document.querySelectorAll('.node[data-path]');
+    const lines = document.querySelectorAll('.connector[data-path]');
+    buttons.forEach((button) => button.addEventListener('click', () => {
+      buttons.forEach((item) => item.classList.remove('active'));
+      button.classList.add('active');
+      const focus = button.dataset.focus;
+      nodes.forEach((node) => {
+        const paths = node.dataset.path.split(' ');
+        node.classList.toggle('dim', focus !== 'all' && !paths.includes(focus));
       });
-    });
+      lines.forEach((line) => {
+        const paths = line.dataset.path.split(' ');
+        line.classList.toggle('dim', focus !== 'all' && !paths.includes(focus));
+      });
+    }));
   </script>
 </body>
 </html>
