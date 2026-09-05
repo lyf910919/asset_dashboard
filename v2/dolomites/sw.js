@@ -1,4 +1,4 @@
-const CACHE = 'dolomites-pwa-v4';
+const CACHE = 'dolomites-pwa-v6';
 const ASSETS = ['./', './manifest.webmanifest', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
