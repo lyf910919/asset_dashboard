@@ -1,0 +1,16 @@
+{
+  "name": "多洛米蒂动态行程",
+  "short_name": "行程决策",
+  "description": "以三峰山与布雷耶斯湖天气窗口为核心的摄影行程决策树",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f6efcf",
+  "theme_color": "#f6efcf",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
