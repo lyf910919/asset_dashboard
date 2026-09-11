@@ -6,7 +6,7 @@
     <title>QDII 资产监控看板 v2.0</title>
     <meta name="theme-color" content="#2b8fb8" />
     <link rel="manifest" href="./manifest.webmanifest?v=20260730-pension-calc" />
-    <link rel="stylesheet" href="./styles.css?v=20260730-pension-calc" />
+    <link rel="stylesheet" href="./styles.css?v=20260911-ic-reserve" />
   </head>
   <body>
     <div class="page-bg"></div>
@@ -150,6 +150,13 @@
                   <p id="target-config-subtitle" class="group-target-subtitle">点击分组即可设置目标仓位，偏离 = 当前 - 目标</p>
                 </div>
                 <div class="group-target-actions">
+                  <label class="target-amount-control" for="target-total-amount">
+                    <span>目标总金额（人民币）</span>
+                    <span class="target-amount-input-wrap">
+                      <span class="target-amount-symbol">¥</span>
+                      <input id="target-total-amount" type="number" min="0" step="100" inputmode="decimal" placeholder="按当前总资产" />
+                    </span>
+                  </label>
                   <div class="pie-display-switch target-scope-switch" role="group" aria-label="目标仓位设置范围切换">
                     <button type="button" class="pie-display-btn target-scope-btn is-active" data-target-scope="group">
                       分组
@@ -585,10 +592,10 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20260731-hk-atr-stamp" type="module"></script>
+    <script src="./app.js?v=20260911-ic-reserve" type="module"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js?v=20260731-hk-atr-stamp").catch(() => {});
+        navigator.serviceWorker.register("./sw.js?v=20260911-ic-reserve").catch(() => {});
       }
     </script>
   </body>

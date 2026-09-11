@@ -985,6 +985,37 @@ input:not([type="checkbox"]):not([type="radio"]):focus {
   flex-wrap: wrap;
 }
 
+.target-amount-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.target-amount-input-wrap {
+  position: relative;
+  display: block;
+  width: 150px;
+}
+
+.target-amount-symbol {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  z-index: 1;
+  color: var(--muted);
+  font-size: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+#target-total-amount {
+  height: 32px;
+  padding: 6px 8px 6px 23px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
 .group-target-title {
   margin: 0;
   font-size: 14px;
@@ -2122,6 +2153,15 @@ body.is-locked #tab-config #gist-verify-btn {
   .group-target-actions {
     align-items: stretch;
     justify-content: flex-start;
+  }
+
+  .target-amount-control {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .target-amount-input-wrap {
+    width: min(200px, 62vw);
   }
 
   .target-scope-switch {

@@ -101,7 +101,34 @@ const HOLDING_HISTORY_FIELDS = [
   "groupName",
   "sortOrder",
 ];
-const SETTINGS_HISTORY_FIELDS = ["refreshInterval", "quotePreference", "displayCurrency", "groupTargets", "fundTargets"];
+const SETTINGS_HISTORY_FIELDS = [
+  "refreshInterval",
+  "quotePreference",
+  "displayCurrency",
+  "targetTotalAmount",
+  "groupTargets",
+  "fundTargets",
+];
+
+const IC_RESERVE_ACCOUNT_ID = "account-ic-reserve-v1";
+const IC_RESERVE_ACCOUNT_NAME = "IC准备金";
+const IC_RESERVE_HOLDINGS = [
+  { id: "ic-reserve-003156", code: "003156", name: "招商招悦纯债A", targetShare: 0.14, assetClass: "bond", groupName: "固定收益" },
+  { id: "ic-reserve-007169", code: "007169", name: "易方达中债1-3年国开行A", targetShare: 0.13, assetClass: "bond", groupName: "固定收益" },
+  { id: "ic-reserve-009510", code: "009510", name: "天弘同利E", targetShare: 0.13, assetClass: "bond", groupName: "固定收益" },
+  { id: "ic-reserve-003949", code: "003949", name: "兴全稳泰A", targetShare: 0.1, assetClass: "bond", groupName: "固定收益" },
+  { id: "ic-reserve-000191", code: "000191", name: "富国信用债A", targetShare: 0.1, assetClass: "bond", groupName: "固定收益" },
+  { id: "ic-reserve-002549", code: "002549", name: "嘉实稳祥纯债A", targetShare: 0.06, assetClass: "bond", groupName: "固定收益" },
+  { id: "ic-reserve-007171", code: "007171", name: "易方达中债3-5年国开行A", targetShare: 0.05, assetClass: "bond", groupName: "固定收益" },
+  { id: "ic-reserve-270048", code: "270048", name: "广发纯债A", targetShare: 0.05, assetClass: "bond", groupName: "固定收益" },
+  { id: "ic-reserve-519782", code: "519782", name: "交银裕隆纯债A", targetShare: 0.04, assetClass: "bond", groupName: "固定收益" },
+  { id: "ic-reserve-000642", code: "000642", name: "汇添富货币C", targetShare: 0.04, assetClass: "cash", groupName: "现金管理" },
+  { id: "ic-reserve-013776", code: "013776", name: "中泰兴为价值精选A", targetShare: 0.04, assetClass: "stock", groupName: "权益增强" },
+  { id: "ic-reserve-009051", code: "009051", name: "易方达中证红利ETF联接A", targetShare: 0.04, assetClass: "stock", groupName: "权益增强" },
+  { id: "ic-reserve-011649", code: "011649", name: "易方达逆向投资A", targetShare: 0.03, assetClass: "stock", groupName: "权益增强" },
+  { id: "ic-reserve-110020", code: "110020", name: "易方达沪深300ETF联接A", targetShare: 0.03, assetClass: "stock", groupName: "权益增强" },
+  { id: "ic-reserve-002656", code: "002656", name: "南方创业板ETF联接A", targetShare: 0.02, assetClass: "stock", groupName: "权益增强" },
+];
 
 const defaultHoldings = [
   {
@@ -210,6 +237,7 @@ const el = {
   targetPieSubtitle: document.querySelector("#target-pie-subtitle"),
   targetConfigTitle: document.querySelector("#target-config-title"),
   targetConfigSubtitle: document.querySelector("#target-config-subtitle"),
+  targetTotalAmount: document.querySelector("#target-total-amount"),
   targetScopeButtons: [...document.querySelectorAll("[data-target-scope]")],
   groupTargetSummary: document.querySelector("#group-target-summary"),
   groupTargetList: document.querySelector("#group-target-list"),
@@ -448,6 +476,12 @@ function normalizeFundTargets(input) {
   return normalized;
 }
 
+function normalizeTargetTotalAmount(value) {
+  if (value === "" || value === null || value === undefined) return null;
+  const parsed = Number.parseFloat(String(value));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 function normalizeSortOrder(value) {
   const parsed = Number.parseInt(String(value), 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
@@ -564,6 +598,7 @@ function normalizeAccount(input, index = 0) {
       refreshInterval: normalizeInterval(input?.settings?.refreshInterval),
       quotePreference: normalizeQuotePreference(input?.settings?.quotePreference),
       displayCurrency: normalizeDisplayCurrency(input?.settings?.displayCurrency),
+      targetTotalAmount: normalizeTargetTotalAmount(input?.settings?.targetTotalAmount),
       groupTargets: normalizeGroupTargets(input?.settings?.groupTargets),
       fundTargets: normalizeFundTargets(input?.settings?.fundTargets),
     },
@@ -582,6 +617,7 @@ function createAccount(seed = {}) {
       refreshInterval: normalizeInterval(seed?.settings?.refreshInterval ?? 60),
       quotePreference: normalizeQuotePreference(seed?.settings?.quotePreference ?? "nav"),
       displayCurrency: normalizeDisplayCurrency(seed?.settings?.displayCurrency ?? "cny"),
+      targetTotalAmount: normalizeTargetTotalAmount(seed?.settings?.targetTotalAmount),
       groupTargets: normalizeGroupTargets(seed?.settings?.groupTargets),
       fundTargets: normalizeFundTargets(seed?.settings?.fundTargets),
     },
@@ -594,7 +630,7 @@ function createVaultFromHoldings(holdings) {
   const account = createAccount({
     name: DEFAULT_ACCOUNT_NAME,
     holdings: holdings.map((item) => normalizeHolding(item)),
-    settings: { refreshInterval: 60, quotePreference: "nav", displayCurrency: "cny", groupTargets: {}, fundTargets: {} },
+    settings: { refreshInterval: 60, quotePreference: "nav", displayCurrency: "cny", targetTotalAmount: null, groupTargets: {}, fundTargets: {} },
   });
   return normalizeVault({
     version: 2,
@@ -622,6 +658,12 @@ function normalizeVault(vault) {
   if (accounts.length === 0 || !accounts.some((account) => !account.deleted)) {
     accounts.push(createAccount({ name: DEFAULT_ACCOUNT_NAME }));
   }
+  const hasIcReserveAccount = accounts.some(
+    (account) => account.id === IC_RESERVE_ACCOUNT_ID || account.name === IC_RESERVE_ACCOUNT_NAME,
+  );
+  if (!hasIcReserveAccount) {
+    accounts.push(createIcReserveAccount());
+  }
 
   let activeAccountId = String(vault?.activeAccountId || "").trim();
   const activeAccounts = accounts.filter((account) => !account.deleted);
@@ -638,6 +680,32 @@ function normalizeVault(vault) {
     activeAccountId,
     updatedAt: vault?.updatedAt || latestAccountUpdatedAt || nowIso(),
   };
+}
+
+function createIcReserveAccount() {
+  const holdings = IC_RESERVE_HOLDINGS.map((seed, index) =>
+    createHolding({ ...seed, units: 0, cost: null, sortOrder: index + 1 }),
+  );
+  const fundTargets = Object.fromEntries(IC_RESERVE_HOLDINGS.map((holding) => [holding.id, holding.targetShare]));
+  const groupTargets = {
+    [buildGroupCompositeKey("bond", "固定收益")]: 0.8,
+    [buildGroupCompositeKey("cash", "现金管理")]: 0.04,
+    [buildGroupCompositeKey("stock", "权益增强")]: 0.16,
+  };
+
+  return createAccount({
+    id: IC_RESERVE_ACCOUNT_ID,
+    name: IC_RESERVE_ACCOUNT_NAME,
+    holdings,
+    settings: {
+      refreshInterval: 60,
+      quotePreference: "nav",
+      displayCurrency: "cny",
+      targetTotalAmount: null,
+      groupTargets,
+      fundTargets,
+    },
+  });
 }
 
 function mergeAccounts(localAccount, remoteAccount) {
@@ -3465,8 +3533,9 @@ function openGroupTargetModal(groupKey) {
       const classLabel = ASSET_CLASS_LABELS[classKey] || classKey;
       const targetShare = Number.isFinite(targets[groupKey]) ? targets[groupKey] : null;
       const currentAmount = Number.isFinite(metric?.assetAmount) ? metric.assetAmount : 0;
-      const currentShare = snapshot.totalAsset > 0 ? currentAmount / snapshot.totalAsset : 0;
-      const targetAmount = targetShare !== null && snapshot.totalAsset > 0 ? snapshot.totalAsset * targetShare : null;
+      const targetAmountBase = getTargetAmountBase(snapshot);
+      const currentShare = Number.isFinite(targetAmountBase) && targetAmountBase > 0 ? currentAmount / targetAmountBase : 0;
+      const targetAmount = targetShare !== null && Number.isFinite(targetAmountBase) ? targetAmountBase * targetShare : null;
       const groupName = holding ? getHoldingGroupName(holding) : DEFAULT_GROUP_NAME;
       const code = String(holding?.code || "").trim();
       return {
@@ -3491,7 +3560,8 @@ function openGroupTargetModal(groupKey) {
     const meta = parseGroupCompositeKey(groupKey);
     const normalizedKey = buildGroupCompositeKey(meta.classKey, meta.groupName);
     const targetShare = Number.isFinite(targets[normalizedKey]) ? targets[normalizedKey] : null;
-    const targetAmount = targetShare !== null && snapshot.totalAsset > 0 ? snapshot.totalAsset * targetShare : null;
+    const targetAmountBase = getTargetAmountBase(snapshot);
+    const targetAmount = targetShare !== null && Number.isFinite(targetAmountBase) ? targetAmountBase * targetShare : null;
     return {
       key: normalizedKey,
       scope: "group",
@@ -3647,6 +3717,7 @@ function updateLockUI() {
   el.pieDisplayButtons.forEach((button) => {
     button.disabled = !state.unlocked;
   });
+  if (el.targetTotalAmount) el.targetTotalAmount.disabled = !state.unlocked;
   syncTargetScopeButtons();
   syncTargetPieLevelButtons();
   el.unlockOpenBtn.classList.toggle("is-hidden", state.unlocked);
@@ -4928,6 +4999,22 @@ function getTotalGroupTargetShare(groupTargets = readActiveGroupTargets()) {
   return getTotalTargetShare(groupTargets);
 }
 
+function getTargetAmountBase(snapshot) {
+  const configuredAmount = normalizeTargetTotalAmount(getActiveAccount()?.settings?.targetTotalAmount);
+  if (configuredAmount !== null) {
+    return convertMoneyAmount(configuredAmount, "CNY", getDisplayCurrencyCode());
+  }
+  return snapshot.totalAsset > 0 ? snapshot.totalAsset : null;
+}
+
+function syncTargetTotalAmountInput() {
+  if (!el.targetTotalAmount) return;
+  el.targetTotalAmount.disabled = !state.unlocked;
+  if (document.activeElement === el.targetTotalAmount) return;
+  const amount = normalizeTargetTotalAmount(getActiveAccount()?.settings?.targetTotalAmount);
+  el.targetTotalAmount.value = amount === null ? "" : String(amount);
+}
+
 function getTargetScopeMeta(scope = state.targetScope) {
   const normalized = normalizeTargetScope(scope);
   if (normalized === "fund") {
@@ -4964,16 +5051,18 @@ function updateTargetSectionLabels(scope = state.targetScope) {
 function buildGroupTargetRows(snapshot, groupTargets = readActiveGroupTargets()) {
   const keys = new Set([...snapshot.groupStats.keys(), ...Object.keys(groupTargets)]);
   const rows = [];
+  const targetAmountBase = getTargetAmountBase(snapshot);
 
   keys.forEach((key) => {
     const { classKey, groupName } = parseGroupCompositeKey(key);
     const stat = snapshot.groupStats.get(key) || createEmptyStat();
     const currentAmount = Number.isFinite(stat.amount) ? stat.amount : 0;
-    const currentShare = snapshot.totalAsset > 0 ? currentAmount / snapshot.totalAsset : 0;
+    const currentShare = Number.isFinite(targetAmountBase) && targetAmountBase > 0 ? currentAmount / targetAmountBase : 0;
     const targetShare = Number.isFinite(groupTargets[key]) ? groupTargets[key] : null;
-    const targetAmount = targetShare !== null && snapshot.totalAsset > 0 ? snapshot.totalAsset * targetShare : null;
+    const targetAmount = targetShare !== null && Number.isFinite(targetAmountBase) ? targetAmountBase * targetShare : null;
     const shareDiff = targetShare !== null ? currentShare - targetShare : null;
     const amountDiff = Number.isFinite(targetAmount) ? currentAmount - targetAmount : null;
+    const buyAmount = Number.isFinite(targetAmount) ? Math.max(targetAmount - currentAmount, 0) : null;
 
     rows.push({
       key,
@@ -4986,6 +5075,7 @@ function buildGroupTargetRows(snapshot, groupTargets = readActiveGroupTargets())
       targetAmount,
       shareDiff,
       amountDiff,
+      buyAmount,
       hasTarget: targetShare !== null,
       scope: "group",
       name: groupName,
@@ -5022,6 +5112,7 @@ function buildFundTargetRows(snapshot, fundTargets = readActiveFundTargets()) {
   const holdingMap = new Map(holdings.map((holding) => [holding.id, holding]));
   const keys = new Set([...activeHoldings.map((holding) => holding.id), ...Object.keys(fundTargets)]);
   const rows = [];
+  const targetAmountBase = getTargetAmountBase(snapshot);
 
   keys.forEach((key) => {
     const holding = holdingMap.get(key) || null;
@@ -5031,11 +5122,12 @@ function buildFundTargetRows(snapshot, fundTargets = readActiveFundTargets()) {
     const classLabel = ASSET_CLASS_LABELS[classKey] || classKey;
     const groupName = holding ? getHoldingGroupName(holding) : DEFAULT_GROUP_NAME;
     const currentAmount = Number.isFinite(metric?.assetAmount) ? metric.assetAmount : 0;
-    const currentShare = snapshot.totalAsset > 0 ? currentAmount / snapshot.totalAsset : 0;
+    const currentShare = Number.isFinite(targetAmountBase) && targetAmountBase > 0 ? currentAmount / targetAmountBase : 0;
     const targetShare = Number.isFinite(fundTargets[key]) ? fundTargets[key] : null;
-    const targetAmount = targetShare !== null && snapshot.totalAsset > 0 ? snapshot.totalAsset * targetShare : null;
+    const targetAmount = targetShare !== null && Number.isFinite(targetAmountBase) ? targetAmountBase * targetShare : null;
     const shareDiff = targetShare !== null ? currentShare - targetShare : null;
     const amountDiff = Number.isFinite(targetAmount) ? currentAmount - targetAmount : null;
+    const buyAmount = Number.isFinite(targetAmount) ? Math.max(targetAmount - currentAmount, 0) : null;
     const code = String(holding?.code || "").trim();
     const name = metric?.name || holding?.name || code || "未知持仓";
 
@@ -5050,6 +5142,7 @@ function buildFundTargetRows(snapshot, fundTargets = readActiveFundTargets()) {
       targetAmount,
       shareDiff,
       amountDiff,
+      buyAmount,
       hasTarget: targetShare !== null,
       scope: "fund",
       holding,
@@ -5110,7 +5203,7 @@ function createGroupTargetHeader(scope = state.targetScope) {
   const header = document.createElement("div");
   header.className = "group-target-header";
   const meta = getTargetScopeMeta(scope);
-  [meta.itemLabel, "当前", "目标", "偏离"].forEach((label) => {
+  [meta.itemLabel, "当前", "目标", "需买入"].forEach((label) => {
     const cell = document.createElement("span");
     cell.className = "group-target-header-cell";
     cell.textContent = label;
@@ -5142,6 +5235,7 @@ function createGroupTargetValueCell(valueText, amountText, valueClassName = "", 
 function clearGroupTargetSection(message) {
   updateTargetSectionLabels();
   syncTargetScopeButtons();
+  syncTargetTotalAmountInput();
   if (el.groupTargetSummary) {
     el.groupTargetSummary.textContent = "未设置目标";
     el.groupTargetSummary.classList.remove("is-bad");
@@ -5170,6 +5264,7 @@ function renderGroupTargetSection(snapshot) {
   el.groupTargetSummary.classList.toggle("is-bad", totalTargetShare > 1.0001);
   updateTargetSectionLabels(scope);
   syncTargetScopeButtons();
+  syncTargetTotalAmountInput();
   el.groupTargetList.classList.toggle("is-fund-target-list", scope === "fund");
 
   el.groupTargetList.innerHTML = "";
@@ -5217,10 +5312,10 @@ function renderGroupTargetSection(snapshot) {
         "目标",
       ),
       createGroupTargetValueCell(
-        row.hasTarget ? formatTargetShareDiff(row.shareDiff) : "--",
-        row.hasTarget && Number.isFinite(row.amountDiff) ? formatSignedCompactMoney(row.amountDiff) : "--",
+        row.hasTarget && Number.isFinite(row.buyAmount) ? formatMoney(row.buyAmount) : "--",
+        row.hasTarget && Number.isFinite(row.shareDiff) ? `${formatTargetShareDiff(row.shareDiff)} 偏离` : "--",
         row.hasTarget && Number.isFinite(row.shareDiff) ? status.className : "",
-        "偏离",
+        "需买入",
       ),
     );
     fragment.appendChild(item);
@@ -5247,6 +5342,7 @@ function buildTargetPieSeries(level, snapshot, targets = readActiveTargets(), sc
   const normalizedScope = normalizeTargetScope(scope);
   const normalizedLevel = normalizeTargetPieLevel(level, normalizedScope);
   const totalTargetShare = getTotalTargetShare(targets);
+  const targetAmountBase = getTargetAmountBase(snapshot);
   if (totalTargetShare <= 0) {
     return { items: [], totalBase: 0, totalTargetShare };
   }
@@ -5291,7 +5387,7 @@ function buildTargetPieSeries(level, snapshot, targets = readActiveTargets(), sc
       label,
       value,
       targetShare: value,
-      targetAmount: snapshot.totalAsset > 0 ? snapshot.totalAsset * value : null,
+      targetAmount: Number.isFinite(targetAmountBase) ? targetAmountBase * value : null,
       isRemainder: false,
     }))
     .sort((a, b) => b.value - a.value);
@@ -5302,7 +5398,7 @@ function buildTargetPieSeries(level, snapshot, targets = readActiveTargets(), sc
       label: "未设目标",
       value: remainder,
       targetShare: remainder,
-      targetAmount: snapshot.totalAsset > 0 ? snapshot.totalAsset * remainder : null,
+      targetAmount: Number.isFinite(targetAmountBase) ? targetAmountBase * remainder : null,
       isRemainder: true,
     });
   }
@@ -6231,6 +6327,17 @@ function updateQuotePreferenceInVault(value) {
   if (diff.changed) {
     void emitHistoryChange("SETTINGS_CHANGE", { before: diff.before, after: diff.after }, account.id);
   }
+}
+
+function updateTargetTotalAmountInVault(value) {
+  if (!state.vault) return;
+  const account = getActiveAccount();
+  if (!account) return;
+  account.settings.targetTotalAmount = normalizeTargetTotalAmount(value);
+  const stamp = nowIso();
+  account.settingsUpdatedAt = stamp;
+  account.updatedAt = stamp;
+  state.vault.updatedAt = stamp;
 }
 
 function updateDisplayCurrencySettingInVault(value) {
@@ -7235,6 +7342,14 @@ function bindEvents() {
       if (!state.unlocked) return;
       setTargetScope(button.dataset.targetScope);
     });
+  });
+
+  el.targetTotalAmount?.addEventListener("input", () => {
+    if (!state.unlocked) return;
+    updateTargetTotalAmountInVault(el.targetTotalAmount.value);
+    renderPieOnly();
+    schedulePersist();
+    scheduleSync();
   });
 
   el.targetPieModeButtons.forEach((button) => {
