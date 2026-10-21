@@ -5203,7 +5203,7 @@ function createGroupTargetHeader(scope = state.targetScope) {
   const header = document.createElement("div");
   header.className = "group-target-header";
   const meta = getTargetScopeMeta(scope);
-  [meta.itemLabel, "当前", "目标", "需买入"].forEach((label) => {
+  [meta.itemLabel, "当前", "目标", "需买入 / 卖出"].forEach((label) => {
     const cell = document.createElement("span");
     cell.className = "group-target-header-cell";
     cell.textContent = label;
@@ -5312,10 +5312,22 @@ function renderGroupTargetSection(snapshot) {
         "目标",
       ),
       createGroupTargetValueCell(
-        row.hasTarget && Number.isFinite(row.buyAmount) ? formatMoney(row.buyAmount) : "--",
-        row.hasTarget && Number.isFinite(row.shareDiff) ? `${formatTargetShareDiff(row.shareDiff)} 偏离` : "--",
-        row.hasTarget && Number.isFinite(row.shareDiff) ? status.className : "",
-        "需买入",
+        row.hasTarget && Number.isFinite(row.amountDiff) ? formatMoney(Math.abs(row.amountDiff)) : "--",
+        row.hasTarget && Number.isFinite(row.amountDiff)
+          ? Math.abs(row.amountDiff) < 0.01
+            ? "无需调仓"
+            : row.amountDiff > 0
+              ? "需卖出"
+              : "需买入"
+          : "--",
+        row.hasTarget && Number.isFinite(row.amountDiff)
+          ? Math.abs(row.amountDiff) < 0.01
+            ? "is-neutral"
+            : row.amountDiff > 0
+              ? "is-up"
+              : "is-down"
+          : "",
+        "需买入 / 卖出",
       ),
     );
     fragment.appendChild(item);
