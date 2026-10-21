@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20260911-ic-reserve";
+const ASSET_VERSION = "20261021-buy-sell-refresh";
 const CACHE_NAME = `qdii-dashboard-v2-${ASSET_VERSION}`;
 const ASSET_LIST = [
   "./",
