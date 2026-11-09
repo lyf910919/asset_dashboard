@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "indexCode": "000688",
   "indexName": "科创50",
-  "generatedAt": "2026-11-10T01:23:01+08:00",
+  "generatedAt": "2026-11-10T02:40:47+08:00",
   "constituentVersionDate": "2025-09-23",
   "constituentSourceName": "上交所科创50指数成分股（2025年第三季度）",
   "constituentSourceUrl": "https://www.sse.com.cn/market/sseindex/indexlist/",
@@ -25,7 +25,7 @@
     "amountMa20Yuan": 67186636704.35,
     "previousVolumeHands": 8682879.0,
     "previousAmountYuan": 78121888301.0,
-    "priceChangePct": 0.6338826480465798,
+    "priceChangePct": 0.6338826480465576,
     "constituentCount": 50,
     "amountCount": 50
   },
@@ -35,7 +35,7 @@
       "volumeHands": 7268893.0,
       "amountYuan": 82024743309.0,
       "amountCount": 50,
-      "closeSum": 8292.590000000002,
+      "closeSum": 8292.59,
       "constituentCount": 50
     },
     {
@@ -43,7 +43,7 @@
       "volumeHands": 5530292.0,
       "amountYuan": 63888272343.0,
       "amountCount": 50,
-      "closeSum": 8112.91,
+      "closeSum": 8112.910000000001,
       "constituentCount": 50
     },
     {
@@ -67,7 +67,7 @@
       "volumeHands": 5836077.0,
       "amountYuan": 67332089645.0,
       "amountCount": 50,
-      "closeSum": 7822.98,
+      "closeSum": 7822.9800000000005,
       "constituentCount": 50
     },
     {
@@ -75,7 +75,7 @@
       "volumeHands": 5813250.0,
       "amountYuan": 69482434089.0,
       "amountCount": 50,
-      "closeSum": 7961.32,
+      "closeSum": 7961.319999999999,
       "constituentCount": 50
     },
     {
@@ -83,7 +83,7 @@
       "volumeHands": 4987274.0,
       "amountYuan": 60016710888.0,
       "amountCount": 50,
-      "closeSum": 7812.710000000001,
+      "closeSum": 7812.710000000002,
       "constituentCount": 50
     },
     {
@@ -91,7 +91,7 @@
       "volumeHands": 4276805.0,
       "amountYuan": 46944253125.0,
       "amountCount": 50,
-      "closeSum": 7749.970000000002,
+      "closeSum": 7749.970000000003,
       "constituentCount": 50
     },
     {
@@ -99,7 +99,7 @@
       "volumeHands": 3933812.0,
       "amountYuan": 40622203414.0,
       "amountCount": 50,
-      "closeSum": 7698.749999999998,
+      "closeSum": 7698.749999999999,
       "constituentCount": 50
     },
     {
@@ -107,7 +107,7 @@
       "volumeHands": 6272692.0,
       "amountYuan": 63467429171.0,
       "amountCount": 50,
-      "closeSum": 7574.649999999997,
+      "closeSum": 7574.649999999998,
       "constituentCount": 50
     },
     {
@@ -115,7 +115,7 @@
       "volumeHands": 4507605.0,
       "amountYuan": 48241202926.0,
       "amountCount": 50,
-      "closeSum": 7529.68,
+      "closeSum": 7529.679999999999,
       "constituentCount": 50
     },
     {
@@ -147,7 +147,7 @@
       "volumeHands": 7165929.0,
       "amountYuan": 87218627918.0,
       "amountCount": 50,
-      "closeSum": 8104.370000000003,
+      "closeSum": 8104.3700000000035,
       "constituentCount": 50
     },
     {
@@ -155,7 +155,7 @@
       "volumeHands": 5801001.0,
       "amountYuan": 66639921434.0,
       "amountCount": 50,
-      "closeSum": 8099.59,
+      "closeSum": 8099.590000000002,
       "constituentCount": 50
     },
     {
@@ -163,7 +163,7 @@
       "volumeHands": 7147057.0,
       "amountYuan": 89772340000.0,
       "amountCount": 50,
-      "closeSum": 8178.860000000001,
+      "closeSum": 8178.860000000002,
       "constituentCount": 50
     },
     {
@@ -179,7 +179,7 @@
       "volumeHands": 4735812.0,
       "amountYuan": 52586813460.0,
       "amountCount": 50,
-      "closeSum": 7993.910000000002,
+      "closeSum": 7993.910000000001,
       "constituentCount": 50
     },
     {
@@ -187,7 +187,7 @@
       "volumeHands": 5727007.0,
       "amountYuan": 62899450316.0,
       "amountCount": 50,
-      "closeSum": 7678.539999999998,
+      "closeSum": 7678.54,
       "constituentCount": 50
     },
     {
@@ -195,7 +195,7 @@
       "volumeHands": 4316289.0,
       "amountYuan": 50176038328.0,
       "amountCount": 50,
-      "closeSum": 7733.780000000003,
+      "closeSum": 7733.780000000002,
       "constituentCount": 50
     },
     {
@@ -203,7 +203,7 @@
       "volumeHands": 5136806.0,
       "amountYuan": 56203787561.0,
       "amountCount": 50,
-      "closeSum": 7599.940000000001,
+      "closeSum": 7599.9400000000005,
       "constituentCount": 50
     },
     {
@@ -211,7 +211,7 @@
       "volumeHands": 6564725.0,
       "amountYuan": 66642401584.0,
       "amountCount": 50,
-      "closeSum": 7278.46,
+      "closeSum": 7278.460000000001,
       "constituentCount": 50
     },
     {
@@ -219,7 +219,7 @@
       "volumeHands": 7101053.0,
       "amountYuan": 71825992339.0,
       "amountCount": 50,
-      "closeSum": 7293.579999999999,
+      "closeSum": 7293.58,
       "constituentCount": 50
     },
     {
@@ -227,7 +227,7 @@
       "volumeHands": 4965275.0,
       "amountYuan": 50716007670.0,
       "amountCount": 50,
-      "closeSum": 7213.8300000000045,
+      "closeSum": 7213.830000000004,
       "constituentCount": 50
     },
     {
@@ -267,7 +267,7 @@
       "volumeHands": 6175508.0,
       "amountYuan": 56371705514.0,
       "amountCount": 50,
-      "closeSum": 6816.099999999999,
+      "closeSum": 6816.1,
       "constituentCount": 50
     },
     {
@@ -275,7 +275,7 @@
       "volumeHands": 6452266.0,
       "amountYuan": 63182918741.0,
       "amountCount": 50,
-      "closeSum": 6922.98,
+      "closeSum": 6922.979999999999,
       "constituentCount": 50
     },
     {
@@ -291,7 +291,7 @@
       "volumeHands": 6374620.0,
       "amountYuan": 59140257461.0,
       "amountCount": 50,
-      "closeSum": 6759.740000000001,
+      "closeSum": 6759.739999999999,
       "constituentCount": 50
     },
     {
@@ -299,7 +299,7 @@
       "volumeHands": 8485212.0,
       "amountYuan": 83406832691.0,
       "amountCount": 50,
-      "closeSum": 6998.99,
+      "closeSum": 6998.990000000001,
       "constituentCount": 50
     },
     {
@@ -307,7 +307,7 @@
       "volumeHands": 7188920.0,
       "amountYuan": 73974417455.0,
       "amountCount": 50,
-      "closeSum": 6902.879999999999,
+      "closeSum": 6902.879999999998,
       "constituentCount": 50
     },
     {
@@ -331,7 +331,7 @@
       "volumeHands": 5937215.0,
       "amountYuan": 57312371163.0,
       "amountCount": 50,
-      "closeSum": 6412.709999999998,
+      "closeSum": 6412.709999999997,
       "constituentCount": 50
     },
     {
@@ -347,7 +347,7 @@
       "volumeHands": 8522119.0,
       "amountYuan": 71355746019.0,
       "amountCount": 50,
-      "closeSum": 6262.1,
+      "closeSum": 6262.100000000001,
       "constituentCount": 50
     },
     {
@@ -355,7 +355,7 @@
       "volumeHands": 8623283.0,
       "amountYuan": 74999048225.0,
       "amountCount": 50,
-      "closeSum": 6031.44,
+      "closeSum": 6031.439999999999,
       "constituentCount": 50
     },
     {
@@ -363,7 +363,7 @@
       "volumeHands": 10140611.0,
       "amountYuan": 91789540254.0,
       "amountCount": 50,
-      "closeSum": 6635.75,
+      "closeSum": 6635.749999999999,
       "constituentCount": 50
     },
     {
@@ -371,7 +371,7 @@
       "volumeHands": 11026926.0,
       "amountYuan": 100517409243.0,
       "amountCount": 50,
-      "closeSum": 6787.399999999999,
+      "closeSum": 6787.4,
       "constituentCount": 50
     },
     {
@@ -379,7 +379,7 @@
       "volumeHands": 8682879.0,
       "amountYuan": 78121888301.0,
       "amountCount": 50,
-      "closeSum": 6633.720000000002,
+      "closeSum": 6633.720000000003,
       "constituentCount": 50
     },
     {
