@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "indexCode": "000688",
   "indexName": "科创50",
-  "generatedAt": "2026-11-11T16:15:51+08:00",
+  "generatedAt": "2026-11-11T17:13:47+08:00",
   "constituentVersionDate": "2025-09-23",
   "constituentSourceName": "上交所科创50指数成分股（2025年第三季度）",
   "constituentSourceUrl": "https://www.sse.com.cn/market/sseindex/indexlist/",
@@ -25,7 +25,7 @@
     "amountMa20Yuan": 67868883054.6,
     "previousVolumeHands": 5688623.0,
     "previousAmountYuan": 57059126536.0,
-    "priceChangePct": 2.41197691732169,
+    "priceChangePct": 2.4119769173216454,
     "constituentCount": 50,
     "amountCount": 50
   },
@@ -35,7 +35,7 @@
       "volumeHands": 5016080.0,
       "amountYuan": 55381067899.0,
       "amountCount": 50,
-      "closeSum": 7979.410000000003,
+      "closeSum": 7979.410000000002,
       "constituentCount": 50
     },
     {
@@ -43,7 +43,7 @@
       "volumeHands": 4532517.0,
       "amountYuan": 48900021102.0,
       "amountCount": 50,
-      "closeSum": 7949.34,
+      "closeSum": 7949.340000000001,
       "constituentCount": 50
     },
     {
@@ -91,7 +91,7 @@
       "volumeHands": 6272692.0,
       "amountYuan": 63467429171.0,
       "amountCount": 50,
-      "closeSum": 7574.649999999998,
+      "closeSum": 7574.649999999999,
       "constituentCount": 50
     },
     {
@@ -115,7 +115,7 @@
       "volumeHands": 6002177.0,
       "amountYuan": 75787015592.0,
       "amountCount": 50,
-      "closeSum": 7938.290000000002,
+      "closeSum": 7938.290000000003,
       "constituentCount": 50
     },
     {
@@ -123,7 +123,7 @@
       "volumeHands": 5112087.0,
       "amountYuan": 58955848748.0,
       "amountCount": 50,
-      "closeSum": 7899.710000000001,
+      "closeSum": 7899.710000000002,
       "constituentCount": 50
     },
     {
@@ -147,7 +147,7 @@
       "volumeHands": 7147057.0,
       "amountYuan": 89772340000.0,
       "amountCount": 50,
-      "closeSum": 8178.8600000000015,
+      "closeSum": 8178.86,
       "constituentCount": 50
     },
     {
@@ -179,7 +179,7 @@
       "volumeHands": 4316289.0,
       "amountYuan": 50176038328.0,
       "amountCount": 50,
-      "closeSum": 7733.780000000002,
+      "closeSum": 7733.7800000000025,
       "constituentCount": 50
     },
     {
@@ -195,7 +195,7 @@
       "volumeHands": 6564725.0,
       "amountYuan": 66642401584.0,
       "amountCount": 50,
-      "closeSum": 7278.46,
+      "closeSum": 7278.460000000001,
       "constituentCount": 50
     },
     {
@@ -227,7 +227,7 @@
       "volumeHands": 4573495.0,
       "amountYuan": 46960138603.0,
       "amountCount": 50,
-      "closeSum": 6999.990000000002,
+      "closeSum": 6999.990000000001,
       "constituentCount": 50
     },
     {
@@ -243,7 +243,7 @@
       "volumeHands": 6127131.0,
       "amountYuan": 59546545457.0,
       "amountCount": 50,
-      "closeSum": 6939.63,
+      "closeSum": 6939.629999999999,
       "constituentCount": 50
     },
     {
@@ -267,7 +267,7 @@
       "volumeHands": 5494797.0,
       "amountYuan": 54778132001.0,
       "amountCount": 50,
-      "closeSum": 6934.360000000002,
+      "closeSum": 6934.3600000000015,
       "constituentCount": 50
     },
     {
@@ -283,7 +283,7 @@
       "volumeHands": 8485212.0,
       "amountYuan": 83406832691.0,
       "amountCount": 50,
-      "closeSum": 6998.990000000001,
+      "closeSum": 6998.99,
       "constituentCount": 50
     },
     {
@@ -347,7 +347,7 @@
       "volumeHands": 10140611.0,
       "amountYuan": 91789540254.0,
       "amountCount": 50,
-      "closeSum": 6635.749999999999,
+      "closeSum": 6635.75,
       "constituentCount": 50
     },
     {
@@ -379,7 +379,7 @@
       "volumeHands": 5688623.0,
       "amountYuan": 57059126536.0,
       "amountCount": 50,
-      "closeSum": 6749.649999999998,
+      "closeSum": 6749.649999999999,
       "constituentCount": 50
     },
     {
@@ -387,7 +387,7 @@
       "volumeHands": 6171261.0,
       "amountYuan": 63766504342.0,
       "amountCount": 50,
-      "closeSum": 6912.450000000001,
+      "closeSum": 6912.45,
       "constituentCount": 50
     }
   ]
