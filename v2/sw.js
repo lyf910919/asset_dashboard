@@ -1,11 +1,17 @@
-const ASSET_VERSION = "20261021-buy-sell-refresh";
+const ASSET_VERSION = "20261118-dashboard";
 const CACHE_NAME = `qdii-dashboard-v2-${ASSET_VERSION}`;
 const ASSET_LIST = [
   "./",
   "./index.html",
-  `./styles.css?v=${ASSET_VERSION}`,
+  "./styles.css?v=20261021-buy-sell-refresh",
+  `./workspace.css?v=${ASSET_VERSION}`,
   `./app.js?v=${ASSET_VERSION}`,
+  "./lib/storage.js?v=20260730-hkdiv-watch",
+  "./lib/market.js?v=20260730-hkdiv-watch",
+  "./lib/gist.js?v=20260730-hkdiv-watch",
+  "./lib/performance.js?v=20260730-hkdiv-watch",
   "./icon.svg",
+  "./navigation.svg",
   `./manifest.webmanifest?v=${ASSET_VERSION}`,
   "./trend/index.html",
   "./pension/index.html",
@@ -36,7 +42,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys.filter((key) => key.startsWith("qdii-dashboard-v2-") && key !== CACHE_NAME).map((key) => caches.delete(key))))
       .then(() => self.clients.claim()),
   );
 });
@@ -65,6 +71,9 @@ self.addEventListener("fetch", (event) => {
           if (cached) return cached;
           if (url.pathname.endsWith("/trend/")) {
             return caches.match("./trend/index.html");
+          }
+          if (url.pathname.endsWith("/pension/")) {
+            return caches.match("./pension/index.html");
           }
           if (url.pathname.endsWith("/")) {
             return caches.match("./index.html");

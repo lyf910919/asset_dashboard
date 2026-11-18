@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="趋势规则">
-  <meta name="theme-color" content="#1e40af">
+  <meta name="theme-color" content="#f3f5f4">
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -501,11 +501,30 @@
     @media (max-width:900px){.med-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.med-control-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
     @media (max-width:520px){.entry-ret-row{grid-template-columns:repeat(2,minmax(0,1fr))}.med-grid{grid-template-columns:1fr}.med-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.med-toolbar{align-items:flex-start;flex-direction:column}.med-filters{width:100%}.med-control-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.med-trade-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
+  <link rel="stylesheet" href="../workspace.css?v=20261118-dashboard">
 </head>
-<body>
-  <nav class="topbar">
-    <div class="brand">趋势规则系统</div>
-    <div class="nav-links" aria-label="区块导航">
+<body class="workspace trend-page">
+  <nav class="app-nav" aria-label="主导航">
+    <div class="app-brand"><img src="../icon.svg" alt="" width="28" height="28">资产看板</div>
+    <a href="../"><svg aria-hidden="true"><use href="../navigation.svg#portfolio"></use></svg>资产统计</a>
+    <a href="./" aria-current="page"><svg aria-hidden="true"><use href="../navigation.svg#trend"></use></svg>趋势交易</a>
+    <a href="../pension/"><svg aria-hidden="true"><use href="../navigation.svg#pension"></use></svg>养老金</a>
+  </nav>
+  <main>
+    <header class="workspace-heading">
+      <h1>趋势交易</h1>
+      <div class="statusbar">
+        <span id="statusDot" class="dot" aria-hidden="true"></span>
+        <span id="statusText" class="status-text" role="status">行情 待刷新</span>
+        <button id="refreshBtn" class="refresh icon-action" title="刷新行情" aria-label="刷新行情"><svg aria-hidden="true"><use href="../navigation.svg#refresh"></use></svg></button>
+        <label class="switch" title="每30秒自动刷新">
+          <input id="autoRefresh" type="checkbox" aria-label="每30秒自动刷新">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </header>
+    <div class="trend-navigation">
+      <div class="nav-links" role="group" aria-label="趋势工具">
       <button class="nav-tab active" data-view="overview">趋势概览</button>
       <button class="nav-tab" data-view="stop-detail">止损</button>
       <button class="nav-tab" data-view="status">持仓状态</button>
@@ -514,28 +533,9 @@
       <button class="nav-tab" data-view="position-calc">仓位</button>
       <button class="nav-tab" data-view="exit">出场</button>
       <button class="nav-tab" data-view="risk">风控</button>
-    </div>
-    <div class="statusbar">
-      <span id="statusDot" class="dot"></span>
-      <span id="statusText" class="status-text">行情 待刷新</span>
-      <button id="refreshBtn" class="refresh" title="刷新行情">↺</button>
-      <label class="switch" title="每30秒自动刷新">
-        <input id="autoRefresh" type="checkbox">
-        <span class="slider"></span>
-      </label>
-    </div>
-  </nav>
-
-  <main>
-    <section class="section intro">
-      <div class="section-head">
-        <div>
-          <h1>科技成长趋势规则系统</h1>
-          <div class="subtle">持仓止损、入场闸门、加仓节奏与账户风控的一页式观察台</div>
-        </div>
-        <span id="dataMode" class="pill">静态配置</span>
       </div>
-    </section>
+      <span id="dataMode" class="subtle">静态配置</span>
+    </div>
 
         <section id="overview" class="section view-panel active">
           <div class="section-head"><h2>趋势概览</h2><span id="ovStamp" class="subtle"></span></div>
@@ -2319,7 +2319,8 @@
         </div>
       </div>`;
 
-      $("ovContent").innerHTML = priceRow + indBlock + indInterpHtml + maBlock + volBlock + conBlock;
+      $("ovContent").innerHTML = priceRow + conBlock + indBlock + indInterpHtml +
+        `<div class="trend-signal-grid">${maBlock}${volBlock}</div>`;
       $("ovStamp").textContent = cfg.signalName ? `${cfg.observeOnly ? "观察" : "信号"}：${cfg.signalName}` : "";
     }
     // ===== end 趋势概览 =====
@@ -3611,7 +3612,11 @@
     function showView(viewId, updateHash=true) {
       if (!$(viewId)) viewId = "overview";
       document.querySelectorAll(".view-panel").forEach(panel => panel.classList.toggle("active", panel.id === viewId));
-      document.querySelectorAll(".nav-tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === viewId));
+      document.querySelectorAll(".nav-tab").forEach(tab => {
+        const active = tab.dataset.view === viewId;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-pressed", String(active));
+      });
       if (updateHash) history.replaceState(null, "", "#" + viewId);
       window.scrollTo({ top:0, behavior:"auto" });
     }

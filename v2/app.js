@@ -58,16 +58,16 @@ const ASSET_CLASS_LABELS = {
   cash: "现金",
 };
 const PIE_COLORS = [
-  "#2b8fb8",
-  "#56b8d5",
-  "#4d79bf",
-  "#87a7d6",
-  "#5ea8c2",
-  "#7fc6d9",
-  "#3f6fa3",
-  "#90c9e6",
-  "#6899b7",
-  "#a1d1dd",
+  "#247569",
+  "#3b6397",
+  "#926342",
+  "#6d578a",
+  "#4e7250",
+  "#466d7e",
+  "#8a5364",
+  "#77682c",
+  "#446976",
+  "#646a75",
 ];
 const DISPLAY_CURRENCY_LABELS = {
   cny: "人民币",
@@ -242,6 +242,7 @@ const el = {
   groupTargetSummary: document.querySelector("#group-target-summary"),
   groupTargetList: document.querySelector("#group-target-list"),
   addRowBtn: document.querySelector("#add-row-btn"),
+  addHoldingQuickBtn: document.querySelector("#add-holding-quick-btn"),
   quoteDebugSummary: document.querySelector("#quote-debug-summary"),
   quoteDebugChanges: document.querySelector("#quote-debug-changes"),
   quoteDebugCurrent: document.querySelector("#quote-debug-current"),
@@ -2817,6 +2818,9 @@ function setActiveTab(tab) {
   el.tabPieBtn.classList.toggle("is-active", isPie);
   el.tabPerformanceBtn.classList.toggle("is-active", isPerformance);
   el.tabConfigBtn.classList.toggle("is-active", state.activeTab === "config");
+  for (const button of [el.tabViewBtn, el.tabPieBtn, el.tabPerformanceBtn, el.tabConfigBtn]) {
+    button.setAttribute("aria-pressed", String(button.dataset.tab === state.activeTab));
+  }
   el.tabView.classList.toggle("is-active", isView);
   el.tabPie.classList.toggle("is-active", isPie);
   el.tabPerformance.classList.toggle("is-active", isPerformance);
@@ -2993,6 +2997,14 @@ function updateModalOpenState() {
     !el.archiveModal.hidden ||
     !el.deleteConfirmModal.hidden;
   document.body.classList.toggle("modal-open", hasOpenModal);
+  updateModalViewport();
+}
+
+function updateModalViewport() {
+  const viewport = window.visualViewport;
+  const keyboardLayout = document.body.classList.contains("modal-open") && viewport && viewport.scale === 1;
+  document.body.style.setProperty("--modal-top", keyboardLayout ? `${viewport.offsetTop}px` : "");
+  document.body.style.setProperty("--modal-height", keyboardLayout ? `${viewport.height}px` : "");
 }
 
 function openArchiveModal() {
@@ -3388,11 +3400,9 @@ function openHoldingModal(mode = "create", holding = null) {
 
   el.holdingModal.hidden = false;
   updateModalOpenState();
-
-  requestAnimationFrame(() => {
-    el.holdingNameInput.focus();
-    el.holdingNameInput.select();
-  });
+  const card = el.holdingModal.querySelector(".modal-card");
+  card.scrollTop = 0;
+  card.focus({ preventScroll: true });
 }
 
 function closeHoldingModal() {
@@ -3697,6 +3707,7 @@ function updateLockUI() {
   if (el.historyReplayDateInput) el.historyReplayDateInput.disabled = !state.unlocked;
   if (el.historyReplayBtn) el.historyReplayBtn.disabled = !state.unlocked;
   el.addRowBtn.disabled = !state.unlocked;
+  el.addHoldingQuickBtn.disabled = !state.unlocked;
   el.changePassBtn.disabled = !state.unlocked;
   el.accountSelect.disabled = !state.unlocked;
   el.displayCurrencyButtons.forEach((button) => {
@@ -7377,6 +7388,16 @@ function bindEvents() {
   });
 
   el.addRowBtn.addEventListener("click", () => addHoldingRow());
+  el.addHoldingQuickBtn.addEventListener("click", () => addHoldingRow());
+  const accountMenu = document.querySelector(".account-menu");
+  document.addEventListener("click", (event) => {
+    if (!accountMenu.open) return;
+    if (!accountMenu.contains(event.target) || event.target.closest(".account-actions button")) {
+      accountMenu.open = false;
+    }
+  });
+  window.visualViewport?.addEventListener("resize", updateModalViewport);
+  window.visualViewport?.addEventListener("scroll", updateModalViewport);
 
   window.addEventListener("resize", () => {
     if (!state.unlocked) return;

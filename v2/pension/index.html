@@ -2,8 +2,8 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#157a4d" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f3f5f4" />
     <title>个人养老金仓位计算器</title>
     <style>
       :root { --bg:#eef6fa; --surface:#fff; --soft:#f7fbf9; --line:#cddfe8; --text:#102532; --muted:#597485; --green:#157a4d; --green-soft:#e8f6ee; --blue:#2b8fb8; --amber:#a96805; --amber-soft:#fff6df; --shadow:0 8px 24px rgba(16,33,41,.08); --radius:8px; }
@@ -61,22 +61,34 @@
       @media (max-width:760px) { .hero,.grid { grid-template-columns:1fr; } .input-row { grid-template-columns:1fr 1fr; } .result-row { grid-template-columns:minmax(0,1fr) 72px 94px; } .topbar { padding-inline:12px; } }
       @media (max-width:440px) { .input-row { grid-template-columns:1fr; } .brand small { display:none; } .result-row { grid-template-columns:minmax(0,1fr) 74px; } .money { grid-column:2; } }
     </style>
+    <link rel="stylesheet" href="../workspace.css?v=20261118-dashboard" />
   </head>
-  <body>
-    <header class="topbar"><a class="back" href="../">← 资产概览</a><div class="brand">个人养老金仓位计算器<small id="saveStatus">温度驱动的年度新钱分配</small></div><div class="top-actions"><button id="saveState" class="save" type="button">保存记录</button><button id="reset" class="reset" type="button">恢复默认</button></div></header>
+  <body class="workspace pension-page">
+    <nav class="app-nav" aria-label="主导航">
+      <div class="app-brand"><img src="../icon.svg" alt="" width="28" height="28" />资产看板</div>
+      <a href="../"><svg aria-hidden="true"><use href="../navigation.svg#portfolio"></use></svg>资产统计</a>
+      <a href="../trend/"><svg aria-hidden="true"><use href="../navigation.svg#trend"></use></svg>趋势交易</a>
+      <a href="./" aria-current="page"><svg aria-hidden="true"><use href="../navigation.svg#pension"></use></svg>养老金</a>
+    </nav>
     <main>
+      <header class="workspace-heading">
+        <h1>养老金计算</h1>
+        <div class="top-actions"><button id="saveState" class="save" type="button">保存</button><button id="reset" class="reset" type="button">恢复默认</button></div>
+        <p id="saveStatus" role="status"></p>
+      </header>
       <section class="panel hero">
-        <div><h1>新钱分配</h1><p class="sub">以全市场温度决定股债层级，以指数温度决定权益内部倾斜。</p>
-          <div class="input-row"><div class="field"><label for="newMoney">新钱金额（元）</label><input id="newMoney" type="number" min="0" step="100" value="12000"></div><div class="field"><label for="marketTemp">全市场温度（°）</label><input id="marketTemp" type="number" min="0" max="100" step="1" value="42"></div><div class="field"><label for="fofName">稳健 FOF</label><input id="fofName" type="text" value="017384 兴全安泰稳健"></div></div>
+        <div><h2>投入参数</h2>
+          <div class="input-row"><div class="field"><label for="newMoney">新钱金额（元）</label><input id="newMoney" type="number" inputmode="decimal" min="0" step="100" value="12000"></div><div class="field"><label for="marketTemp">全市场温度（°）</label><input id="marketTemp" type="number" inputmode="numeric" min="0" max="100" step="1" value="42"></div></div>
+          <div class="section-head temperature-heading"><h2>指数温度</h2></div>
+          <div id="indexInputs" class="input-row"></div>
         </div>
         <div class="summary"><div class="metric"><span>指数基金合计</span><strong id="indexPct">--</strong></div><div class="metric"><span>017384</span><strong id="fofPct">--</strong></div><div class="metric wide"><span>组合实际权益暴露</span><strong id="effectiveEquity">--</strong></div><div class="metric wide"><span>当前规则档位</span><strong id="activeBand">--</strong></div></div>
       </section>
-      <section class="grid"><section class="panel"><div class="section-head"><h2>建议买入金额</h2><p id="allocationHint">按当前规则</p></div><div id="resultList" class="result-list"></div><p class="note">金额按元取整并确保合计等于新钱金额。017384的实际权益暴露按其规则范围估算，不把它当作纯债。</p></section>
-      <section class="panel"><div class="section-head"><h2>温度输入</h2><p>各指数只影响权益内部比例</p></div><div id="indexInputs" class="input-row"></div><div class="note">温度数据建议在年度投入或季度复核时更新；本页只计算目标分配，不替代你设定的再平衡阈值。</div></section></section>
-      <section class="panel"><div class="tabs"><button class="tab active" data-tab="layer1" type="button">第一层：总仓位</button><button class="tab" data-tab="layer2" type="button">第二层：权益内部</button><button class="tab" data-tab="settings" type="button">基金与约束</button></div>
+      <section class="panel allocation-results"><div class="section-head"><h2>建议买入金额</h2><p id="allocationHint">按当前规则</p></div><div id="resultList" class="result-list"></div><p class="note">金额按元取整。组合权益暴露包含按配置区间估算的 FOF 权益。</p></section>
+      <section class="panel pension-rules"><h2>分配规则</h2><div class="tabs" role="group" aria-label="分配规则"><button class="tab active" data-tab="layer1" type="button">总仓位</button><button class="tab" data-tab="layer2" type="button">权益内部</button><button class="tab" data-tab="settings" type="button">基金与约束</button></div>
         <div id="layer1" class="config active"><div class="config-card"><div class="config-title"><h2>全市场温度与大类比例</h2><p>温度落入哪一行，就使用该行比例</p></div><div class="table-wrap"><table><thead><tr><th>温度下限</th><th>温度上限</th><th>四只指数合计%</th><th>017384%</th><th></th></tr></thead><tbody id="layer1Rows"></tbody></table></div><div class="actions"><button id="addLayer1" class="mini" type="button">新增档位</button><span id="layer1Status" class="status"></span></div></div></div>
         <div id="layer2" class="config"><div class="config-card"><div class="config-title"><h2>指数温度与配置系数</h2><p>中性权重 × 系数后归一化</p></div><div class="table-wrap"><table><thead><tr><th>温度下限</th><th>温度上限</th><th>配置系数</th><th></th></tr></thead><tbody id="layer2Rows"></tbody></table></div><div class="actions"><button id="addLayer2" class="mini" type="button">新增档位</button><span id="layer2Status" class="status"></span></div></div></div>
-        <div id="settings" class="config"><div class="config-card"><div class="config-title"><h2>权益基金中性权重与约束</h2><p>下限、上限均以权益内部仓位计</p></div><div class="table-wrap"><table><thead><tr><th>名称</th><th>中性权重%</th><th>下限%</th><th>上限%</th></tr></thead><tbody id="fundRows"></tbody></table></div></div><div class="config-card"><div class="config-title"><h2>017384 内含权益范围</h2><p>用于展示组合实际权益暴露</p></div><div class="input-row"><div class="field"><label for="fofEquityMin">最低权益%</label><input id="fofEquityMin" type="number" min="0" max="100" step="1" value="10"></div><div class="field"><label for="fofEquityMax">最高权益%</label><input id="fofEquityMax" type="number" min="0" max="100" step="1" value="25"></div></div></div></div>
+        <div id="settings" class="config"><div class="config-card"><div class="config-title"><h2>权益基金中性权重与约束</h2><p>下限、上限均以权益内部仓位计</p></div><div class="table-wrap"><table><thead><tr><th>名称</th><th>中性权重%</th><th>下限%</th><th>上限%</th></tr></thead><tbody id="fundRows"></tbody></table></div></div><div class="config-card"><div class="config-title"><h2>稳健 FOF</h2><p>用于估算组合权益暴露</p></div><div class="input-row"><div class="field"><label for="fofName">基金名称</label><input id="fofName" type="text" value="017384 兴全安泰稳健"></div><div class="field"><label for="fofEquityMin">最低权益%</label><input id="fofEquityMin" type="number" min="0" max="100" step="1" value="10"></div><div class="field"><label for="fofEquityMax">最高权益%</label><input id="fofEquityMax" type="number" min="0" max="100" step="1" value="25"></div></div></div></div>
       </section>
     </main>
     <script>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <symbol id="portfolio" viewBox="0 0 24 24">
+    <rect x="3" y="3" width="7" height="9" rx="1"/>
+    <rect x="14" y="3" width="7" height="5" rx="1"/>
+    <rect x="14" y="12" width="7" height="9" rx="1"/>
+    <rect x="3" y="16" width="7" height="5" rx="1"/>
+  </symbol>
+  <symbol id="trend" viewBox="0 0 24 24">
+    <path d="M3 3v18h18M7 14l4-4 4 4 6-6"/>
+  </symbol>
+  <symbol id="pension" viewBox="0 0 24 24">
+    <path d="M20 12c0 4-2.8 6-7.2 7.6a2 2 0 0 1-1.6 0C6.8 18 4 16 4 12V6l8-3 8 3Z"/>
+    <path d="m9 11 2 2 4-4"/>
+  </symbol>
+  <symbol id="refresh" viewBox="0 0 24 24">
+    <path d="M20 7v5h-5M20 12a8 8 0 1 0-2.3 5.7"/>
+  </symbol>
+  <symbol id="plus" viewBox="0 0 24 24">
+    <path d="M12 5v14M5 12h14"/>
+  </symbol>
+  <symbol id="more" viewBox="0 0 24 24">
+    <circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>
+  </symbol>
+</svg>

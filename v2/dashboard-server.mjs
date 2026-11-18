@@ -20,7 +20,7 @@ const MIME = {
 
 createServer(async (req, res) => {
   const parsedUrl = new URL(req.url || "/index.html", `http://${req.headers.host || `${HOST}:${PORT}`}`);
-  const requestPath = parsedUrl.pathname === "/" ? "/index.html" : parsedUrl.pathname;
+  const requestPath = parsedUrl.pathname.endsWith("/") ? `${parsedUrl.pathname}index.html` : parsedUrl.pathname;
   const safePath = normalize(join(__dirname, requestPath));
 
   if (!safePath.startsWith(__dirname)) {
