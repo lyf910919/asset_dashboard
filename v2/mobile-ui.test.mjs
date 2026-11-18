@@ -55,7 +55,7 @@ try {
   await visible("#performance-chart");
 
   await page.locator(".app-nav").getByText("趋势交易").tap();
-  await visible("#overview");
+  await visible("#ovAssetBar select");
   await page.tap("[data-view=position-calc]");
   await fill("#planPrice", "2");
   await visible("#positionOutputs");
