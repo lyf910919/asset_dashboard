@@ -6,7 +6,7 @@
     <title>资产看板</title>
     <meta name="theme-color" content="#f3f5f4" />
     <link rel="manifest" href="./manifest.webmanifest?v=20261118-dashboard-r2" />
-    <link rel="stylesheet" href="./styles.css?v=20261021-buy-sell-refresh" />
+    <link rel="stylesheet" href="./styles.css?v=20261118-quote-mode" />
     <link rel="stylesheet" href="./workspace.css?v=20261118-dashboard-r2" />
   </head>
   <body class="workspace assets-page">
@@ -60,6 +60,13 @@
         </div>
 
         <div id="tab-view" class="tab-content is-active">
+          <div class="quote-mode-toolbar">
+            <span class="view-level-label" id="quote-mode-label">价格模式</span>
+            <div class="pie-display-switch quote-mode-switch" role="group" aria-labelledby="quote-mode-label">
+              <button type="button" class="pie-display-btn is-active" data-quote-preference="nav" aria-pressed="true" disabled>优先净值</button>
+              <button type="button" class="pie-display-btn" data-quote-preference="estimate" aria-pressed="false" disabled>最新价格</button>
+            </div>
+          </div>
           <section class="overview-strip panel-lite">
             <article class="overview-card">
               <p class="overview-label">总资产</p>
@@ -317,13 +324,6 @@
                   <option value="60" selected>每 60 秒</option>
                   <option value="180">每 3 分钟</option>
                   <option value="300">每 5 分钟</option>
-                </select>
-              </div>
-              <div class="control-item">
-                <label for="quote-preference">价格模式</label>
-                <select id="quote-preference">
-                  <option value="nav" selected>优先净值</option>
-                  <option value="estimate">最新价格</option>
                 </select>
               </div>
               <div class="control-item">
@@ -606,10 +606,10 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20261118-dashboard-r2" type="module"></script>
+    <script src="./app.js?v=20261118-quote-mode" type="module"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js?v=20261118-dashboard-r2").catch(() => {});
+        navigator.serviceWorker.register("./sw.js?v=20261118-quote-mode").catch(() => {});
       }
     </script>
   </body>

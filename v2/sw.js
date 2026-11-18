@@ -1,10 +1,10 @@
-const ASSET_VERSION = "20261118-dashboard-r2";
+const ASSET_VERSION = "20261118-quote-mode";
 const CACHE_NAME = `qdii-dashboard-v2-${ASSET_VERSION}`;
 const ASSET_LIST = [
   "./",
   "./index.html",
-  "./styles.css?v=20261021-buy-sell-refresh",
-  `./workspace.css?v=${ASSET_VERSION}`,
+  `./styles.css?v=${ASSET_VERSION}`,
+  "./workspace.css?v=20261118-dashboard-r2",
   `./app.js?v=${ASSET_VERSION}`,
   "./lib/storage.js?v=20260730-hkdiv-watch",
   "./lib/market.js?v=20260730-hkdiv-watch",
@@ -12,7 +12,7 @@ const ASSET_LIST = [
   "./lib/performance.js?v=20260730-hkdiv-watch",
   "./icon.svg",
   "./navigation.svg",
-  `./manifest.webmanifest?v=${ASSET_VERSION}`,
+  "./manifest.webmanifest?v=20261118-dashboard-r2",
   "./trend/index.html",
   "./pension/index.html",
   "./trend/manifest.json",

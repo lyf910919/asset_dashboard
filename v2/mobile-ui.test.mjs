@@ -24,10 +24,19 @@ try {
   };
 
   await page.goto(url);
+  const navMode = page.locator('[data-quote-preference="nav"]');
+  const latestMode = page.locator('[data-quote-preference="estimate"]');
+  assert.equal(await latestMode.isDisabled(), true);
   await page.tap("#unlock-open-btn");
   await fill("#passphrase-input", "testpass123");
   await page.tap("#unlock-btn");
   await visible("#lock-btn:enabled");
+  assert.equal(await navMode.getAttribute("aria-pressed"), "true");
+  await latestMode.tap();
+  assert.equal(await latestMode.getAttribute("aria-pressed"), "true");
+  assert.equal(await navMode.getAttribute("aria-pressed"), "false");
+  await navMode.tap();
+  assert.equal(await navMode.getAttribute("aria-pressed"), "true");
   await noOverflow();
 
   await page.tap("#add-holding-quick-btn");
@@ -39,6 +48,7 @@ try {
   await page.tap("#holding-save-btn");
   await page.locator("#holding-modal").waitFor({ state: "hidden" });
   await page.tap("#tab-config-btn");
+  assert.equal(await page.locator("#tab-config #quote-preference").count(), 0);
   const holding = page.locator(".config-item").filter({ hasText: "移动端测试基金" });
   await holding.locator(".edit-btn").tap();
   assert.equal(await page.inputValue("#holding-units-input"), "100");

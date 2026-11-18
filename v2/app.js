@@ -157,7 +157,7 @@ const el = {
   overviewDayChangePct: document.querySelector("#overview-day-change-pct"),
   lastRefresh: document.querySelector("#last-refresh"),
   interval: document.querySelector("#refresh-interval"),
-  quotePreference: document.querySelector("#quote-preference"),
+  quotePreferenceButtons: [...document.querySelectorAll("[data-quote-preference]")],
   exportBtn: document.querySelector("#export-btn"),
   importBtn: document.querySelector("#import-btn"),
   importFile: document.querySelector("#import-file"),
@@ -2784,6 +2784,16 @@ function syncDisplayCurrencyButtons() {
   });
 }
 
+function syncQuotePreferenceButtons() {
+  const preference = normalizeQuotePreference(getActiveAccount()?.settings?.quotePreference);
+  el.quotePreferenceButtons.forEach((button) => {
+    const active = button.dataset.quotePreference === preference;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+    button.disabled = !state.unlocked;
+  });
+}
+
 function updateDisplayCurrencyInVault(value) {
   if (!state.vault) return;
   const account = getActiveAccount();
@@ -2940,7 +2950,7 @@ function saveAccountFromModal() {
       name: accountName,
       settings: {
         refreshInterval: normalizeInterval(el.interval.value),
-        quotePreference: normalizeQuotePreference(el.quotePreference.value),
+        quotePreference: normalizeQuotePreference(getActiveAccount()?.settings?.quotePreference),
         displayCurrency: getCurrentDisplayCurrency(),
       },
     });
@@ -3697,7 +3707,7 @@ function updateLockUI() {
   if (el.gistIdInput) el.gistIdInput.disabled = false;
   if (el.gistVerifyBtn) el.gistVerifyBtn.disabled = false;
   el.interval.disabled = !state.unlocked;
-  el.quotePreference.disabled = !state.unlocked;
+  syncQuotePreferenceButtons();
   el.exportBtn.disabled = !state.unlocked;
   el.importBtn.disabled = false;
   if (el.exportHistoryBtn) el.exportHistoryBtn.disabled = !state.unlocked;
@@ -6424,7 +6434,7 @@ function setIntervalSelectFromVault() {
   const account = getActiveAccount();
   const value = normalizeInterval(account?.settings?.refreshInterval);
   el.interval.value = String(value);
-  el.quotePreference.value = normalizeQuotePreference(account?.settings?.quotePreference);
+  syncQuotePreferenceButtons();
   syncDisplayCurrencyButtons();
 }
 
@@ -7187,12 +7197,15 @@ function bindEvents() {
     scheduleSync();
   });
 
-  el.quotePreference.addEventListener("change", () => {
-    if (!state.unlocked) return;
-    updateQuotePreferenceInVault(el.quotePreference.value);
-    schedulePersist();
-    scheduleSync();
-    refreshData().catch((error) => setPriceStatus(formatError(error), "bad"));
+  el.quotePreferenceButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      if (!state.unlocked || button.getAttribute("aria-pressed") === "true") return;
+      updateQuotePreferenceInVault(button.dataset.quotePreference);
+      syncQuotePreferenceButtons();
+      schedulePersist();
+      scheduleSync();
+      refreshData().catch((error) => setPriceStatus(formatError(error), "bad"));
+    });
   });
 
   el.quoteDebugClearBtn.addEventListener("click", () => {
